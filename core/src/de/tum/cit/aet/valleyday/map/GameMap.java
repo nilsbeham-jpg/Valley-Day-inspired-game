@@ -8,6 +8,14 @@ import de.tum.cit.aet.valleyday.ValleyDayGame;
 import java.util.Arrays;
 import java.util.List;
 
+import java.io.IOException;
+import java.util.Properties;
+import java.util.ArrayList;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
+
+
 /**
  * Represents the game map.
  * Holds all the objects and entities in the game.
@@ -48,7 +56,14 @@ public class GameMap {
     private final Chest chest;
     
     private final Flowers[][] flowers;
-    
+
+
+    private Tile[][] tiles;
+    private int mapWidth;
+    private int mapHeight;
+
+
+
     public GameMap(ValleyDayGame game) {
         this.game = game;
         this.world = new World(Vector2.Zero, true);
