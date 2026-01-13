@@ -17,11 +17,11 @@ import de.tum.cit.aet.valleyday.texture.Textures;
 public class Player implements Drawable {
     
     /** Total time elapsed since the game started. We use this for calculating the player movement and animating it. */
-    private float elapsedTime; //游戏累计经过的时间
+    private float elapsedTime; 
     
-    private boolean moving;
+    private boolean moving; //Detect whether a person is moving
 
-    private Direction facing= Direction.DOWN; 
+    private Direction facing= Direction.DOWN;  //The default character faces downward.
 
     /** The Box2D hitbox of the player, used for position and collision detection. */
     private final Body hitbox;
@@ -81,6 +81,7 @@ public class Player implements Drawable {
     public void tick(float frameTime) { // tick() tells physics how the player wants to move
         if(moving){
         this.elapsedTime += frameTime;
+        
         }
         // Make the player move in a circle with radius 2 tiles
         // You can change this to make the player move differently, e.g. in response to user input.
@@ -188,13 +189,43 @@ public class Player implements Drawable {
 
 
     }
-    public Direction getFacing(){
+    public Direction getFacing(){ //check direction and return the facing direction
         return facing;
     }
 
+
+    //find the front x-coordinate of the player 
+    public int getTileX(){
+        return (int) Math.floor(getX());
+    }
+    public int getTileY(){
+        return (int) Math.floor(getY());
+    }
+    public int getFrontTileX(){
+        return getTileX() + 
+        switch (facing) {
+        case LEFT -> -1;
+        case RIGHT -> 1;
+        default -> 0;
+    };
+    }
+
+    //find the front y-coordinate of the player 
+    public int getFrontTileY(){
+        return getTileX() + 
+        switch (facing) {
+        case DOWN -> -1;
+        case UP -> 1;
+        default -> 0;
+    };
+    
+    }
+    
+
+
     @Override
     public TextureRegion getCurrentAppearance() {
-        // Get the frame of the walk down animation that corresponds to the current time.
+        // Get the frame of the walk down animation that corresponds to the current time. Let the player move.
         switch (facing) {
         case UP:
             return Animations.CHARACTER_WALK_UP.getKeyFrame(elapsedTime,true);
