@@ -215,20 +215,18 @@ public class GameMap {
 
 
 
-
-
     public GameMap(ValleyDayGame game) {
         this.game = game;
         this.world = new World(Vector2.Zero, true); //Vector2.Zero：重力向量为 (0,0)，表示无重力（俯视角游戏常这样）。
         // true：允许“sleep”（不动的物体会休眠，省计算）
         // Create a player with initial position (1, 3)
-        //int[] entrance = findEntrancePosition();
-        //this.player = new Player(this.world, entrance[0], entrance[1]);
 
-       this.player = new Player(this.world, 1, 3); //创建玩家位置
+       //this.player = new Player(this.world, 1, 3); //创建玩家位置
 
         loadMap("maps/map-1.properties");
         printMapToConsole();
+        int[] entrance = findEntrancePosition();
+        this.player = new Player(this.world, this ,entrance[0], entrance[1]);
 
 
 
@@ -252,7 +250,15 @@ public class GameMap {
         this.player.tick(frameTime);
         doPhysicsStep(frameTime);
     }
-    
+
+    public boolean isFence(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return true; // treat outside map as solid
+        }
+        return tiles[x][y].type == TileType.FENCE;
+    }
+
+
     /**
      * Performs as many physics steps as necessary to catch up to the given frame time.
      * This will update the Box2D world by the given time step.
