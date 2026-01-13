@@ -311,13 +311,14 @@ public class GameMap {
     public boolean hasPlayerReachedExit() {
         if (gameWon) return true;
 
-        int px = (int) Math.floor(player.getX());
-        int py = (int) Math.floor(player.getY());
+        int px = worldToTile(player.getX());
+        int py = worldToTile(player.getY());
 
         if (isExit(px, py)) {
             gameWon = true;
             return true;
         }
+
         return false;
     }
 
@@ -354,5 +355,10 @@ public class GameMap {
     public int getMapHeight() {
         return mapHeight;
     }
+
+    private int worldToTile(float value) {
+        return (int) Math.floor(value);
+    }
+
 
 }
