@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
 import de.tum.cit.aet.valleyday.texture.Animations;
 import de.tum.cit.aet.valleyday.texture.Drawable;
+import de.tum.cit.aet.valleyday.texture.Textures;
 
 /**
  * Represents the player character in the game.
@@ -18,6 +19,8 @@ public class Player implements Drawable {
     /** Total time elapsed since the game started. We use this for calculating the player movement and animating it. */
     private float elapsedTime; //游戏累计经过的时间
     
+    private Direction facing= Direction.DOWN; 
+
     /** The Box2D hitbox of the player, used for position and collision detection. */
     private final Body hitbox;
     
@@ -67,15 +70,48 @@ public class Player implements Drawable {
         // Make the player move in a circle with radius 2 tiles
         // You can change this to make the player move differently, e.g. in response to user input.
         // See Gdx.input.isKeyPressed() for keyboard input
-        float xVelocity = (float) Math.sin(this.elapsedTime) * 2; //用 sin / cos 生成一个圆周运动半径 ≈ 2 tiles
-        float yVelocity = (float) Math.cos(this.elapsedTime) * 2;
-        this.hitbox.setLinearVelocity(xVelocity, yVelocity);
+        float speed=2f;
+        float xVelocity=0f;
+        float yVelocity=0f;
+        
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        yVelocity = speed;
+        facing= Direction.UP;
     }
-    
+    if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        yVelocity = -speed;
+        facing= Direction.DOWN;
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        xVelocity = -speed;
+        facing= Direction.LEFT;
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        xVelocity = speed;
+        facing= Direction.RIGHT;
+
+    }
+        this.hitbox.setLinearVelocity(xVelocity, yVelocity);
+
+    }
+    public Direction getFacing(){
+        return facing;
+    }
+
     @Override
     public TextureRegion getCurrentAppearance() {
         // Get the frame of the walk down animation that corresponds to the current time.
-        return Animations.CHARACTER_WALK_DOWN.getKeyFrame(this.elapsedTime, true);
+        switch (facing) {
+        case UP:
+            return Textures.PLAYER_UP;
+        case LEFT:
+            return Textures.PLAYER_LEFT;
+        case RIGHT:
+            return Textures.PLAYER_RIGHT;
+        case DOWN:
+        default:
+            return Textures.PLAYER_DOWN;
+    }
     }
     
     @Override

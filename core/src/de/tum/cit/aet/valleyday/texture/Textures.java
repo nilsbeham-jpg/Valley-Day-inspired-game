@@ -12,5 +12,10 @@ public class Textures {
     public static final TextureRegion FLOWERS = SpriteSheet.BASIC_TILES.at(2, 5);
 
     public static final TextureRegion CHEST = SpriteSheet.BASIC_TILES.at(5, 5);
+
+    public static final TextureRegion PLAYER_DOWN  = SpriteSheet.CHARACTER.at(1, 1); //人物的方向
+    public static final TextureRegion PLAYER_LEFT  = SpriteSheet.CHARACTER.at(4, 1);
+    public static final TextureRegion PLAYER_RIGHT = SpriteSheet.CHARACTER.at(2, 1);
+    public static final TextureRegion PLAYER_UP    = SpriteSheet.CHARACTER.at(3, 1);
     
 }
