@@ -64,6 +64,34 @@ public class GameMap {
 
 
 
+
+
+
+    public void printMapToConsole() {
+        System.out.println("=== MAP DEBUG VIEW ===");
+
+        for (int y = mapHeight - 1; y >= 0; y--) {
+            for (int x = 0; x < mapWidth; x++) {
+                Tile tile = tiles[x][y];
+
+                char symbol = switch (tile.type) {
+                    case FENCE -> '#';
+                    case DEBRIS -> 'D';
+                    case ENTRANCE -> 'E';
+                    default -> '.';
+                };
+
+                System.out.print(symbol);
+            }
+            System.out.println();
+        }
+
+        System.out.println("=====================");
+    }
+
+
+
+
     private void loadMap(String path) {
         Properties props = new Properties();
 
@@ -113,31 +141,64 @@ public class GameMap {
         }
     }
 
+    private int[] findEntrancePosition() { // finds the entrance of the map
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                if (tiles[x][y].type == TileType.ENTRANCE) {
+                    return new int[]{x, y};
+                }
+            }
+        }
+        throw new IllegalStateException("No entrance found in map!");
+    }
+
     private Tile createTileFromValue(int value) {
         switch (value) {
+
             case 0:
-                // indestructible wall
+                // Fence (indestructible)
                 return new Tile(TileType.FENCE);
 
             case 1:
-                // destructible wall
+                // Debris (branch)
                 return new Tile(TileType.DEBRIS);
 
-            case 3:
-                // entrance
+            case 2:
+                // Entrance (player start)
                 return new Tile(TileType.ENTRANCE);
 
-            case 5: {
-                // tool hidden under debris
+            case 3: {
+                // Wildlife visitor (hidden under debris)
                 Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.TOOL;
+                t.hiddenType = TileType.WILDLIFE;
+                return t;
+            }
+
+            case 4: {
+                // Exit (hidden under debris)
+                Tile t = new Tile(TileType.DEBRIS);
+                t.hiddenType = TileType.EXIT;
+                return t;
+            }
+
+            case 5: {
+                // Fertilizer (hidden under debris)
+                Tile t = new Tile(TileType.DEBRIS);
+                t.hiddenType = TileType.FERTILIZER;
                 return t;
             }
 
             case 6: {
-                // wildlife hidden under debris
+                // Watering can (hidden under debris)
                 Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.WILDLIFE;
+                t.hiddenType = TileType.WATERING_CAN;
+                return t;
+            }
+
+            case 7: {
+                // Shovel (hidden under debris)
+                Tile t = new Tile(TileType.DEBRIS);
+                t.hiddenType = TileType.SHOVEL;
                 return t;
             }
 
@@ -150,12 +211,27 @@ public class GameMap {
 
 
 
+
+
+
+
+
+
     public GameMap(ValleyDayGame game) {
         this.game = game;
         this.world = new World(Vector2.Zero, true); //Vector2.Zero：重力向量为 (0,0)，表示无重力（俯视角游戏常这样）。
         // true：允许“sleep”（不动的物体会休眠，省计算）
         // Create a player with initial position (1, 3)
-        this.player = new Player(this.world, 1, 3); //创建玩家位置
+        //int[] entrance = findEntrancePosition();
+        //this.player = new Player(this.world, entrance[0], entrance[1]);
+
+       this.player = new Player(this.world, 1, 3); //创建玩家位置
+
+        loadMap("maps/map-1.properties");
+        printMapToConsole();
+
+
+
         // Create a chest in the middle of the map
         this.chest = new Chest(world, 3, 3); //初始箱子位置
         // Create flowers in a 7x7 grid
@@ -194,7 +270,7 @@ public class GameMap {
     public Player getPlayer() {
         return player;
     }
-    
+
     /** Returns the chest on the map. */
     public Chest getChest() {
         return chest;

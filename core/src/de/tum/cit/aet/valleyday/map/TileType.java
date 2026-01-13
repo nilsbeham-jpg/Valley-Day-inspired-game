@@ -5,7 +5,10 @@ public enum TileType {
     FENCE,
     DEBRIS,
     ENTRANCE,
+
     EXIT,
-    TOOL,
-    WILDLIFE
+    WILDLIFE,
+    FERTILIZER,
+    WATERING_CAN,
+    SHOVEL
 }
