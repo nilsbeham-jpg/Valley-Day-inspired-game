@@ -13,11 +13,11 @@ import com.badlogic.gdx.audio.Music;
  */
 public enum MusicTrack {
     
-    BACKGROUND("background.mp3", 0.2f);
-    
+    BACKGROUND("background.mp3", 0.2f); // is literally a constructor call- Eqivalent to public static final MusicTrack BACKGROUND = new MusicTrack("background.mp3", 0.2f);
+
     /** The music file owned by this variant. */
-    private final Music music;
-    
+    private final Music music; // music is a field inside the enum instance MusicTrack.BACKGROUND.
+
     MusicTrack(String fileName, float volume) {
         this.music = Gdx.audio.newMusic(Gdx.files.internal("audio/" + fileName));
         this.music.setLooping(true);

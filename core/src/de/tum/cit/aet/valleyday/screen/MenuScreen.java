@@ -21,7 +21,7 @@ import de.tum.cit.aet.valleyday.ValleyDayGame;
  */
 public class MenuScreen implements Screen {
 
-    private final Stage stage;
+    private final Stage stage; // root container of everything UI-related.
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -35,7 +35,7 @@ public class MenuScreen implements Screen {
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera 负责把“世界坐标”映射到“屏幕像素”
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
-        Table table = new Table(); // Create a table for layout 用Table 进行布局
+        Table table = new Table(); // Create a table for layout table is a layout manager.
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 

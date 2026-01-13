@@ -25,7 +25,7 @@ public class GameScreen implements Screen {
      * (e.g. x=1, y=1 is the bottom left corner of the map)
      * rather than absolute pixel coordinates.
      */
-    public static final int TILE_SIZE_PX = 16; //一个“格子(tile)”原始贴图大小是 16 像素（比如 16×16 的小像素图）
+    public static final int TILE_SIZE_PX = 16; // your world logic thinks in tiles, your screen thinks in pixels 1 tile = 16 pixels
     
     /**
      * The scale of the game.
@@ -33,11 +33,11 @@ public class GameScreen implements Screen {
      */
     public static final int SCALE = 4; //SCALE = 4：把所有贴图放大 4 倍显示（16×16 变成 64×64），画面更大更清晰
 
-    private final ValleyDayGame game; //主游戏对象，用于切 screen、拿全局资源（SpriteBatch、Map、Skin 
-    private final SpriteBatch spriteBatch; //2D 绘制“批处理器”。所有贴图绘制都通过它，性能更好
+    private final ValleyDayGame game;
+    private final SpriteBatch spriteBatch;
     private final GameMap map;
     private final Hud hud;
-    private final OrthographicCamera mapCamera; //地图相机，控制你“看地图的哪一块、怎么缩放”
+    private final OrthographicCamera mapCamera;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
