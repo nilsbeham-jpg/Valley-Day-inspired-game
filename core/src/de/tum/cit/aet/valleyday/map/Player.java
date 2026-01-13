@@ -19,6 +19,8 @@ public class Player implements Drawable {
     /** Total time elapsed since the game started. We use this for calculating the player movement and animating it. */
     private float elapsedTime; //游戏累计经过的时间
     
+    private boolean moving;
+
     private Direction facing= Direction.DOWN; 
 
     /** The Box2D hitbox of the player, used for position and collision detection. */
@@ -66,11 +68,13 @@ public class Player implements Drawable {
      * @param frameTime the time since the last frame.
      */
     public void tick(float frameTime) { // tick() tells physics how the player wants to move
+        if(moving){
         this.elapsedTime += frameTime;
+        }
         // Make the player move in a circle with radius 2 tiles
         // You can change this to make the player move differently, e.g. in response to user input.
         // See Gdx.input.isKeyPressed() for keyboard input
-        float speed=2f;
+        float speed=3f;
         float xVelocity=0f;
         float yVelocity=0f;
         
@@ -92,6 +96,7 @@ public class Player implements Drawable {
 
     }
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
+        this.moving= (xVelocity!=0f)||(yVelocity!=0f);
 
     }
     public Direction getFacing(){
@@ -103,14 +108,14 @@ public class Player implements Drawable {
         // Get the frame of the walk down animation that corresponds to the current time.
         switch (facing) {
         case UP:
-            return Textures.PLAYER_UP;
+            return Animations.CHARACTER_WALK_UP.getKeyFrame(elapsedTime,true);
         case LEFT:
-            return Textures.PLAYER_LEFT;
+            return Animations.CHARACTER_WALK_LEFT.getKeyFrame(elapsedTime,true);
         case RIGHT:
-            return Textures.PLAYER_RIGHT;
+            return Animations.CHARACTER_WALK_RIGHT.getKeyFrame(elapsedTime,true);
         case DOWN:
         default:
-            return Textures.PLAYER_DOWN;
+            return Animations.CHARACTER_WALK_DOWN.getKeyFrame(elapsedTime,true);
     }
     }
     
