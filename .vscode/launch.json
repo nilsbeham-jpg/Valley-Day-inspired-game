@@ -7,7 +7,7 @@
         "request": "launch",
         "mainClass": "de.tum.cit.aet.valleyday.DesktopLauncher",
         // uncomment the following line to run on macOS
-        "vmArgs": "-XstartOnFirstThread"
+        //"vmArgs": "-XstartOnFirstThread"
       }
     ]
 }

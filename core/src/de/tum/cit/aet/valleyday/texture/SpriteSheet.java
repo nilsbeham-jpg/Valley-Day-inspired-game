@@ -9,15 +9,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * It is assumed that every spritesheet has some standard grid size which can be used for easier coordinate specification.
  * See the assets/texture folder for the actual texture files (plus some more samples which are not enumerated here).
  * Feel free to add your own spritesheets and use them in the game!
- *
+ *SpriteSheet 用来集中管理“精灵表（spritesheet）”，
+并提供一个统一的方法，按“行/列”从精灵表中取出单个贴图（TextureRegion）。
  * @see Texture a whole image
  * @see TextureRegion a part of an image
  */
 public enum SpriteSheet {
     
     /** The character spritesheet, which has a grid size of 16x32. */
-    CHARACTER("character.png", 16, 32),
-    /** The basic tiles spritesheet, which has a grid size of 16x16. */
+    CHARACTER("character.png", 16, 32), //角色贴图是 16×32
+    /** The basic tiles spritesheet, which has a grid size of 16x16. */ //地面/基础瓦片是 16×16
     BASIC_TILES("basictiles.png", 16, 16);
     
     private final Texture spritesheet;

@@ -1,4 +1,5 @@
 package de.tum.cit.aet.valleyday.map;
+import com.badlogic.gdx.Gdx;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -15,7 +16,7 @@ import de.tum.cit.aet.valleyday.texture.Drawable;
 public class Player implements Drawable {
     
     /** Total time elapsed since the game started. We use this for calculating the player movement and animating it. */
-    private float elapsedTime;
+    private float elapsedTime; //游戏累计经过的时间
     
     /** The Box2D hitbox of the player, used for position and collision detection. */
     private final Body hitbox;
@@ -34,23 +35,23 @@ public class Player implements Drawable {
      */
     private Body createHitbox(World world, float startX, float startY) {
         // BodyDef is like a blueprint for the movement properties of the body.
-        BodyDef bodyDef = new BodyDef();
+        BodyDef bodyDef = new BodyDef(); //身体蓝图
         // Dynamic bodies are affected by forces and collisions.
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.type = BodyDef.BodyType.DynamicBody; //会受速度、力、碰撞影响适合：玩家敌人可移动物体
         // Set the initial position of the body.
         bodyDef.position.set(startX, startY);
         // Create the body in the world using the body definition.
-        Body body = world.createBody(bodyDef);
+        Body body = world.createBody(bodyDef); //在world中 创建真正的身体
         // Now we need to give the body a shape so the physics engine knows how to collide with it.
         // We'll use a circle shape for the player.
-        CircleShape circle = new CircleShape();
+        CircleShape circle = new CircleShape(); //创建一个碰撞形状
         // Give the circle a radius of 0.3 tiles (the player is 0.6 tiles wide).
         circle.setRadius(0.3f);
         // Attach the shape to the body as a fixture.
         // Bodies can have multiple fixtures, but we only need one for the player.
-        body.createFixture(circle, 1.0f);
+        body.createFixture(circle, 1.0f); //将碰撞形状给身体
         // We're done with the shape, so we should dispose of it to free up memory.
-        circle.dispose();
+        circle.dispose(); //释放 shape 内存
         // Set the player as the user data of the body so we can look up the player from the body later.
         body.setUserData(this);
         return body;
@@ -66,7 +67,7 @@ public class Player implements Drawable {
         // Make the player move in a circle with radius 2 tiles
         // You can change this to make the player move differently, e.g. in response to user input.
         // See Gdx.input.isKeyPressed() for keyboard input
-        float xVelocity = (float) Math.sin(this.elapsedTime) * 2;
+        float xVelocity = (float) Math.sin(this.elapsedTime) * 2; //用 sin / cos 生成一个圆周运动半径 ≈ 2 tiles
         float yVelocity = (float) Math.cos(this.elapsedTime) * 2;
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
     }
