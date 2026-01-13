@@ -18,17 +18,17 @@ public class DesktopLauncher {
 	 */
 	public static void main(String[] arg) {
 		// Configuration for the game window
-		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration(); //This object describes: “How should the window and runtime look?”
 		config.setTitle("Valley Day"); // Set the window title
 
-		// Get the display mode of the current monitor
+		// Get the display mode of the current monitor -- “What are the properties of the user’s current monitor?”
 		Graphics.DisplayMode displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode();
 		// Set the window size to 80% of the screen width and height
 		config.setWindowedMode(
 				Math.round(0.8f * displayMode.width),
 				Math.round(0.8f * displayMode.height)
 		);
-		config.useVsync(true); // Enable vertical sync
+		config.useVsync(true); // Enable vertical sync , tells Gpu “Only draw frames when the monitor is ready.”
 		config.setForegroundFPS(60); // Set the foreground frames per second
 
 		// Launch the game

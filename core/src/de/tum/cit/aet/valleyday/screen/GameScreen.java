@@ -25,7 +25,7 @@ public class GameScreen implements Screen {
      * (e.g. x=1, y=1 is the bottom left corner of the map)
      * rather than absolute pixel coordinates.
      */
-    public static final int TILE_SIZE_PX = 16;
+    public static final int TILE_SIZE_PX = 16; // your world logic thinks in tiles, your screen thinks in pixels 1 tile = 16 pixels
     
     /**
      * The scale of the game.
@@ -34,10 +34,10 @@ public class GameScreen implements Screen {
     public static final int SCALE = 4;
 
     private final ValleyDayGame game;
-    private final SpriteBatch spriteBatch;
+    private final SpriteBatch spriteBatch; // how pixels are drawn efficiently???
     private final GameMap map;
     private final Hud hud;
-    private final OrthographicCamera mapCamera;
+    private final OrthographicCamera mapCamera; // where you’re looking from
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
