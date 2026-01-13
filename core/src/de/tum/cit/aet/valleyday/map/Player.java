@@ -28,6 +28,9 @@ public class Player implements Drawable {
 
     private final GameMap map;
 
+    private static final float RADIUS = 0.3f;
+
+
     public Player(World world, GameMap map, float x, float y) {
         this.map = map;
         this.hitbox = createHitbox(world, x, y);
@@ -108,22 +111,68 @@ public class Player implements Drawable {
         float nextX = hitbox.getPosition().x + xVelocity * frameTime;
         float nextY = hitbox.getPosition().y + yVelocity * frameTime;
 
-        int nextTileX = worldToTile(nextX);
-        int nextTileY = worldToTile(nextY);
 
-    // Check horizontal movement
-        if (xVelocity != 0) {
-            if (map.isFence(nextTileX, worldToTile(hitbox.getPosition().y))) { // if the player  would move into a Wall set his velocity to zero
+
+
+        float currentX = hitbox.getPosition().x;
+        float currentY = hitbox.getPosition().y;
+
+// --- Horizontal collision ---
+        if (xVelocity > 0) { // moving right
+            int tileX = (int) Math.floor(nextX + RADIUS);
+            int tileY = (int) Math.floor(currentY);
+            if (map.isBlocked(tileX, tileY)) {
                 xVelocity = 0;
             }
         }
 
-    // Check vertical movement
-        if (yVelocity != 0) {
-            if (map.isFence(worldToTile(hitbox.getPosition().x), nextTileY)) {
+        if (xVelocity < 0) { // moving left
+            int tileX = (int) Math.floor(nextX - RADIUS);
+            int tileY = (int) Math.floor(currentY);
+            if (map.isBlocked(tileX, tileY)) {
+                xVelocity = 0;
+            }
+        }
+
+// --- Vertical collision ---
+        if (yVelocity > 0) { // moving up
+            int tileX = (int) Math.floor(currentX);
+            int tileY = (int) Math.floor(nextY + RADIUS);
+            if (map.isBlocked(tileX, tileY)) {
                 yVelocity = 0;
             }
         }
+
+        if (yVelocity < 0) { // moving down
+            int tileX = (int) Math.floor(currentX);
+            int tileY = (int) Math.floor(nextY - RADIUS);
+            if (map.isBlocked(tileX, tileY)) {
+                yVelocity = 0;
+            }
+        }
+
+
+
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+
+            int px = worldToTile(hitbox.getPosition().x);
+            int py = worldToTile(hitbox.getPosition().y);
+
+            int tx = px;
+            int ty = py;
+
+            switch (facing) {
+                case UP -> ty += 1;
+                case DOWN -> ty -= 1;
+                case LEFT -> tx -= 1;
+                case RIGHT -> tx += 1;
+            }
+
+            map.interactWithTile(tx, ty); //Interaction is directional
+        }
+
 
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
         this.moving= (xVelocity!=0f)||(yVelocity!=0f);

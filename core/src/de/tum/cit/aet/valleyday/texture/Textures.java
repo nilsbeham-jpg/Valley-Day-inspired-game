@@ -17,5 +17,10 @@ public class Textures {
     public static final TextureRegion PLAYER_LEFT  = SpriteSheet.CHARACTER.at(4, 1);
     public static final TextureRegion PLAYER_RIGHT = SpriteSheet.CHARACTER.at(2, 1);
     public static final TextureRegion PLAYER_UP    = SpriteSheet.CHARACTER.at(3, 1);
+
+
+    public static final TextureRegion FENCE  = SpriteSheet.BASIC_TILES.at(8,4);
+    public static final TextureRegion DEBRIS = SpriteSheet.BASIC_TILES.at(8, 8);
+    public static final TextureRegion EXIT   = SpriteSheet.BASIC_TILES.at(1, 1);
     
 }
