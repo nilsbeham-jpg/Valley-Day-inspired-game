@@ -25,7 +25,7 @@ public class GameMap {
     // A static block is executed once when the class is referenced for the first time.
     static {
         // Initialize the Box2D physics engine.
-        com.badlogic.gdx.physics.box2d.Box2D.init(); //box2d模块初始化
+        com.badlogic.gdx.physics.box2d.Box2D.init();
     }
     
     // Box2D physics simulation parameters (you can experiment with these if you want, but they work well as they are)
