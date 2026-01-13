@@ -25,11 +25,14 @@ public class Player implements Drawable {
 
     /** The Box2D hitbox of the player, used for position and collision detection. */
     private final Body hitbox;
-    
-    public Player(World world, float x, float y) {
+
+    private final GameMap map;
+
+    public Player(World world, GameMap map, float x, float y) {
+        this.map = map;
         this.hitbox = createHitbox(world, x, y);
     }
-    
+
     /**
      * Creates a Box2D body for the player.
      * This is what the physics engine uses to move the player around and detect collisions with other bodies.
@@ -61,7 +64,12 @@ public class Player implements Drawable {
         body.setUserData(this);
         return body;
     }
-    
+
+    private int worldToTile(float value) {
+        return (int) Math.floor(value);
+    }
+
+
     /**
      * Move the player around in a circle by updating the linear velocity of its hitbox every frame.
      * This doesn't actually move the player, but it tells the physics engine how the player should move next frame.
@@ -95,8 +103,29 @@ public class Player implements Drawable {
         facing= Direction.RIGHT;
 
     }
+        float nextX = hitbox.getPosition().x + xVelocity * frameTime;
+        float nextY = hitbox.getPosition().y + yVelocity * frameTime;
+
+        int nextTileX = worldToTile(nextX);
+        int nextTileY = worldToTile(nextY);
+
+    // Check horizontal movement
+        if (xVelocity != 0) {
+            if (map.isFence(nextTileX, worldToTile(hitbox.getPosition().y))) {
+                xVelocity = 0;
+            }
+        }
+
+    // Check vertical movement
+        if (yVelocity != 0) {
+            if (map.isFence(worldToTile(hitbox.getPosition().x), nextTileY)) {
+                yVelocity = 0;
+            }
+        }
+
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
         this.moving= (xVelocity!=0f)||(yVelocity!=0f);
+
 
     }
     public Direction getFacing(){
