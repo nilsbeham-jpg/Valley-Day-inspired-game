@@ -1,6 +1,6 @@
 package de.tum.cit.aet.valleyday.map;
 import com.badlogic.gdx.Gdx;
-
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
