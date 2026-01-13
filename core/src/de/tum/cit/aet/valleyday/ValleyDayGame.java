@@ -21,17 +21,17 @@ public class ValleyDayGame extends Game {
      * Sprite Batch for rendering game elements.
      * This eats a lot of memory, so we only want one of these.
      */
-    private SpriteBatch spriteBatch;
+    private SpriteBatch spriteBatch; //贴图绘制核心对象
 
     /** The game's UI skin. This is used to style the game's UI elements. */
-    private Skin skin;
+    private Skin skin; //UI样式
     
     /**
      * The file chooser for loading map files from the user's computer.
      * This will give you access to a {@link com.badlogic.gdx.files.FileHandle} object,
      * which you can use to read the contents of the map file as a String, and then parse it into a {@link GameMap}.
      */
-    private final NativeFileChooser fileChooser;
+    private final NativeFileChooser fileChooser; //用于从用户电脑选择文件（比如加载 map 文件）
     
     /**
      * The map. This is where all the game objects are stored.

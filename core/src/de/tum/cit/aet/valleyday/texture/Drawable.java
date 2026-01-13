@@ -23,7 +23,7 @@ public interface Drawable {
      * It must be multiplied by {@link GameScreen#TILE_SIZE_PX}
      * and {@link GameScreen#SCALE} to get the pixel coordinate.
      * @return The X coordinate of the drawable.
-     */
+     *///返回的是游戏世界的坐标tile
     float getX();
     
     /**

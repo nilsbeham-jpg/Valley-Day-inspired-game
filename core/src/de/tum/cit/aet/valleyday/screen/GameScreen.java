@@ -31,13 +31,13 @@ public class GameScreen implements Screen {
      * The scale of the game.
      * This is used to make everything in the game look bigger or smaller.
      */
-    public static final int SCALE = 4;
+    public static final int SCALE = 4; //SCALE = 4：把所有贴图放大 4 倍显示（16×16 变成 64×64），画面更大更清晰
 
     private final ValleyDayGame game;
-    private final SpriteBatch spriteBatch; // how pixels are drawn efficiently???
+    private final SpriteBatch spriteBatch;
     private final GameMap map;
     private final Hud hud;
-    private final OrthographicCamera mapCamera; // where you’re looking from
+    private final OrthographicCamera mapCamera;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -50,26 +50,26 @@ public class GameScreen implements Screen {
         this.map = game.getMap();
         this.hud = new Hud(spriteBatch, game.getSkin().getFont("font"));
         // Create and configure the camera for the game view
-        this.mapCamera = new OrthographicCamera();
+        this.mapCamera = new OrthographicCamera(); //创建正交相机
         this.mapCamera.setToOrtho(false);
     }
     
     /**
      * The render method is called every frame to render the game.
      * @param deltaTime The time in seconds since the last render.
-     */
+     *///deltaTime：上一帧到这一帧过去了多少秒（秒数）
     @Override
     public void render(float deltaTime) {
-        // Check for escape key press to go back to the menu
+        // Check for escape key press to go back to the menu //按ESC到菜单界面
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.goToMenu();
         }
         
         // Clear the previous frame from the screen, or else the picture smears
-        ScreenUtils.clear(Color.BLACK);
+        ScreenUtils.clear(Color.BLACK); //清屏：避免“拖影/涂抹”
         
         // Cap frame time to 250ms to prevent spiral of death
-        float frameTime = Math.min(deltaTime, 0.250f);
+        float frameTime = Math.min(deltaTime, 0.250f); //如果某一帧卡顿（比如 deltaTime=2秒），物理会需要做很多步来追赶，会导致更卡，进入“死亡螺旋”
         
         // Update the map state
         map.tick(frameTime);
@@ -78,10 +78,10 @@ public class GameScreen implements Screen {
         updateCamera();
         
         // Render the map on the screen
-        renderMap();
+        renderMap(); //把 flowers/chest/player 画到屏幕上
         
         // Render the HUD on the screen
-        hud.render();
+        hud.render(); //HUD画在最上层
     }
     
     /**
@@ -89,7 +89,7 @@ public class GameScreen implements Screen {
      * Currently, this just centers the camera at the origin.
      */
     private void updateCamera() {
-        mapCamera.setToOrtho(false);
+        mapCamera.setToOrtho(false); //Y轴向上
         mapCamera.position.x = 3.5f * TILE_SIZE_PX * SCALE;
         mapCamera.position.y = 3.5f * TILE_SIZE_PX * SCALE;
         mapCamera.update(); // This is necessary to apply the changes
@@ -104,6 +104,7 @@ public class GameScreen implements Screen {
         
         // Render everything in the map here, in order from lowest to highest (later things appear on top)
         // You may want to add a method to GameMap to return all the drawables in the correct order
+        //画画面的顺序 先花后箱子后玩家
         for (Flowers flowers : map.getFlowers()) {
             draw(spriteBatch, flowers);
         }
@@ -126,7 +127,7 @@ public class GameScreen implements Screen {
         float x = drawable.getX() * TILE_SIZE_PX * SCALE;
         float y = drawable.getY() * TILE_SIZE_PX * SCALE;
         // Additionally scale everything by the game scale
-        float width = texture.getRegionWidth() * SCALE;
+        float width = texture.getRegionWidth() * SCALE; //让贴图跟地图一致缩放
         float height = texture.getRegionHeight() * SCALE;
         spriteBatch.draw(texture, x, y, width, height);
     }
@@ -139,7 +140,7 @@ public class GameScreen implements Screen {
      */
     @Override
     public void resize(int width, int height) {
-        mapCamera.setToOrtho(false);
+        mapCamera.setToOrtho(false); //当窗口大小变化，HUD 需要调整 viewport 或布局
         hud.resize(width, height);
     }
 

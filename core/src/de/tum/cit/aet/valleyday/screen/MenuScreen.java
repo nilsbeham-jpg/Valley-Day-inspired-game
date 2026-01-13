@@ -30,9 +30,9 @@ public class MenuScreen implements Screen {
      */
     public MenuScreen(ValleyDayGame game) {
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1.5f; // Set camera zoom for a closer view 创建相机 Zoom代表视角远近
 
-        Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
+        Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera 负责把“世界坐标”映射到“屏幕像素”
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         Table table = new Table(); // Create a table for layout table is a layout manager.
@@ -41,6 +41,7 @@ public class MenuScreen implements Screen {
 
         // Add a label as a title
         table.add(new Label("Hello World from the Menu!", game.getSkin(), "title")).padBottom(80).row();
+        //这个控件下面留 80 像素空白（把按钮和标题拉开）
 
         // Create and add a button to go to the game screen
         TextButton goToGameButton = new TextButton("Go To Game", game.getSkin());
@@ -78,7 +79,7 @@ public class MenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of the stage when screen is disposed
+        // Dispose of the stage when screen is disposed 释放资源
         stage.dispose();
     }
 

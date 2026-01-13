@@ -6,7 +6,7 @@ import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
 /**
- * A chest is a static object with a hitbox, so the player cannot walk through it.
+ * A chest is a static object with a hitbox, so the player cannot walk through it. 箱子 玩家无法穿透他
  */
 public class Chest implements Drawable {
     

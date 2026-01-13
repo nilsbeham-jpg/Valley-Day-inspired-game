@@ -33,7 +33,7 @@ public class Hud {
         spriteBatch.setProjectionMatrix(camera.combined);
         // Start drawing
         spriteBatch.begin();
-        // Draw the HUD elements
+        // Draw the HUD elements HUD内容
         font.draw(spriteBatch, "Press Esc to Pause!", 10, Gdx.graphics.getHeight() - 10);
         // Finish drawing
         spriteBatch.end();
@@ -44,7 +44,7 @@ public class Hud {
      * This is called when the window is resized.
      * @param width The new width of the screen.
      * @param height The new height of the screen.
-     */
+     */ //Hud 随窗口变化
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
     }

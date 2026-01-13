@@ -12,7 +12,7 @@ public class Animations {
     
     /**
      * The animation for the character walking down.
-     */
+     */ //代表行动
     public static final Animation<TextureRegion> CHARACTER_WALK_DOWN = new Animation<>(0.1f,
             SpriteSheet.CHARACTER.at(1, 1),
             SpriteSheet.CHARACTER.at(1, 2),
