@@ -138,7 +138,30 @@ public class GameMap {
             int value = Integer.parseInt(props.getProperty(key));
 
             tiles[x][y] = createTileFromValue(value); // add the values to the tile if not EMPTY
+
+
         }
+        // Check if there is an exit else
+        boolean exitFound = false;
+        ArrayList<int[]> debrisPositions = new ArrayList<>();
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                Tile tile = tiles[x][y];
+                if (tile.hiddenType == TileType.EXIT) {
+                    exitFound = true;
+                }
+                if (tile.type == TileType.DEBRIS) {
+                    debrisPositions.add(new int[]{x, y});
+                }
+            }
+        }
+
+        if (!exitFound && !debrisPositions.isEmpty()) {
+            int[] pos = debrisPositions.get(MathUtils.random(debrisPositions.size()-1));
+            tiles[pos[0]][pos[1]].hiddenType = TileType.EXIT;
+        } //If the map does not already contain an exit, then pick one existing debris tile at random and hide the exit underneath that debris.
+
     }
 
     private int[] findEntrancePosition() { // finds the entrance of the map
@@ -208,6 +231,32 @@ public class GameMap {
     }
 
 
+    public void interactWithTile(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return; //safeguard that only coordinates that make sense are entered
+        }
+
+        Tile tile = tiles[x][y];
+
+        // Only debris can be interacted with (for now)
+        if (tile.type == TileType.DEBRIS) {
+
+            // If something was hidden, reveal it
+            if (tile.hiddenType != null) {
+                tile.type = tile.hiddenType;
+                tile.hiddenType = null;
+            } else {
+                // Otherwise, debris is simply removed
+                tile.type = TileType.EMPTY;
+            }
+            System.out.println("Interacted with tile at " + x + "," + y +
+                    " -> " + tile.type); //debug
+
+        }
+    }
+
+
+
 
 
 
@@ -257,6 +306,30 @@ public class GameMap {
         }
         return tiles[x][y].type == TileType.FENCE;
     }
+
+    public boolean isExit(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return false;
+        }
+        return tiles[x][y].type == TileType.EXIT;
+    }
+
+    private boolean gameWon = false;
+
+    public boolean hasPlayerReachedExit() {
+        if (gameWon) return true;
+
+        int px = (int) Math.floor(player.getX());
+        int py = (int) Math.floor(player.getY());
+
+        if (isExit(px, py)) {
+            gameWon = true;
+            return true;
+        }
+        return false;
+    }
+
+
 
 
     /**

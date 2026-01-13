@@ -123,6 +123,24 @@ public class Player implements Drawable {
                 yVelocity = 0;
             }
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+
+            int px = worldToTile(hitbox.getPosition().x);
+            int py = worldToTile(hitbox.getPosition().y);
+
+            int tx = px;
+            int ty = py;
+
+            switch (facing) {
+                case UP -> ty += 1;
+                case DOWN -> ty -= 1;
+                case LEFT -> tx -= 1;
+                case RIGHT -> tx += 1;
+            }
+
+            map.interactWithTile(tx, ty); //Interaction is directional
+        }
+
 
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
         this.moving= (xVelocity!=0f)||(yVelocity!=0f);

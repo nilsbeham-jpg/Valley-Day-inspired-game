@@ -73,12 +73,19 @@ public class GameScreen implements Screen {
         
         // Update the map state
         map.tick(frameTime);
+
+        if (map.hasPlayerReachedExit()) {
+            game.goToMenu(); // or game.goToWinScreen() later
+            return;}
         
         // Update the camera
         updateCamera();
         
         // Render the map on the screen
         renderMap(); //把 flowers/chest/player 画到屏幕上
+
+
+
         
         // Render the HUD on the screen
         hud.render(); //HUD画在最上层
