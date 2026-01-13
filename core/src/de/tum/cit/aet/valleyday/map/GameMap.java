@@ -308,7 +308,7 @@ public class GameMap {
         tickCrops(frameTime);
         doPhysicsStep(frameTime);
     }
-    //-----------------------------------------------------------------------------
+    //----------------------------------------------------------------------------- 
     private void handleAKey() {
     if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
         return;
