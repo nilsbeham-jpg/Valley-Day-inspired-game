@@ -10,8 +10,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.map.Flowers;
+import de.tum.cit.aet.valleyday.map.Tile;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.map.GameMap;
+import de.tum.cit.aet.valleyday.texture.Textures;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -108,14 +110,42 @@ public class GameScreen implements Screen {
         
         // Start drawing
         spriteBatch.begin();
-        
+
+        Tile[][] tiles = map.getTiles();
+
+        for (int x = 0; x < map.getMapWidth(); x++) {
+            for (int y = 0; y < map.getMapHeight(); y++) {
+                Tile tile = tiles[x][y];
+
+                TextureRegion texture = switch (tile.type) {
+                    case FENCE -> Textures.FENCE;
+                    case DEBRIS -> Textures.DEBRIS;
+                    case EXIT -> Textures.EXIT;
+                    default -> null;
+                };
+
+                if (texture != null) {
+                    float drawX = x * TILE_SIZE_PX * SCALE;
+                    float drawY = y * TILE_SIZE_PX * SCALE;
+                    spriteBatch.draw(
+                            texture,
+                            drawX,
+                            drawY,
+                            TILE_SIZE_PX * SCALE,
+                            TILE_SIZE_PX * SCALE
+                    );
+                }
+            }
+        }
+
+
+
+
+
         // Render everything in the map here, in order from lowest to highest (later things appear on top)
         // You may want to add a method to GameMap to return all the drawables in the correct order
         //画画面的顺序 先花后箱子后玩家
-        for (Flowers flowers : map.getFlowers()) {
-            draw(spriteBatch, flowers);
-        }
-        draw(spriteBatch, map.getChest());
+
         draw(spriteBatch, map.getPlayer());
         
         // Finish drawing, i.e. send the drawn items to the graphics card

@@ -53,10 +53,6 @@ public class GameMap {
     // Game objects
     private final Player player;
     
-    private final Chest chest;
-    
-    private final Flowers[][] flowers;
-
 
     private Tile[][] tiles;
     private int mapWidth;
@@ -272,22 +268,14 @@ public class GameMap {
 
        //this.player = new Player(this.world, 1, 3); //创建玩家位置
 
-        loadMap("maps/map-2.properties");
+        loadMap("maps/map-1.properties");
         printMapToConsole();
         int[] entrance = findEntrancePosition();
         this.player = new Player(this.world, this ,entrance[0], entrance[1]);
 
 
 
-        // Create a chest in the middle of the map
-        this.chest = new Chest(world, 3, 3); //初始箱子位置
-        // Create flowers in a 7x7 grid
-        this.flowers = new Flowers[7][7];
-        for (int i = 0; i < flowers.length; i++) {
-            for (int j = 0; j < flowers[i].length; j++) {
-                this.flowers[i][j] = new Flowers(i, j);
-            }
-        }
+
     }
     
     /**
@@ -300,12 +288,16 @@ public class GameMap {
         doPhysicsStep(frameTime);
     }
 
-    public boolean isFence(int x, int y) {
+
+    public boolean isBlocked(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
-            return true; // treat outside map as solid
+            return true; // outside map is solid
         }
-        return tiles[x][y].type == TileType.FENCE;
+
+        TileType type = tiles[x][y].type;
+        return type == TileType.FENCE || type == TileType.DEBRIS;
     }
+
 
     public boolean isExit(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
@@ -350,13 +342,17 @@ public class GameMap {
         return player;
     }
 
-    /** Returns the chest on the map. */
-    public Chest getChest() {
-        return chest;
+
+    public Tile[][] getTiles() {
+        return tiles;
     }
-    
-    /** Returns the flowers on the map. */
-    public List<Flowers> getFlowers() {
-        return Arrays.stream(flowers).flatMap(Arrays::stream).toList();
+
+    public int getMapWidth() {
+        return mapWidth;
     }
+
+    public int getMapHeight() {
+        return mapHeight;
+    }
+
 }
