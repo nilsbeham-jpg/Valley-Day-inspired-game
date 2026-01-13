@@ -64,6 +64,92 @@ public class GameMap {
 
 
 
+    private void loadMap(String path) {
+        Properties props = new Properties();
+
+        try {
+            props.load(Gdx.files.internal(path).reader()); // reads the file given a certain path
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load map file: " + path, e);
+        }
+
+        // 1. Determine map size from max x/y found, because the provided maps does not specify width/height
+        int maxX = 0;
+        int maxY = 0;
+
+        for (String key : props.stringPropertyNames()) { // loops threw all keys
+            if (!key.contains(",")) continue;
+
+            String[] parts = key.split(","); // split each line in x and y value
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+
+            if (x > maxX) maxX = x; // if the current x or y coordinates are greater than the max they become the new max
+            if (y > maxY) maxY = y;
+        }
+
+        mapWidth  = maxX + 1;
+        mapHeight = maxY + 1;
+
+        tiles = new Tile[mapWidth][mapHeight]; // A two-dimensional grid of Tile references
+
+        // 2. Fill everything with EMPTY first
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                tiles[x][y] = new Tile(TileType.EMPTY);
+            }
+        }
+
+        // 3. Read actual tiles from file
+        for (String key : props.stringPropertyNames()) {
+            if (!key.contains(",")) continue;
+
+            String[] parts = key.split(",");
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+            int value = Integer.parseInt(props.getProperty(key));
+
+            tiles[x][y] = createTileFromValue(value); // add the values to the tile if not EMPTY
+        }
+    }
+
+    private Tile createTileFromValue(int value) {
+        switch (value) {
+            case 0:
+                // indestructible wall
+                return new Tile(TileType.FENCE);
+
+            case 1:
+                // destructible wall
+                return new Tile(TileType.DEBRIS);
+
+            case 3:
+                // entrance
+                return new Tile(TileType.ENTRANCE);
+
+            case 5: {
+                // tool hidden under debris
+                Tile t = new Tile(TileType.DEBRIS);
+                t.hiddenType = TileType.TOOL;
+                return t;
+            }
+
+            case 6: {
+                // wildlife hidden under debris
+                Tile t = new Tile(TileType.DEBRIS);
+                t.hiddenType = TileType.WILDLIFE;
+                return t;
+            }
+
+            default:
+                return new Tile(TileType.EMPTY);
+        }
+    }
+
+
+
+
+
     public GameMap(ValleyDayGame game) {
         this.game = game;
         this.world = new World(Vector2.Zero, true); //Vector2.Zero：重力向量为 (0,0)，表示无重力（俯视角游戏常这样）。
