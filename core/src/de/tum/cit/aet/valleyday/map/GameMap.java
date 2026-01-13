@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 
+import com.badlogic.gdx.Input;
+
 
 /**
  * Represents the game map.
@@ -58,7 +60,9 @@ public class GameMap {
     private int mapWidth;
     private int mapHeight;
 
-
+    private CropTile[][] crops; // Creat CropTile and init the harvest and task(quota)
+    private int harvested = 0;
+    private int quota = 10;
 
 
 
@@ -157,6 +161,21 @@ public class GameMap {
             int[] pos = debrisPositions.get(MathUtils.random(debrisPositions.size()-1));
             tiles[pos[0]][pos[1]].hiddenType = TileType.EXIT;
         } //If the map does not already contain an exit, then pick one existing debris tile at random and hide the exit underneath that debris.
+
+
+        //  Initialize crops grid AFTER tiles are ready
+    crops = new CropTile[mapWidth][mapHeight];
+
+    for (int x = 0; x < mapWidth; x++) {
+    for (int y = 0; y < mapHeight; y++) {
+
+        // 暂时约定：EMPTY = 可种植的地
+        if (tiles[x][y].type == TileType.EMPTY) {
+            crops[x][y] = new CropTile();
+        }
+    }
+}
+
 
     }
 
@@ -285,8 +304,62 @@ public class GameMap {
      *///先更新玩家再 step 物理，是常见做法（玩家把力/速度设置进 body，然后物理推进）
     public void tick(float frameTime) {
         this.player.tick(frameTime);
+        handleAKey();
+        tickCrops(frameTime);
         doPhysicsStep(frameTime);
     }
+    //-----------------------------------------------------------------------------
+    private void handleAKey() {
+    if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+        return;
+    }
+
+    int fx = player.getFrontTileX();
+    int fy = player.getFrontTileY();
+
+    if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
+        return;
+    }
+
+    // 只允许在 EMPTY 这种“地面”上种/收
+    if (tiles[fx][fy].type != TileType.EMPTY) {
+        return;
+    }
+
+    CropTile crop = crops[fx][fy];
+    if (crop == null) {
+        return;
+    }
+
+    if (crop.isEmpty()) {
+        crop.plant();
+        System.out.println("Plant at (" + fx + "," + fy + ")");
+        return;
+    }
+
+    if (crop.isMature()) {
+        crop.harvest();
+        harvested += 1;
+        System.out.println("Harvest at (" + fx + "," + fy + "), harvested=" + harvested);
+        return;
+    }
+
+    System.out.println("A pressed but stage=" + crop.getStage() + " at (" + fx + "," + fy + ")");
+}
+
+private void tickCrops(float dt) {
+    if (crops == null) {
+        return;
+    }
+    for (int x = 0; x < mapWidth; x++) {
+        for (int y = 0; y < mapHeight; y++) {
+            if (crops[x][y] != null) {
+                crops[x][y].tick(dt);
+            }
+        }
+    }
+}
+//-------------------------------------------------------------------
 
 
     public boolean isBlocked(int x, int y) {
@@ -328,7 +401,7 @@ public class GameMap {
      * Performs as many physics steps as necessary to catch up to the given frame time.
      * This will update the Box2D world by the given time step.
      * @param frameTime Time since last frame in seconds
-     */ //这个东西是为了即使帧率波动，物理仍然以固定步长运行，结果更稳定
+     */ 
     private void doPhysicsStep(float frameTime) {
         this.physicsTime += frameTime;
         while (this.physicsTime >= TIME_STEP) {
