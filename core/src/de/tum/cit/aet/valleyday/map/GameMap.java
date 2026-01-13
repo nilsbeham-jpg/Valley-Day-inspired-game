@@ -223,7 +223,7 @@ public class GameMap {
 
        //this.player = new Player(this.world, 1, 3); //创建玩家位置
 
-        loadMap("maps/map-1.properties");
+        loadMap("maps/map-2.properties");
         printMapToConsole();
         int[] entrance = findEntrancePosition();
         this.player = new Player(this.world, this ,entrance[0], entrance[1]);

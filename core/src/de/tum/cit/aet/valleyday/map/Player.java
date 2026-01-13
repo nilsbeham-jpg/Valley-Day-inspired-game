@@ -99,6 +99,7 @@ public class Player implements Drawable {
         facing= Direction.RIGHT;
 
     }
+    // calculate were the player is next
         float nextX = hitbox.getPosition().x + xVelocity * frameTime;
         float nextY = hitbox.getPosition().y + yVelocity * frameTime;
 
@@ -107,7 +108,7 @@ public class Player implements Drawable {
 
     // Check horizontal movement
         if (xVelocity != 0) {
-            if (map.isFence(nextTileX, worldToTile(hitbox.getPosition().y))) {
+            if (map.isFence(nextTileX, worldToTile(hitbox.getPosition().y))) { // if the player  would move into a Wall set his velocity to zero
                 xVelocity = 0;
             }
         }
