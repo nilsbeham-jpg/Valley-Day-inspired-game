@@ -187,6 +187,20 @@ public class Player implements Drawable {
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
         this.moving= (xVelocity!=0f)||(yVelocity!=0f);
 
+/*if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+
+    int tileX = getTileX();
+    int tileY = getTileY();
+
+    int frontX = getFrontTileX();
+    int frontY = getFrontTileY();
+
+    System.out.println("=== A KEY DEBUG ===");
+    System.out.println("player pos = (" + getX() + ", " + getY() + ")");
+    System.out.println("player tile = (" + tileX + ", " + tileY + ")");
+    System.out.println("facing = " + facing);
+    System.out.println("front tile = (" + frontX + ", " + frontY + ")");
+}/* */
 
     }
     public Direction getFacing(){ //check direction and return the facing direction
@@ -196,30 +210,33 @@ public class Player implements Drawable {
 
     //find the front x-coordinate of the player 
     public int getTileX(){
-        return (int) Math.floor(getX());
+        return (int) Math.round(getX());
     }
     public int getTileY(){
-        return (int) Math.floor(getY());
+        return (int) Math.round(getY());
     }
-    public int getFrontTileX(){
-        return getTileX() + 
-        switch (facing) {
-        case LEFT -> -1;
-        case RIGHT -> 1;
-        default -> 0;
-    };
+    public int getFrontTileX() {
+    int tileX = getTileX();
+    if (facing == Direction.LEFT) {
+        return tileX - 1;
     }
+    if (facing == Direction.RIGHT) {
+        return tileX + 1;
+    }
+    return tileX;
+}
 
-    //find the front y-coordinate of the player 
-    public int getFrontTileY(){
-        return getTileX() + 
-        switch (facing) {
-        case DOWN -> -1;
-        case UP -> 1;
-        default -> 0;
-    };
-    
+public int getFrontTileY() {
+    int tileY = getTileY();
+    if (facing == Direction.DOWN) {
+        return tileY - 1;
     }
+    if (facing == Direction.UP) {
+        return tileY + 1;
+    }
+    return tileY;
+}
+
     
 
 

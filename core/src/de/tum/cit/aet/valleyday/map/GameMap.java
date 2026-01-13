@@ -416,6 +416,9 @@ private void tickCrops(float dt) {
         return player;
     }
 
+    public CropTile[][] getCrops() {
+    return crops;
+    }
 
     public Tile[][] getTiles() {
         return tiles;

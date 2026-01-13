@@ -22,8 +22,8 @@ public enum SpriteSheet {
     /** The basic tiles spritesheet, which has a grid size of 16x16. */ //地面/基础瓦片是 16×16
     BASIC_TILES("basictiles.png", 16, 16),
     FENCE_GATE("Fance_Gate.png", 1, 4),
-    FARM_THINGS("farmthings.png", 8, 8);
-
+    FARM_THINGS("farmthings.png", 8, 8),
+    CROPS("crops.png",64,64);
 
     
     private final Texture spritesheet;
@@ -41,6 +41,7 @@ public enum SpriteSheet {
         this.spritesheet = new Texture(Gdx.files.internal("texture/" + filename));
         this.width = width;
         this.height = height;
+        
     }
     
     /**

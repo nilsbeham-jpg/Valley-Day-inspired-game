@@ -69,6 +69,8 @@ public void tick(float frameTime){ //do nothing if it is empty
         if (matureTime >= MATURE_TO_ROTTEN) { //caculate the time from mature to rotten
                 stage = CropStage.ROTTEN;
     }
+    
     }  
+    
 }
 }
