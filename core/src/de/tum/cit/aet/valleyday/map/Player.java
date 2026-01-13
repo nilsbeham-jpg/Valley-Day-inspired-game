@@ -28,7 +28,7 @@ public class Player implements Drawable {
 
     private final GameMap map;
 
-    private static final float RADIUS = 0.3f;
+    private static final float RADIUS = 0.25f;
 
 
     public Player(World world, GameMap map, float x, float y) {
@@ -48,7 +48,7 @@ public class Player implements Drawable {
         // BodyDef is like a blueprint for the movement properties of the body.
         BodyDef bodyDef = new BodyDef(); //身体蓝图
         // Dynamic bodies are affected by forces and collisions.
-        bodyDef.type = BodyDef.BodyType.DynamicBody; //会受速度、力、碰撞影响适合：玩家敌人可移动物体
+        bodyDef.type = BodyDef.BodyType.KinematicBody; //会受速度、力、碰撞影响适合：玩家敌人可移动物体
         // Set the initial position of the body.
         bodyDef.position.set(startX, startY);
         // Create the body in the world using the body definition.
@@ -118,38 +118,48 @@ public class Player implements Drawable {
         float currentY = hitbox.getPosition().y;
 
 // --- Horizontal collision ---
-        if (xVelocity > 0) { // moving right
-            int tileX = (int) Math.floor(nextX + RADIUS);
-            int tileY = (int) Math.floor(currentY);
-            if (map.isBlocked(tileX, tileY)) {
+        if (xVelocity > 0) { // right
+            int tileX = worldToTile(nextX + RADIUS);
+            int tileY1 = worldToTile(currentY + RADIUS * 0.9f);
+            int tileY2 = worldToTile(currentY - RADIUS * 0.9f);
+
+            if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
                 xVelocity = 0;
             }
         }
 
-        if (xVelocity < 0) { // moving left
-            int tileX = (int) Math.floor(nextX - RADIUS);
-            int tileY = (int) Math.floor(currentY);
-            if (map.isBlocked(tileX, tileY)) {
+        if (xVelocity < 0) { // left
+            int tileX = worldToTile(nextX - RADIUS);
+            int tileY1 = worldToTile(currentY + RADIUS * 0.9f);
+            int tileY2 = worldToTile(currentY - RADIUS * 0.9f);
+
+            if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
                 xVelocity = 0;
             }
         }
+
 
 // --- Vertical collision ---
-        if (yVelocity > 0) { // moving up
-            int tileX = (int) Math.floor(currentX);
-            int tileY = (int) Math.floor(nextY + RADIUS);
-            if (map.isBlocked(tileX, tileY)) {
+        if (yVelocity > 0) { // up
+            int tileY = worldToTile(nextY + RADIUS);
+            int tileX1 = worldToTile(currentX + RADIUS * 0.9f);
+            int tileX2 = worldToTile(currentX - RADIUS * 0.9f);
+
+            if (map.isBlocked(tileX1, tileY) || map.isBlocked(tileX2, tileY)) {
                 yVelocity = 0;
             }
         }
 
-        if (yVelocity < 0) { // moving down
-            int tileX = (int) Math.floor(currentX);
-            int tileY = (int) Math.floor(nextY - RADIUS);
-            if (map.isBlocked(tileX, tileY)) {
+        if (yVelocity < 0) { // down
+            int tileY = worldToTile(nextY - RADIUS);
+            int tileX1 = worldToTile(currentX + RADIUS * 0.9f);
+            int tileX2 = worldToTile(currentX - RADIUS * 0.9f);
+
+            if (map.isBlocked(tileX1, tileY) || map.isBlocked(tileX2, tileY)) {
                 yVelocity = 0;
             }
         }
+
 
 
 

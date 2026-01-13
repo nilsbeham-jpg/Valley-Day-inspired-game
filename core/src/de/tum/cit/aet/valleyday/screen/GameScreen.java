@@ -160,15 +160,20 @@ public class GameScreen implements Screen {
      */
     private static void draw(SpriteBatch spriteBatch, Drawable drawable) {
         TextureRegion texture = drawable.getCurrentAppearance();
-        // Drawable coordinates are in tiles, so we need to scale them to pixels
-        float x = drawable.getX() * TILE_SIZE_PX * SCALE;
-        float y = drawable.getY() * TILE_SIZE_PX * SCALE;
-        // Additionally scale everything by the game scale
-        float width = texture.getRegionWidth() * SCALE; //让贴图跟地图一致缩放
-        float height = texture.getRegionHeight() * SCALE;
+
+        float worldX = drawable.getX() - 0.5f;
+        float worldY = drawable.getY() - 0.5f;
+
+        float x = worldX * TILE_SIZE_PX * SCALE;
+        float y = worldY * TILE_SIZE_PX * SCALE;
+
+        float width  = TILE_SIZE_PX * SCALE;
+        float height = TILE_SIZE_PX * SCALE;
+
         spriteBatch.draw(texture, x, y, width, height);
     }
-    
+
+
     /**
      * Called when the window is resized.
      * This is where the camera is updated to match the new window size.
