@@ -135,11 +135,28 @@ public class GameScreen implements Screen {
      * Updates the camera to match the current state of the game.
      * Currently, this just centers the camera at the origin.
      */
+    private static final float DEAD_ZONE_FACTOR = 0.8f;
+
     private void updateCamera() {
-        mapCamera.setToOrtho(false); //Y轴向上
-        mapCamera.position.x = 3.5f * TILE_SIZE_PX * SCALE;
-        mapCamera.position.y = 3.5f * TILE_SIZE_PX * SCALE;
-        mapCamera.update(); // This is necessary to apply the changes
+        float playerX = map.getPlayer().getX() * TILE_SIZE_PX * SCALE;
+        float playerY = map.getPlayer().getY() * TILE_SIZE_PX * SCALE;
+
+        float halfW = mapCamera.viewportWidth * 0.5f;
+        float halfH = mapCamera.viewportHeight * 0.5f;
+
+        float deadW = halfW * DEAD_ZONE_FACTOR;
+        float deadH = halfH * DEAD_ZONE_FACTOR;
+
+        float camX = mapCamera.position.x;
+        float camY = mapCamera.position.y;
+
+        if (playerX < camX - deadW) camX = playerX + deadW;
+        if (playerX > camX + deadW) camX = playerX - deadW;
+        if (playerY < camY - deadH) camY = playerY + deadH;
+        if (playerY > camY + deadH) camY = playerY - deadH;
+
+        mapCamera.position.set(camX, camY, 0);
+        mapCamera.update();
     }
 
     private static final int GRASS_PADDING = 10; // tiles
@@ -327,9 +344,13 @@ if (crops != null) {
      */
     @Override
     public void resize(int width, int height) {
-        mapCamera.setToOrtho(false); //当窗口大小变化，HUD 需要调整 viewport 或布局
+        mapCamera.viewportWidth = width;
+        mapCamera.viewportHeight = height;
+        mapCamera.update();
+
         hud.resize(width, height);
     }
+
 
     // Unused methods from the Screen interface
     @Override
@@ -342,8 +363,20 @@ if (crops != null) {
 
     @Override
     public void show() {
+        // Set viewport size in WORLD UNITS (pixels in your case)
+        mapCamera.setToOrtho(false,
+                Gdx.graphics.getWidth(),
+                Gdx.graphics.getHeight()
+        );
 
+        // Center camera on player ONCE
+        float px = map.getPlayer().getX() * TILE_SIZE_PX * SCALE;
+        float py = map.getPlayer().getY() * TILE_SIZE_PX * SCALE;
+
+        mapCamera.position.set(px, py, 0);
+        mapCamera.update();
     }
+
 
     @Override
     public void hide() {
