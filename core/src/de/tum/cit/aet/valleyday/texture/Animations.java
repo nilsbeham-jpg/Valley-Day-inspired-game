@@ -42,4 +42,15 @@ public class Animations {
             SpriteSheet.CHARACTER.at(2, 4)
     );
     
+//CHICKEN WALK
+     public static final Animation<TextureRegion> CHICKEN_WALK = new Animation<>(
+            0.15f, // 
+            SpriteSheet.FARM_THINGS.at(1, 1),
+            SpriteSheet.FARM_THINGS.at(1, 2),
+            SpriteSheet.FARM_THINGS.at(1, 3),
+            SpriteSheet.FARM_THINGS.at(1, 4)
+    );
+    static {
+        CHICKEN_WALK.setPlayMode(Animation.PlayMode.LOOP);
+    }
 }
