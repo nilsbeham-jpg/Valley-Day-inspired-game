@@ -26,8 +26,13 @@ import de.tum.cit.aet.valleyday.map.terrain.Fence;
 
 
 /**
- * Represents the game map.
- * Holds all the objects and entities in the game.
+ * The class is responsbible for:
+ * loading the map layout
+ * owning tiles, crops, and terrain objects
+ * owning the physics World
+ * owning the Player
+ * advancing world simulation (physics + crops)
+ * answering questions like “is this blocked?”, “is this an exit?”
  */
 public class GameMap {
     
@@ -97,7 +102,12 @@ public class GameMap {
     } */
 
 
-
+    /**
+     * Read map file
+     * Determine map size
+     * Create tiles
+     * Post-process logic (exit hiding, crops)
+     */
 
     private void loadMap(String path) {
         Properties props = new Properties();
@@ -235,6 +245,14 @@ public class GameMap {
 
 
 
+    /**
+     *
+     * Used for:
+     * destroying debris
+     * revealing hidden objects
+     *
+     */
+
     public void interactWithTile(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return;
@@ -246,10 +264,6 @@ public class GameMap {
             tile.interact();
         }
     }
-
-
-
-
 
 
 
@@ -286,7 +300,13 @@ public class GameMap {
         tickCrops(frameTime);
         doPhysicsStep(frameTime);
     }
-    //----------------------------------------------------------------------------- 
+    //-----------------------------------------------------------------------------
+
+    /**
+     * Reads keyboard input
+     * Checks player-facing tile
+     * Plants / harvests crops
+     */
     private void handleAKey() {
     if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
         return;
@@ -327,19 +347,19 @@ public class GameMap {
     System.out.println("A pressed but stage=" + crop.getStage() + " at (" + fx + "," + fy + ")");
 }
 
-private void tickCrops(float dt) {
-    if (crops == null) {
-        return;
-    }
-    for (int x = 0; x < mapWidth; x++) {
-        for (int y = 0; y < mapHeight; y++) {
-            if (crops[x][y] != null) {
-                crops[x][y].tick(dt);
+    private void tickCrops(float dt) {
+        if (crops == null) {
+            return;
+        }
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                if (crops[x][y] != null) {
+                    crops[x][y].tick(dt);
+                }
             }
         }
     }
-}
-//-------------------------------------------------------------------
+    //-------------------------------------------------------------------
 
 
     public boolean isBlocked(int x, int y) {
