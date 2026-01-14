@@ -33,9 +33,9 @@ public class WildlifeVisitor {
     // ----------------------------
     // Walk animation timing
     // ----------------------------
-    private static final float WALK_TIME_WANDER = 0.22f;
-    private static final float WALK_TIME_CHASE  = 0.16f;
-    private static final float WALK_TIME_FLEE   = 0.12f;
+    private static final float WALK_TIME_WANDER = 0.7f;
+    private static final float WALK_TIME_CHASE  = 0.15f;
+    private static final float WALK_TIME_FLEE   = 0.1f;
 
     // Render position in tile units (smooth walking)
     private float renderX;
@@ -57,6 +57,9 @@ public class WildlifeVisitor {
 
     private int lastDx = 0;
     private int lastDy = 0;
+
+    // ✅ NEW: face direction for sprite flip (方案A核心)
+    private boolean faceLeft = false;
 
     private enum State { WANDER, CHASE, FLEE }
     private State state = State.WANDER;
@@ -113,8 +116,22 @@ public class WildlifeVisitor {
         return renderY;
     }
 
+    // ✅ CHANGED: flipX based on faceLeft
     public TextureRegion getCurrentAppearance() {
-        return Animations.CHICKEN_WALK.getKeyFrame(animTime, true);
+        TextureRegion frame = Animations.CHICKEN_WALK.getKeyFrame(animTime, true);
+
+        // Important: copy, don't mutate shared frames
+        TextureRegion out = new TextureRegion(frame);
+
+        boolean flipped = out.isFlipX();
+        if (faceLeft && !flipped) {
+            out.flip(true, false);
+        }
+        if (!faceLeft && flipped) {
+            out.flip(true, false);
+        }
+
+        return out;
     }
 
     public void startFleeFrom(int playerTileX, int playerTileY) {
@@ -139,13 +156,10 @@ public class WildlifeVisitor {
 
         animTime += dt;
 
-        // 1) update smooth walking animation
         updateStepAnimation(dt);
 
-        // 2) collision check
         checkPlayerCollision(map);
 
-        // 3) fleeing behavior
         if (state == State.FLEE) {
             tickFlee(dt, map);
             return;
@@ -156,7 +170,6 @@ public class WildlifeVisitor {
             return;
         }
 
-        // Decide CHASE vs WANDER
         int[] seen = map.findNearestMatureCrop(x, y, VISION_RANGE);
         if (seen != null) {
             state = State.CHASE;
@@ -176,13 +189,11 @@ public class WildlifeVisitor {
             moveWanderOneStep(map);
         }
 
-        // steal crop if on mature
         CropTile crop = map.getCropAt(x, y);
         if (crop != null && crop.getStage() == CropStage.MATURE) {
             crop.harvest();
         }
 
-        // collision again after movement
         checkPlayerCollision(map);
     }
 
@@ -268,6 +279,14 @@ public class WildlifeVisitor {
             }
         }
 
+        // ✅ Update facing BEFORE beginStepTo (because beginStepTo changes x)
+        int dxMove = bestNx - x;
+        if (dxMove < 0) {
+            faceLeft = true;
+        } else if (dxMove > 0) {
+            faceLeft = false;
+        }
+
         lastDx = bestNx - x;
         lastDy = bestNy - y;
 
@@ -295,6 +314,14 @@ public class WildlifeVisitor {
 
         int nx = next[0];
         int ny = next[1];
+
+        // ✅ Update facing BEFORE beginStepTo
+        int dxMove = nx - x;
+        if (dxMove < 0) {
+            faceLeft = true;
+        } else if (dxMove > 0) {
+            faceLeft = false;
+        }
 
         lastDx = nx - x;
         lastDy = ny - y;
@@ -324,6 +351,13 @@ public class WildlifeVisitor {
                 continue;
             }
 
+            // ✅ Update facing BEFORE beginStepTo
+            if (dx < 0) {
+                faceLeft = true;
+            } else if (dx > 0) {
+                faceLeft = false;
+            }
+
             lastDx = dx;
             lastDy = dy;
 
@@ -336,10 +370,9 @@ public class WildlifeVisitor {
     }
 
     // ----------------------------
-    // Collision (IMPORTANT CHANGE)
+    // Collision
     // ----------------------------
     private void checkPlayerCollision(GameMap map) {
-        // If map already losing or player already scared, do nothing
         if (map.isLostByWildlife()) {
             return;
         }
@@ -348,9 +381,7 @@ public class WildlifeVisitor {
         int py = map.worldToTile(map.getPlayer().getY());
 
         if (px == x && py == y) {
-            // ✅ DO NOT end game instantly here.
-            // We only "trigger scare", and GameMap will handle the run-out-of-map loss.
-            map.loseByWildlife();
+            map.loseByWildlife(); // trigger scared (not instant gameover)
         }
     }
 }
