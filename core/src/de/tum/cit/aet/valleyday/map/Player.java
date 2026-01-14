@@ -30,6 +30,14 @@ public class Player implements Drawable {
 
     private static final float RADIUS = 0.25f;
 
+    private boolean hasShovel = false;
+
+    public void enableShovel() {
+        hasShovel = true;
+    }
+
+
+
 
     public Player(World world, GameMap map, float x, float y) {
         this.map = map;

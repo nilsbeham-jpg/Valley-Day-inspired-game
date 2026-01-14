@@ -20,7 +20,27 @@ public boolean isMature(){
     return stage == CropStage.MATURE; // know if the Tile is Mature
 }
 
-public void plant(){
+
+
+ public void advanceStage() {
+        if (stage == CropStage.SEED) {
+            stage = CropStage.SPROUT;
+        } else if (stage == CropStage.SPROUT) {
+            stage = CropStage.MATURE;
+        }
+    }
+
+
+    public void restoreIfRotted() {
+        if (stage == CropStage.ROTTEN) {
+            stage = CropStage.MATURE;
+            stageTime = 0f;
+        }
+    }
+
+
+
+    public void plant(){
     if(stage!=CropStage.EMPTY){
         return;
     }
@@ -70,7 +90,9 @@ public void tick(float frameTime){ //do nothing if it is empty
                 stage = CropStage.ROTTEN;
     }
     
-    }  
+    }
+
+
     
 }
 }

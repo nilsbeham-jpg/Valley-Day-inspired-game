@@ -2,11 +2,35 @@ package de.tum.cit.aet.valleyday.map;
 
 public class Tile {
 
-    public TileType type;        // what you see
-    public TileType hiddenType;  // what is hidden (null if nothing)
+    private TileObject object;
+    private TileObject hiddenObject;
 
-    public Tile(TileType type) {
-        this.type = type;
-        this.hiddenType = null;
+    public Tile(TileObject object) {
+        this.object = object;
+    }
+
+    public boolean isBlocked() {
+        return object != null && !object.isWalkable();
+    }
+
+    public boolean hasHiddenObject() {
+        return hiddenObject != null;
+    }
+
+    public void setHiddenObject(TileObject hidden) {
+        this.hiddenObject = hidden;
+    }
+
+    public void interact() {
+        if (hiddenObject != null) {
+            object = hiddenObject;
+            hiddenObject = null;
+        } else {
+            object = null;
+        }
+    }
+
+    public TileObject getObject() {
+        return object;
     }
 }

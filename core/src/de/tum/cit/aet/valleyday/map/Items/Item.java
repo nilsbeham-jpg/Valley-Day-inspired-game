@@ -1,0 +1,23 @@
+package de.tum.cit.aet.valleyday.map.Items;
+
+import de.tum.cit.aet.valleyday.map.GameMap;
+import de.tum.cit.aet.valleyday.map.TileObject;
+
+public abstract class Item extends TileObject {
+
+    protected Item(int x, int y) {
+        super(x, y);
+    }
+
+    @Override
+    public boolean isWalkable() {
+        return true; // player can walk over items
+    }
+
+    @Override
+    public boolean isDestructible() {
+        return false;
+    }
+
+    public abstract void onPickup(GameMap map);
+}

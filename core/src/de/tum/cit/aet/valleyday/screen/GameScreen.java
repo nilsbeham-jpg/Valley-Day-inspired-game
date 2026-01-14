@@ -9,15 +9,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
-import de.tum.cit.aet.valleyday.map.Flowers;
-import de.tum.cit.aet.valleyday.map.Tile;
+import de.tum.cit.aet.valleyday.map.*;
 import de.tum.cit.aet.valleyday.texture.Drawable;
-import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
 
-import de.tum.cit.aet.valleyday.map.CropTile;
-import de.tum.cit.aet.valleyday.map.CropStage;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
 
@@ -110,7 +106,10 @@ public class GameScreen implements Screen {
         mapCamera.position.y = 3.5f * TILE_SIZE_PX * SCALE;
         mapCamera.update(); // This is necessary to apply the changes
     }
-    
+
+    private static final int GRASS_PADDING = 10; // tiles
+
+
     private void renderMap() {
         // This configures the spriteBatch to use the camera's perspective when rendering
         spriteBatch.setProjectionMatrix(mapCamera.combined);
@@ -121,22 +120,23 @@ public class GameScreen implements Screen {
         Tile[][] tiles = map.getTiles();
 
 
-        // 1️⃣ DRAW GRASS BACKGROUND
-                for (int x = 0; x < map.getMapWidth(); x++) {
-                    for (int y = 0; y < map.getMapHeight(); y++) {
+        // DRAW GRASS BACKGROUND WITH PADDING
+        for (int x = -GRASS_PADDING; x < map.getMapWidth() + GRASS_PADDING; x++) {
+            for (int y = -GRASS_PADDING; y < map.getMapHeight() + GRASS_PADDING; y++) {
 
-                        float drawX = x * TILE_SIZE_PX * SCALE;
-                        float drawY = y * TILE_SIZE_PX * SCALE;
+                float drawX = x * TILE_SIZE_PX * SCALE;
+                float drawY = y * TILE_SIZE_PX * SCALE;
 
-                        spriteBatch.draw(
-                                Textures.GRASS,
-                                drawX,
-                                drawY,
-                                TILE_SIZE_PX * SCALE,
-                                TILE_SIZE_PX * SCALE
-                        );
-                    }
-                }
+                spriteBatch.draw(
+                        Textures.GRASS,
+                        drawX,
+                        drawY,
+                        TILE_SIZE_PX * SCALE,
+                        TILE_SIZE_PX * SCALE
+                );
+            }
+        }
+
 
 
 
@@ -144,12 +144,18 @@ public class GameScreen implements Screen {
             for (int y = 0; y < map.getMapHeight(); y++) {
                 Tile tile = tiles[x][y];
 
-                TextureRegion texture = switch (tile.type) {
-                    case FENCE -> Textures.FENCE;
-                    case DEBRIS -> Textures.DEBRIS;
-                    case EXIT -> Textures.EXIT;
-                    default -> null;
-                };
+                TileObject obj = tile.getObject();
+
+                TextureRegion texture = null;
+
+                if (obj instanceof Fence) {
+                    texture = Textures.FENCE;
+                } else if (obj instanceof Debris) {
+                    texture = Textures.DEBRIS;
+                } else if (obj instanceof Exit) {
+                    texture = Textures.EXIT;
+                }
+
 
                 if (texture != null) {
                     float drawX = x * TILE_SIZE_PX * SCALE;

@@ -5,6 +5,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 
+import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
+import de.tum.cit.aet.valleyday.map.Items.WateringCan;
+import de.tum.cit.aet.valleyday.map.Items.Shovel;
+
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,7 +72,7 @@ public class GameMap {
 
 
 
-    public void printMapToConsole() {
+    /*public void printMapToConsole() {
         System.out.println("=== MAP DEBUG VIEW ===");
 
         for (int y = mapHeight - 1; y >= 0; y--) {
@@ -87,7 +92,7 @@ public class GameMap {
         }
 
         System.out.println("=====================");
-    }
+    } */
 
 
 
@@ -124,7 +129,7 @@ public class GameMap {
         // 2. Fill everything with EMPTY first
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
-                tiles[x][y] = new Tile(TileType.EMPTY);
+                tiles[x][y] = new Tile(null);
             }
         }
 
@@ -137,7 +142,7 @@ public class GameMap {
             int y = Integer.parseInt(parts[1]);
             int value = Integer.parseInt(props.getProperty(key));
 
-            tiles[x][y] = createTileFromValue(value); // add the values to the tile if not EMPTY
+            tiles[x][y] = createTileFromValue(value, x, y); // add the values to the tile if not EMPTY
 
 
         }
@@ -148,19 +153,26 @@ public class GameMap {
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
                 Tile tile = tiles[x][y];
-                if (tile.hiddenType == TileType.EXIT) {
+                if (tile.getObject() instanceof Exit) {
                     exitFound = true;
                 }
-                if (tile.type == TileType.DEBRIS) {
+                if (tile.getObject() instanceof Debris) {
                     debrisPositions.add(new int[]{x, y});
                 }
             }
         }
 
         if (!exitFound && !debrisPositions.isEmpty()) {
-            int[] pos = debrisPositions.get(MathUtils.random(debrisPositions.size()-1));
-            tiles[pos[0]][pos[1]].hiddenType = TileType.EXIT;
-        } //If the map does not already contain an exit, then pick one existing debris tile at random and hide the exit underneath that debris.
+            int[] pos = debrisPositions.get(MathUtils.random(debrisPositions.size() - 1));
+
+            Tile tile = tiles[pos[0]][pos[1]];
+
+            // Only hide exit under debris (safety check)
+            if (tile.getObject() instanceof Debris) {
+                tile.setHiddenObject(new Exit(pos[0], pos[1]));
+            }
+        }
+//If the map does not already contain an exit, then pick one existing debris tile at random and hide the exit underneath that debris.
 
 
         //  Initialize crops grid AFTER tiles are ready
@@ -170,7 +182,7 @@ public class GameMap {
     for (int y = 0; y < mapHeight; y++) {
 
         // 暂时约定：EMPTY = 可种植的地
-        if (tiles[x][y].type == TileType.EMPTY) {
+        if (tiles[x][y].getObject() == null) {
             crops[x][y] = new CropTile();
         }
     }
@@ -182,7 +194,7 @@ public class GameMap {
     private int[] findEntrancePosition() { // finds the entrance of the map
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
-                if (tiles[x][y].type == TileType.ENTRANCE) {
+                if (tiles[x][y].getObject() instanceof  Entrance) {
                     return new int[]{x, y};
                 }
             }
@@ -190,85 +202,49 @@ public class GameMap {
         throw new IllegalStateException("No entrance found in map!");
     }
 
-    private Tile createTileFromValue(int value) {
-        switch (value) {
-
-            case 0:
-                // Fence (indestructible)
-                return new Tile(TileType.FENCE);
-
-            case 1:
-                // Debris (branch)
-                return new Tile(TileType.DEBRIS);
-
-            case 2:
-                // Entrance (player start)
-                return new Tile(TileType.ENTRANCE);
-
-            case 3: {
-                // Wildlife visitor (hidden under debris)
-                Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.WILDLIFE;
-                return t;
+    private Tile createTileFromValue(int value, int x, int y) {
+        return switch (value) {
+            case 0 -> new Tile(new Fence(x, y));
+            case 1 -> new Tile(new Debris(x, y));
+            case 2 -> new Tile(new Entrance(x, y));
+            case 4 -> {
+                Tile t = new Tile(new Debris(x, y));
+                t.setHiddenObject(new Exit(x, y));
+                yield t;
             }
-
-            case 4: {
-                // Exit (hidden under debris)
-                Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.EXIT;
-                return t;
+            case 5 -> {
+                Tile t = new Tile(new Debris(x, y));
+                t.setHiddenObject(new Fertilizer(x, y));
+                yield t;
             }
-
-            case 5: {
-                // Fertilizer (hidden under debris)
-                Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.FERTILIZER;
-                return t;
+            case 6 -> {
+                Tile t = new Tile(new Debris(x, y));
+                t.setHiddenObject(new WateringCan(x, y));
+                yield t;
             }
-
-            case 6: {
-                // Watering can (hidden under debris)
-                Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.WATERING_CAN;
-                return t;
+            case 7 -> {
+                Tile t = new Tile(new Debris(x, y));
+                t.setHiddenObject(new Shovel(x, y));
+                yield t;
             }
-
-            case 7: {
-                // Shovel (hidden under debris)
-                Tile t = new Tile(TileType.DEBRIS);
-                t.hiddenType = TileType.SHOVEL;
-                return t;
-            }
-
-            default:
-                return new Tile(TileType.EMPTY);
-        }
+            default -> new Tile(null);
+        };
     }
+
 
 
     public void interactWithTile(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
-            return; //safeguard that only coordinates that make sense are entered
+            return;
         }
 
         Tile tile = tiles[x][y];
 
-        // Only debris can be interacted with (for now)
-        if (tile.type == TileType.DEBRIS) {
-
-            // If something was hidden, reveal it
-            if (tile.hiddenType != null) {
-                tile.type = tile.hiddenType;
-                tile.hiddenType = null;
-            } else {
-                // Otherwise, debris is simply removed
-                tile.type = TileType.EMPTY;
-            }
-            System.out.println("Interacted with tile at " + x + "," + y +
-                    " -> " + tile.type); //debug
-
+        if (tile.getObject() != null && tile.getObject().isDestructible()) {
+            tile.interact();
         }
     }
+
 
 
 
@@ -288,7 +264,7 @@ public class GameMap {
        //this.player = new Player(this.world, 1, 3); //创建玩家位置
 
         loadMap("maps/map-2.properties");
-        printMapToConsole();
+        //printMapToConsole();
         int[] entrance = findEntrancePosition();
         this.player = new Player(this.world, this ,entrance[0], entrance[1]);
 
@@ -320,11 +296,13 @@ public class GameMap {
     if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
         return;
     }
+        Tile tile = tiles[fx][fy];
 
-    // 只允许在 EMPTY 这种“地面”上种/收
-    if (tiles[fx][fy].type != TileType.EMPTY) {
-        return;
-    }
+       // Only allow planting/harvesting on empty ground
+        if (tile.getObject() != null) {
+            return;
+        }
+
 
     CropTile crop = crops[fx][fy];
     if (crop == null) {
@@ -367,16 +345,17 @@ private void tickCrops(float dt) {
             return true; // outside map is solid
         }
 
-        TileType type = tiles[x][y].type;
-        return type == TileType.FENCE || type == TileType.DEBRIS;
+        return tiles[x][y].isBlocked();
     }
+
 
 
     public boolean isExit(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return false;
         }
-        return tiles[x][y].type == TileType.EXIT;
+        return tiles[x][y].getObject() instanceof Exit;
+
     }
 
     private boolean gameWon = false;
@@ -394,6 +373,34 @@ private void tickCrops(float dt) {
 
         return false;
     }
+
+    public void advanceAllCrops() {
+        if (crops == null) return;
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                if (crops[x][y] != null) {
+                    crops[x][y].advanceStage();
+                }
+            }
+        }
+    }
+
+
+    public void restoreAllCrops() {
+        if (crops == null) return;
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                if (crops[x][y] != null) {
+                    crops[x][y].restoreIfRotted();
+                }
+            }
+        }
+    }
+
+
+
 
 
 
