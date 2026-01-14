@@ -27,6 +27,6 @@ public class Textures {
     public static final TextureRegion CROP_SPROUT=SpriteSheet.CROPS.at(2, 1);
     public static final TextureRegion CROP_MATURE=SpriteSheet.CROPS.at(4, 1);
     public static final TextureRegion CROP_ROTTEN=SpriteSheet.CROPS.at(5, 1);
-    
-    
+
+    public static final TextureRegion GRASS  = SpriteSheet.BASIC_TILES.at(9,1);
 }
