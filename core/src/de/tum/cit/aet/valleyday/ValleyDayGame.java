@@ -68,15 +68,23 @@ public class ValleyDayGame extends Game {
      * Switches to the menu screen.
      */
     public void goToMenu() {
-        this.setScreen(new MenuScreen(this)); // Set the current screen to MenuScreen
+        this.setScreen(new MenuScreen(this, false));
     }
+
 
     /**
      * Switches to the game screen.
      */
     public void goToGame() {
-        this.setScreen(new GameScreen(this)); // Set the current screen to GameScreen
+        this.map = new GameMap(this);   // reset world
+        this.setScreen(new GameScreen(this));// Set the current screen to GameScreen
     }
+
+
+    public void resumeGame() {
+        this.setScreen(new GameScreen(this)); // reuse existing map
+    }
+
 
     /** Returns the skin for UI elements. */
     public Skin getSkin() {

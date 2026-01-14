@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import de.tum.cit.aet.valleyday.GameState;
 
 /**
  * A Heads-Up Display (HUD) that displays information on the screen.
@@ -17,7 +18,14 @@ public class Hud {
     private final BitmapFont font;
     /** The camera used to render the HUD. */
     private final OrthographicCamera camera;
-    
+
+    private float remainingTime= 0f;
+
+    public void setRemainingTime(float time) {
+        this.remainingTime = time;
+    }
+
+
     public Hud(SpriteBatch spriteBatch, BitmapFont font) {
         this.spriteBatch = spriteBatch;
         this.font = font;
@@ -29,16 +37,31 @@ public class Hud {
      * This uses a different OrthographicCamera so that the HUD is always fixed on the screen.
      */
     public void render() {
-        // Render from the camera's perspective
         spriteBatch.setProjectionMatrix(camera.combined);
-        // Start drawing
         spriteBatch.begin();
-        // Draw the HUD elements HUD内容
-        font.draw(spriteBatch, "Press Esc to Pause!", 10, Gdx.graphics.getHeight() - 10);
-        // Finish drawing
+
+        // Pause hint
+        font.draw(
+                spriteBatch,
+                "Press Esc to Pause!",
+                10,
+                Gdx.graphics.getHeight() - 10
+        );
+
+        // Daylight countdown (rounded up)
+        int secondsLeft = (int) Math.ceil(remainingTime);
+
+        font.draw(
+                spriteBatch,
+                "Time left: " + secondsLeft,
+                10,
+                Gdx.graphics.getHeight() - 30
+        );
+
         spriteBatch.end();
     }
-    
+
+
     /**
      * Resizes the HUD when the screen size changes.
      * This is called when the window is resized.
@@ -48,5 +71,31 @@ public class Hud {
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
     }
-    
+
+    public void renderEndMessage(GameState state) {
+        spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
+
+        String text = (state == GameState.VICTORY)
+                ? "YOU WIN!"
+                : "GAME OVER";
+
+        font.draw(
+                spriteBatch,
+                text,
+                Gdx.graphics.getWidth() / 2f - 40,
+                Gdx.graphics.getHeight() / 2f
+        );
+
+        font.draw(
+                spriteBatch,
+                "Press ENTER to return to menu",
+                Gdx.graphics.getWidth() / 2f - 140,
+                Gdx.graphics.getHeight() / 2f - 30
+        );
+
+        spriteBatch.end();
+    }
+
+
 }

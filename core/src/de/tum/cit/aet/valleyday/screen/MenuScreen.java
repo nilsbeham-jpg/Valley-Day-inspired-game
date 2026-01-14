@@ -22,13 +22,16 @@ import de.tum.cit.aet.valleyday.ValleyDayGame;
 public class MenuScreen implements Screen {
 
     private final Stage stage; // root container of everything UI-related.
+    private final boolean canResume;
+
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
      *
      * @param game The main game class, used to access global resources and methods.
      */
-    public MenuScreen(ValleyDayGame game) {
+    public MenuScreen(ValleyDayGame game, boolean canResume) {
+        this.canResume = canResume;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view 创建相机 Zoom代表视角远近
 
@@ -44,7 +47,7 @@ public class MenuScreen implements Screen {
         //这个控件下面留 80 像素空白（把按钮和标题拉开）
 
         // Create and add a button to go to the game screen
-        TextButton goToGameButton = new TextButton("Go To Game", game.getSkin());
+        TextButton goToGameButton = new TextButton("Start new Game", game.getSkin());
         table.add(goToGameButton).width(300).row();
         goToGameButton.addListener(new ChangeListener() {
             @Override
@@ -52,6 +55,19 @@ public class MenuScreen implements Screen {
                 game.goToGame(); // Change to the game screen when button is pressed
             }
         });
+        // Resume Game (only if allowed)
+        if (canResume) {
+            TextButton resumeButton = new TextButton("Resume Game", game.getSkin());
+            table.add(resumeButton).width(300).padBottom(20).row();
+
+            resumeButton.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    game.resumeGame(); // SAME world
+                }
+            });
+        }
+
     }
     
     /**

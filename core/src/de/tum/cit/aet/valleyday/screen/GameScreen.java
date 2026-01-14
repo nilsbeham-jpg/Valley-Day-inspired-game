@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
+import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.map.*;
 import de.tum.cit.aet.valleyday.map.crops.CropStage;
@@ -44,7 +45,13 @@ public class GameScreen implements Screen {
     private final GameMap map;
     private final Hud hud;
     private final OrthographicCamera mapCamera;
-    
+
+    private GameState gameState = GameState.PLAYING;
+    private float remainingTime = 20f; // seconds
+
+
+
+
     /**
      * Constructor for GameScreen. Sets up the camera and font.
      *
@@ -68,9 +75,17 @@ public class GameScreen implements Screen {
     public void render(float deltaTime) {
         // Check for escape key press to go back to the menu //按ESC到菜单界面
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            game.goToMenu();
+            game.setScreen(new MenuScreen(game, true));
+            return;
         }
-        
+
+        if (gameState != GameState.PLAYING &&
+                Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            game.setScreen(new MenuScreen(game, false));
+            return;
+        }
+
+
         // Clear the previous frame from the screen, or else the picture smears
         ScreenUtils.clear(new Color(0.2f, 0.5f, 0.2f, 1f)); // dark green
         //清屏：避免“拖影/涂抹”
@@ -79,25 +94,37 @@ public class GameScreen implements Screen {
         float frameTime = Math.min(deltaTime, 0.250f); //如果某一帧卡顿（比如 deltaTime=2秒），物理会需要做很多步来追赶，会导致更卡，进入“死亡螺旋”
         
         // Update the map state
-        map.tick(frameTime);
+        if (gameState == GameState.PLAYING) {
+            map.tick(frameTime);
 
-        if (map.hasPlayerReachedExit()) {
-            game.goToMenu(); // or game.goToWinScreen() later
-            return;}
-        
-        // Update the camera
-        updateCamera();
-        
-        // Render the map on the screen
-        renderMap(); //把 flowers/chest/player 画到屏幕上
+            remainingTime -= frameTime;
+            if (remainingTime <= 0f) {
+                remainingTime = 0f;
+                gameState = GameState.GAME_OVER;
+            }
+        }
 
 
+        if (map.hasPlayerReachedExit() && gameState == GameState.PLAYING) {
+            gameState = GameState.VICTORY;
+        }
 
-        
-        // Render the HUD on the screen
-        hud.render(); //HUD画在最上层
+        if (gameState == GameState.PLAYING) {
+            updateCamera();
+            renderMap();
+            hud.setRemainingTime(remainingTime);
+            hud.render();
+        }
+        else {
+            hud.renderEndMessage(gameState);
+        }
+
+
+
     }
-    
+
+
+
     /**
      * Updates the camera to match the current state of the game.
      * Currently, this just centers the camera at the origin.
