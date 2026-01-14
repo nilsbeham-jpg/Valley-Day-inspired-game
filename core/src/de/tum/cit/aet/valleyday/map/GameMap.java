@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 
 import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
+import de.tum.cit.aet.valleyday.map.Items.Item;
 import de.tum.cit.aet.valleyday.map.Items.WateringCan;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
 import java.util.List;
@@ -352,7 +353,26 @@ for (int x = 0; x < mapWidth; x++) {
         tickWildlife(frameTime);
         tickCrops(frameTime);
         doPhysicsStep(frameTime);
+        checkItemPickup();
     }
+
+
+    private void checkItemPickup() {
+        int px = worldToTile(player.getX());
+        int py = worldToTile(player.getY());
+
+        if (px < 0 || py < 0 || px >= mapWidth || py >= mapHeight) {
+            return;
+        }
+
+        Tile tile = tiles[px][py];
+
+        if (tile.getObject() instanceof Item item) {
+            item.onPickup(this);   // apply effect
+            tile.clearObject();    // remove from map
+        }
+    }
+
     //-----------------------------------------------------------------------------
 
     /**

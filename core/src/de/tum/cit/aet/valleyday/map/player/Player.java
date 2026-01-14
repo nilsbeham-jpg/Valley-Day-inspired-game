@@ -19,15 +19,19 @@ import de.tum.cit.aet.valleyday.texture.Drawable;
  * that asks the map: “May I move here?”
  */
 public class Player implements Drawable {
-    
-    /** Total time elapsed since the game started. We use this for calculating the player movement and animating it. */
-    private float elapsedTime; 
-    
+
+    /**
+     * Total time elapsed since the game started. We use this for calculating the player movement and animating it.
+     */
+    private float elapsedTime;
+
     private boolean moving; //Detect whether a person is moving
 
-    private Direction facing= Direction.DOWN;  //The default character faces downward.
+    private Direction facing = Direction.DOWN;  //The default character faces downward.
 
-    /** The Box2D hitbox of the player, used for position and collision detection. */
+    /**
+     * The Box2D hitbox of the player, used for position and collision detection.
+     */
     private final Body hitbox;
 
     private final GameMap map;
@@ -35,12 +39,24 @@ public class Player implements Drawable {
     private static final float RADIUS = 0.2f;
 
     private boolean hasShovel = false;
+    private float fertilizerTimer = 0f;
+    private float wateringCanTimer = 0f;
+
+
+    // interaction state
+    private float interactionTimer = 0f;
+    private int interactingX = -1;
+    private int interactingY = -1;
+    private boolean interacting = false;
+
+    private float getRequiredInteractionTime() {
+        return hasShovel ? 0.5f : 1.0f;
+    }
+
 
     public void enableShovel() {
         hasShovel = true;
     }
-
-
 
 
     public Player(World world, GameMap map, float x, float y) {
@@ -51,7 +67,8 @@ public class Player implements Drawable {
     /**
      * Creates a Box2D body for the player.
      * This is what the physics engine uses to move the player around and detect collisions with other bodies.
-     * @param world The Box2D world to add the body to.
+     *
+     * @param world  The Box2D world to add the body to.
      * @param startX The initial X position.
      * @param startY The initial Y position.
      * @return The created body.
@@ -81,47 +98,44 @@ public class Player implements Drawable {
     }
 
 
-
-
     /**
      * Move the player around in a circle by updating the linear velocity of its hitbox every frame.
      * This doesn't actually move the player, but it tells the physics engine how the player should move next frame.
+     *
      * @param frameTime the time since the last frame.
      */
     public void tick(float frameTime) { // tick() tells physics how the player wants to move
-        if(moving){
-        this.elapsedTime += frameTime;
-        
+        if (moving) {
+            this.elapsedTime += frameTime;
+
         }
         // Make the player move in a circle with radius 2 tiles
         // You can change this to make the player move differently, e.g. in response to user input.
         // See Gdx.input.isKeyPressed() for keyboard input
-        float speed=3f;
-        float xVelocity=0f;
-        float yVelocity=0f;
-        
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-        yVelocity = speed;
-        facing= Direction.UP;
-    }
-    if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-        yVelocity = -speed;
-        facing= Direction.DOWN;
-    }
-    if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-        xVelocity = -speed;
-        facing= Direction.LEFT;
-    }
-    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-        xVelocity = speed;
-        facing= Direction.RIGHT;
+        float speed = 3f;
+        float xVelocity = 0f;
+        float yVelocity = 0f;
 
-    }
-    // calculate were the player is next
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            yVelocity = speed;
+            facing = Direction.UP;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            yVelocity = -speed;
+            facing = Direction.DOWN;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            xVelocity = -speed;
+            facing = Direction.LEFT;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            xVelocity = speed;
+            facing = Direction.RIGHT;
+
+        }
+        // calculate were the player is next
         float nextX = hitbox.getPosition().x + xVelocity * frameTime;
         float nextY = hitbox.getPosition().y + yVelocity * frameTime;
-
-
 
 
         float currentX = hitbox.getPosition().x;
@@ -130,8 +144,8 @@ public class Player implements Drawable {
 // --- Horizontal collision ---
         if (xVelocity > 0) { // right
             int tileX = map.worldToTile(nextX + RADIUS);
-            int tileY1 = map.worldToTile(currentY + RADIUS* 0.9f);
-            int tileY2 =map.worldToTile(currentY - RADIUS * 0.9f);
+            int tileY1 = map.worldToTile(currentY + RADIUS * 0.9f);
+            int tileY2 = map.worldToTile(currentY - RADIUS * 0.9f);
 
 
             if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
@@ -141,8 +155,8 @@ public class Player implements Drawable {
 
         if (xVelocity < 0) { // left
             int tileX = map.worldToTile(nextX - RADIUS);
-            int tileY1 = map.worldToTile(currentY + RADIUS* 0.9f);
-            int tileY2 =map.worldToTile(currentY - RADIUS * 0.9f);
+            int tileY1 = map.worldToTile(currentY + RADIUS * 0.9f);
+            int tileY2 = map.worldToTile(currentY - RADIUS * 0.9f);
 
             if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
                 xVelocity = 0;
@@ -153,8 +167,8 @@ public class Player implements Drawable {
 // --- Vertical collision ---
         if (yVelocity > 0) { // up
             int tileY = map.worldToTile(nextY + RADIUS);
-            int tileX1 = map.worldToTile(currentX + RADIUS* 0.9f);
-            int tileX2 =map.worldToTile(currentX - RADIUS * 0.9f);
+            int tileX1 = map.worldToTile(currentX + RADIUS * 0.9f);
+            int tileX2 = map.worldToTile(currentX - RADIUS * 0.9f);
 
             if (map.isBlocked(tileX1, tileY) || map.isBlocked(tileX2, tileY)) {
                 yVelocity = 0;
@@ -163,8 +177,8 @@ public class Player implements Drawable {
 
         if (yVelocity < 0) { // down
             int tileY = map.worldToTile(nextY - RADIUS);
-            int tileX1 = map.worldToTile(currentX + RADIUS* 0.9f);
-            int tileX2 =map.worldToTile(currentX - RADIUS * 0.9f);
+            int tileX1 = map.worldToTile(currentX + RADIUS * 0.9f);
+            int tileX2 = map.worldToTile(currentX - RADIUS * 0.9f);
 
             if (map.isBlocked(tileX1, tileY) || map.isBlocked(tileX2, tileY)) {
                 yVelocity = 0;
@@ -172,85 +186,141 @@ public class Player implements Drawable {
         }
 
 
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
 
-
-
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             int[] front = map.getFrontTile(this);
-            map.interactWithTile(front[0], front[1]);
+            int fx = front[0];
+            int fy = front[1];
+
+            // If starting interaction or switching target
+            if (!interacting || fx != interactingX || fy != interactingY) {
+                interacting = true;
+                interactingX = fx;
+                interactingY = fy;
+                interactionTimer = 0f;
+            }
+
+            interactionTimer += frameTime;
+
+            if (interactionTimer >= getRequiredInteractionTime()) {
+                map.interactWithTile(interactingX, interactingY);
+
+                // reset after success
+                interacting = false;
+                interactionTimer = 0f;
+            }
+
+        } else {
+            // key released → cancel interaction
+            interacting = false;
+            interactionTimer = 0f;
+        }
+
+
+        if (fertilizerTimer > 0f) {
+            fertilizerTimer -= frameTime;
+            if (fertilizerTimer < 0f) fertilizerTimer = 0f;
+        }
+
+        if (wateringCanTimer > 0f) {
+            wateringCanTimer -= frameTime;
+            if (wateringCanTimer < 0f) wateringCanTimer = 0f;
         }
 
 
 
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
-        this.moving= (xVelocity!=0f)||(yVelocity!=0f);
-
+        this.moving = (xVelocity != 0f) || (yVelocity != 0f);
 
 
     }
-    public Direction getFacing(){ //check direction and return the facing direction
+
+    public Direction getFacing() { //check direction and return the facing direction
         return facing;
     }
 
 
     //find the front x-coordinate of the player 
-    public int getTileX(){
+    public int getTileX() {
         return (int) Math.round(getX());
     }
-    public int getTileY(){
+
+    public int getTileY() {
         return (int) Math.round(getY());
     }
+
     public int getFrontTileX() {
-    int tileX = getTileX();
-    if (facing == Direction.LEFT) {
-        return tileX - 1;
+        int tileX = getTileX();
+        if (facing == Direction.LEFT) {
+            return tileX - 1;
+        }
+        if (facing == Direction.RIGHT) {
+            return tileX + 1;
+        }
+        return tileX;
     }
-    if (facing == Direction.RIGHT) {
-        return tileX + 1;
-    }
-    return tileX;
-}
 
-public int getFrontTileY() {
-    int tileY = getTileY();
-    if (facing == Direction.DOWN) {
-        return tileY - 1;
+    public int getFrontTileY() {
+        int tileY = getTileY();
+        if (facing == Direction.DOWN) {
+            return tileY - 1;
+        }
+        if (facing == Direction.UP) {
+            return tileY + 1;
+        }
+        return tileY;
     }
-    if (facing == Direction.UP) {
-        return tileY + 1;
-    }
-    return tileY;
-}
-
-    
 
 
     @Override
     public TextureRegion getCurrentAppearance() {
         // Get the frame of the walk down animation that corresponds to the current time. Let the player move.
         switch (facing) {
-        case UP:
-            return Animations.CHARACTER_WALK_UP.getKeyFrame(elapsedTime,true);
-        case LEFT:
-            return Animations.CHARACTER_WALK_LEFT.getKeyFrame(elapsedTime,true);
-        case RIGHT:
-            return Animations.CHARACTER_WALK_RIGHT.getKeyFrame(elapsedTime,true);
-        case DOWN:
-        default:
-            return Animations.CHARACTER_WALK_DOWN.getKeyFrame(elapsedTime,true);
+            case UP:
+                return Animations.CHARACTER_WALK_UP.getKeyFrame(elapsedTime, true);
+            case LEFT:
+                return Animations.CHARACTER_WALK_LEFT.getKeyFrame(elapsedTime, true);
+            case RIGHT:
+                return Animations.CHARACTER_WALK_RIGHT.getKeyFrame(elapsedTime, true);
+            case DOWN:
+            default:
+                return Animations.CHARACTER_WALK_DOWN.getKeyFrame(elapsedTime, true);
+        }
     }
-    }
-    
+
     @Override
     public float getX() {
         // The x-coordinate of the player is the x-coordinate of the hitbox (this can change every frame).
         return hitbox.getPosition().x;
     }
-    
+
     @Override
     public float getY() {
         // The y-coordinate of the player is the y-coordinate of the hitbox (this can change every frame).
         return hitbox.getPosition().y;
     }
+
+
+    public boolean hasShovel() {
+        return hasShovel;
+    }
+
+    public void activateFertilizer(float duration) {
+        fertilizerTimer = duration;
+    }
+
+    public void activateWateringCan(float duration) {
+        wateringCanTimer = duration;
+    }
+
+    public boolean isFertilizerActive() {
+        return fertilizerTimer > 0f;
+    }
+
+    public boolean isWateringCanActive() {
+        return wateringCanTimer > 0f;
+    }
+
+
 }
+

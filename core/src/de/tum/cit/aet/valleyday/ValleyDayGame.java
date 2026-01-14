@@ -40,6 +40,9 @@ public class ValleyDayGame extends Game {
      */
     private GameMap map;
 
+    private GameScreen currentGameScreen;
+
+
     /**
      * Constructor for ValleyDayGame.
      *
@@ -76,13 +79,17 @@ public class ValleyDayGame extends Game {
      * Switches to the game screen.
      */
     public void goToGame() {
-        this.map = new GameMap(this);   // reset world
-        this.setScreen(new GameScreen(this));// Set the current screen to GameScreen
+        this.map = new GameMap(this);              // NEW world
+        this.currentGameScreen = new GameScreen(this); // NEW screen
+        this.setScreen(currentGameScreen);
     }
 
 
+
     public void resumeGame() {
-        this.setScreen(new GameScreen(this)); // reuse existing map
+        if (currentGameScreen != null) {
+            this.setScreen(currentGameScreen); // SAME screen
+        }
     }
 
 
@@ -109,7 +116,8 @@ public class ValleyDayGame extends Game {
     public void setScreen(Screen screen) {
         Screen previousScreen = super.screen;
         super.setScreen(screen);
-        if (previousScreen != null) {
+        // Only dispose if it is NOT the game screen we want to resume
+        if (previousScreen != null && previousScreen != currentGameScreen) {
             previousScreen.dispose();
         }
     }

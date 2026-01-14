@@ -56,4 +56,8 @@ public class Tile {
     public TileObject getHiddenObject() {
         return hiddenObject;
     }
+    public void clearObject() {
+        object = null;
+    }
+
 }
