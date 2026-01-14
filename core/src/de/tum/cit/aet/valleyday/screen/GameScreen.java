@@ -119,6 +119,7 @@ public class GameScreen implements Screen {
         // Start drawing
         spriteBatch.begin();
 
+        
         Tile[][] tiles = map.getTiles();
 
 
