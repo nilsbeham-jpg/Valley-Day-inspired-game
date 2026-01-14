@@ -68,7 +68,8 @@ public class GameScreen implements Screen {
         }
         
         // Clear the previous frame from the screen, or else the picture smears
-        ScreenUtils.clear(Color.BLACK); //清屏：避免“拖影/涂抹”
+        ScreenUtils.clear(new Color(0.2f, 0.5f, 0.2f, 1f)); // dark green
+        //清屏：避免“拖影/涂抹”
         
         // Cap frame time to 250ms to prevent spiral of death
         float frameTime = Math.min(deltaTime, 0.250f); //如果某一帧卡顿（比如 deltaTime=2秒），物理会需要做很多步来追赶，会导致更卡，进入“死亡螺旋”
@@ -112,6 +113,26 @@ public class GameScreen implements Screen {
         spriteBatch.begin();
 
         Tile[][] tiles = map.getTiles();
+
+
+        // 1️⃣ DRAW GRASS BACKGROUND
+                for (int x = 0; x < map.getMapWidth(); x++) {
+                    for (int y = 0; y < map.getMapHeight(); y++) {
+
+                        float drawX = x * TILE_SIZE_PX * SCALE;
+                        float drawY = y * TILE_SIZE_PX * SCALE;
+
+                        spriteBatch.draw(
+                                Textures.GRASS,
+                                drawX,
+                                drawY,
+                                TILE_SIZE_PX * SCALE,
+                                TILE_SIZE_PX * SCALE
+                        );
+                    }
+                }
+
+
 
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
