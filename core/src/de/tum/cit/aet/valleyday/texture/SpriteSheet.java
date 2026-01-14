@@ -22,11 +22,11 @@ public enum SpriteSheet {
     /** The basic tiles spritesheet, which has a grid size of 16x16. */ //地面/基础瓦片是 16×16
     BASIC_TILES("basictiles.png", 16, 16),
     FENCE_GATE("Fance_Gate.png", 1, 4),
-    FARM_THINGS("farmthings.png", 8, 8),
+    FARM_THINGS("farmthings.png", 16, 16),
     BASICS("basics.png",16,7),
     HARVEST("Harvest.png",16,16),
     CROPS("crops.png",32,32);
-
+    
     
     private final Texture spritesheet;
     private final int width;

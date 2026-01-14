@@ -8,6 +8,9 @@ import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
 import de.tum.cit.aet.valleyday.map.Items.WateringCan;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
+import java.util.List;
+import java.util.ArrayList;
+import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 
 
 import java.io.IOException;
@@ -19,6 +22,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.Input;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
 import de.tum.cit.aet.valleyday.map.player.Player;
+import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Entrance;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
@@ -75,6 +79,9 @@ public class GameMap {
     private CropTile[][] crops; // Creat CropTile and init the harvest and task(quota)
     private int harvested = 0;
     private int quota = 10;
+
+    private final List<WildlifeVisitor> wildlife = new ArrayList<>();
+    private static final int MAX_WILDLIFE = 3; 
 
 
 
@@ -154,7 +161,15 @@ public class GameMap {
             int y = Integer.parseInt(parts[1]);
             int value = Integer.parseInt(props.getProperty(key));
 
-            tiles[x][y] = createTileFromValue(value, x, y); // add the values to the tile if not EMPTY
+            if (value == 3) {
+    if (wildlife.size() < MAX_WILDLIFE) {
+        wildlife.add(new WildlifeVisitor(x, y));
+    }
+    tiles[x][y] = new Tile(null);
+} else {
+    tiles[x][y] = createTileFromValue(value, x, y);
+}
+
 
 
         }
@@ -334,6 +349,7 @@ for (int x = 0; x < mapWidth; x++) {
     public void tick(float frameTime) {
         this.player.tick(frameTime);
         handleAKey();
+        tickWildlife(frameTime);
         tickCrops(frameTime);
         doPhysicsStep(frameTime);
     }
@@ -411,6 +427,14 @@ for (int x = 0; x < mapWidth; x++) {
     }
     //-------------------------------------------------------------------
 
+    private void tickWildlife(float dt) {
+    for (WildlifeVisitor w : wildlife) {
+        w.tick(dt, this);
+    }
+    wildlife.removeIf(w -> !w.isAlive());
+}
+
+
 
     public boolean isBlocked(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
@@ -431,7 +455,14 @@ for (int x = 0; x < mapWidth; x++) {
     }
 
     private boolean gameWon = false;
-
+    private boolean lostWildlife=false;
+    public void loseByWildlife(){
+        lostWildlife=true;
+    }
+    public boolean isLostByWildlife(){
+        return lostWildlife;
+    }
+    
     public boolean hasPlayerReachedExit() {
         if (gameWon) return true;
 
@@ -497,9 +528,141 @@ for (int x = 0; x < mapWidth; x++) {
         return player;
     }
 
+    public List<WildlifeVisitor> getWildlife() {
+    return wildlife;
+}
+
     public CropTile[][] getCrops() {
     return crops;
     }
+
+    public CropTile getCropAt(int x, int y) {
+    if (crops == null) {
+        return null;
+    }
+    if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+        return null;
+    }
+    return crops[x][y];
+}
+//help chicken to find the food
+public int[] findNearestMatureCrop(int sx, int sy, int maxManhattanDist) {
+    if (crops == null) {
+        return null;
+    }
+
+    int bestDist = Integer.MAX_VALUE;
+    int bestX = -1;
+    int bestY = -1;
+
+    for (int x = 0; x < mapWidth; x++) {
+        for (int y = 0; y < mapHeight; y++) {
+            CropTile c = crops[x][y];
+            if (c == null) {
+                continue;
+            }
+            if (c.getStage() != de.tum.cit.aet.valleyday.map.crops.CropStage.MATURE) {
+                continue;
+            }
+
+            int d = Math.abs(x - sx) + Math.abs(y - sy);
+            if (d <= maxManhattanDist && d < bestDist) {
+                bestDist = d;
+                bestX = x;
+                bestY = y;
+            }
+        }
+    }
+
+    if (bestDist == Integer.MAX_VALUE) {
+        return null;
+    }
+    return new int[]{bestX, bestY};
+}
+// 
+
+public int[] nextStepBfs(int sx, int sy, int tx, int ty) {
+    if (sx == tx && sy == ty) {
+        return new int[]{sx, sy};
+    }
+
+    boolean[][] visited = new boolean[mapWidth][mapHeight];
+    int[][] prevX = new int[mapWidth][mapHeight];
+    int[][] prevY = new int[mapWidth][mapHeight];
+
+    for (int x = 0; x < mapWidth; x++) {
+        for (int y = 0; y < mapHeight; y++) {
+            prevX[x][y] = -1;
+            prevY[x][y] = -1;
+        }
+    }
+
+    int[] qx = new int[mapWidth * mapHeight];
+    int[] qy = new int[mapWidth * mapHeight];
+    int head = 0;
+    int tail = 0;
+
+    visited[sx][sy] = true;
+    qx[tail] = sx;
+    qy[tail] = sy;
+    tail++;
+
+    int[][] dirs = new int[][]{{1,0},{-1,0},{0,1},{0,-1}};
+
+    while (head < tail) {
+        int x = qx[head];
+        int y = qy[head];
+        head++;
+
+        for (int[] d : dirs) {
+            int nx = x + d[0];
+            int ny = y + d[1];
+
+            if (nx < 0 || ny < 0 || nx >= mapWidth || ny >= mapHeight) {
+                continue;
+            }
+            if (visited[nx][ny]) {
+                continue;
+            }
+            if (isBlocked(nx, ny)) {
+                continue;
+            }
+
+            visited[nx][ny] = true;
+            prevX[nx][ny] = x;
+            prevY[nx][ny] = y;
+
+            if (nx == tx && ny == ty) {
+                // 回溯到起点的下一步
+                int cx = tx;
+                int cy = ty;
+
+                while (!(prevX[cx][cy] == sx && prevY[cx][cy] == sy)) {
+                    int px = prevX[cx][cy];
+                    int py = prevY[cx][cy];
+                    if (px == -1) {
+                        break;
+                    }
+                    cx = px;
+                    cy = py;
+                }
+
+                return new int[]{cx, cy};
+            }
+
+            qx[tail] = nx;
+            qy[tail] = ny;
+            tail++;
+        }
+    }
+
+    // 找不到路
+    return null;
+}
+
+
+
+
 
     public Tile[][] getTiles() {
         return tiles;

@@ -13,6 +13,7 @@ import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.map.*;
 import de.tum.cit.aet.valleyday.map.crops.CropStage;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
+import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
@@ -228,6 +229,13 @@ public class GameScreen implements Screen {
             }
         }
 
+//RRAW Chicken
+for (WildlifeVisitor w : map.getWildlife()) {
+    TextureRegion tex = w.getCurrentAppearance();
+    float px = w.getX() * TILE_SIZE_PX * SCALE;
+    float py = w.getY() * TILE_SIZE_PX * SCALE;
+    spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
+}
 
 
 
