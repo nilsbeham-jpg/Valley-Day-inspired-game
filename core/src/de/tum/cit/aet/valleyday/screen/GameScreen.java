@@ -48,7 +48,7 @@ public class GameScreen implements Screen {
     private final OrthographicCamera mapCamera;
 
     private GameState gameState = GameState.PLAYING;
-    private float remainingTime = 120f; // seconds
+    private float remainingTime = 320f; // seconds
 
 
 
@@ -64,6 +64,7 @@ public class GameScreen implements Screen {
         this.map = game.getMap();
         this.hud = new Hud(spriteBatch, game.getSkin().getFont("font"));
         hud.setPlayer(map.getPlayer());
+        hud.setMap(map);
         // Create and configure the camera for the game view
         this.mapCamera = new OrthographicCamera(); //创建正交相机
         this.mapCamera.setToOrtho(false);

@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.tum.cit.aet.valleyday.GameState;
+import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.player.Player;
 
 /**
@@ -19,6 +20,7 @@ public class Hud {
     private final BitmapFont font;
     /** The camera used to render the HUD. */
     private final OrthographicCamera camera;
+    private GameMap map;
 
     private float remainingTime= 0f;
     private Player player;
@@ -81,6 +83,12 @@ public class Hud {
         if (player.isWateringCanActive()) {
             font.draw(spriteBatch, "Watering Can active!", 10, y);
         }
+        if (map.isExitUnlocked()) {
+            font.draw(spriteBatch, "Exit unlocked", 10, y);
+        } else {
+            font.draw(spriteBatch, "Exit locked (" + map.getHarvestedCount()+ "/" + map.getQuota() + ")", 10, y);
+        }
+
 
 
 
@@ -124,6 +132,9 @@ public class Hud {
         spriteBatch.end();
     }
 
+    public void setMap(GameMap map) {
+        this.map = map;
+    }
 
 
 }

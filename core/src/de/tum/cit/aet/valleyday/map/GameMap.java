@@ -79,7 +79,7 @@ public class GameMap {
 
     private CropTile[][] crops; // Creat CropTile and init the harvest and task(quota)
     private int harvested = 0;
-    private int quota = 10;
+    private int quota = 5;
 
     private final List<WildlifeVisitor> wildlife = new ArrayList<>();
     private static final int MAX_WILDLIFE = 3; 
@@ -547,7 +547,7 @@ private void handleSKey(float dt) {
     public boolean isLostByWildlife(){
         return lostWildlife;
     }
-    
+
     public boolean hasPlayerReachedExit() {
         if (gameWon) return true;
 
@@ -555,14 +555,15 @@ private void handleSKey(float dt) {
         int px = tile[0];
         int py = tile[1];
 
-
-        if (isExit(px, py)) {
+        if (isExit(px, py) && isExitUnlocked()) {
             gameWon = true;
             return true;
         }
 
         return false;
     }
+
+
 
     public void advanceAllCrops() {
         if (crops == null) return;
@@ -623,7 +624,12 @@ private void handleSKey(float dt) {
             this.physicsTime -= TIME_STEP;
         }
     }
-    
+
+    public boolean isExitUnlocked() {
+        return harvested >= quota;
+    }
+
+
     /** Returns the player on the map. */
     public Player getPlayer() {
         return player;
@@ -804,6 +810,16 @@ public int[] nextStepBfs(int sx, int sy, int tx, int ty) {
 
         return new int[] { tx, ty };
     }
+
+
+    public int getHarvestedCount() {
+        return harvested;
+    }
+
+    public int getQuota() {
+        return quota;
+    }
+
 
 
 
