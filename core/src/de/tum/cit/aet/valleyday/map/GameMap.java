@@ -349,8 +349,9 @@ for (int x = 0; x < mapWidth; x++) {
         return;
     }
 
-    int fx = player.getFrontTileX();
-    int fy = player.getFrontTileY();
+    int fx = worldToTile(player.getX());
+    int fy = worldToTile(player.getY());
+
 
     if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
         return;

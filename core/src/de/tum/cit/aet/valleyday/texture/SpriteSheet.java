@@ -25,7 +25,7 @@ public enum SpriteSheet {
     FARM_THINGS("farmthings.png", 8, 8),
     BASICS("basics.png",16,7),
     HARVEST("Harvest.png",16,16),
-    CROPS("crops.png",64,64);
+    CROPS("crops.png",32,32);
 
     
     private final Texture spritesheet;
