@@ -97,16 +97,27 @@ public class GameScreen implements Screen {
         // Cap frame time to 250ms to prevent spiral of death
         float frameTime = Math.min(deltaTime, 0.250f); //如果某一帧卡顿（比如 deltaTime=2秒），物理会需要做很多步来追赶，会导致更卡，进入“死亡螺旋”
         
-        // Update the map state
-        if (gameState == GameState.PLAYING) {
-            map.tick(frameTime);
+        
 
-            remainingTime -= frameTime;
-            if (remainingTime <= 0f) {
-                remainingTime = 0f;
-                gameState = GameState.GAME_OVER;
-            }
-        }
+        
+        if (gameState == GameState.PLAYING) {
+        map.tick(frameTime);
+
+    
+    if (map.isLostByWildlife()) { //meet wildlife= gameover
+        remainingTime = 0f;
+        gameState = GameState.GAME_OVER;
+        return; 
+    }
+
+ 
+    remainingTime -= frameTime; //remainingTime empty=gameover
+    if (remainingTime <= 0f) {
+        remainingTime = 0f;
+        gameState = GameState.GAME_OVER;
+    }
+}
+
 
 
         if (map.hasPlayerReachedExit() && gameState == GameState.PLAYING) {

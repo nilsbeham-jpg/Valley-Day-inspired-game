@@ -29,6 +29,10 @@ public class Player implements Drawable {
 
     private Direction facing = Direction.DOWN;  //The default character faces downward.
 
+    private boolean scared = false; //player can be scared
+    private float forcedVX = 0f;
+    private float forcedVY = 0f;
+
     /**
      * The Box2D hitbox of the player, used for position and collision detection.
      */
@@ -116,23 +120,27 @@ public class Player implements Drawable {
         float xVelocity = 0f;
         float yVelocity = 0f;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            yVelocity = speed;
-            facing = Direction.UP;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            yVelocity = -speed;
-            facing = Direction.DOWN;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            xVelocity = -speed;
-            facing = Direction.LEFT;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            xVelocity = speed;
-            facing = Direction.RIGHT;
-
-        }
+    if (scared) {
+    xVelocity = forcedVX;
+    yVelocity = forcedVY;
+    } else {
+    if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        yVelocity = speed;
+        facing = Direction.UP;
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        yVelocity = -speed;
+        facing = Direction.DOWN;
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        xVelocity = -speed;
+        facing = Direction.LEFT;
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        xVelocity = speed;
+        facing = Direction.RIGHT;
+    }
+}
         // calculate were the player is next
         float nextX = hitbox.getPosition().x + xVelocity * frameTime;
         float nextY = hitbox.getPosition().y + yVelocity * frameTime;
@@ -140,7 +148,7 @@ public class Player implements Drawable {
 
         float currentX = hitbox.getPosition().x;
         float currentY = hitbox.getPosition().y;
-
+if(!scared){
 // --- Horizontal collision ---
         if (xVelocity > 0) { // right
             int tileX = map.worldToTile(nextX + RADIUS);
@@ -184,56 +192,54 @@ public class Player implements Drawable {
                 yVelocity = 0;
             }
         }
+    }
 
 
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+if (!scared) {
+    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        int[] front = map.getFrontTile(this);
+        int fx = front[0];
+        int fy = front[1];
 
-            int[] front = map.getFrontTile(this);
-            int fx = front[0];
-            int fy = front[1];
-
-            // If starting interaction or switching target
-            if (!interacting || fx != interactingX || fy != interactingY) {
-                interacting = true;
-                interactingX = fx;
-                interactingY = fy;
-                interactionTimer = 0f;
-            }
-
-            interactionTimer += frameTime;
-
-            if (interactionTimer >= getRequiredInteractionTime()) {
-                map.interactWithTile(interactingX, interactingY);
-
-                // reset after success
-                interacting = false;
-                interactionTimer = 0f;
-            }
-
-        } else {
-            // key released → cancel interaction
-            interacting = false;
+        if (!interacting || fx != interactingX || fy != interactingY) {
+            interacting = true;
+            interactingX = fx;
+            interactingY = fy;
             interactionTimer = 0f;
         }
 
+        interactionTimer += frameTime;
 
-        if (fertilizerTimer > 0f) {
-            fertilizerTimer -= frameTime;
-            if (fertilizerTimer < 0f) fertilizerTimer = 0f;
+        if (interactionTimer >= getRequiredInteractionTime()) {
+            map.interactWithTile(interactingX, interactingY);
+            interacting = false;
+            interactionTimer = 0f;
         }
-
-        if (wateringCanTimer > 0f) {
-            wateringCanTimer -= frameTime;
-            if (wateringCanTimer < 0f) wateringCanTimer = 0f;
-        }
-
-
-
-        this.hitbox.setLinearVelocity(xVelocity, yVelocity);
-        this.moving = (xVelocity != 0f) || (yVelocity != 0f);
-
-
+    } else {
+        interacting = false;
+        interactionTimer = 0f;
     }
+
+    if (fertilizerTimer > 0f) {
+        fertilizerTimer -= frameTime;
+        if (fertilizerTimer < 0f) fertilizerTimer = 0f;
+    }
+
+    if (wateringCanTimer > 0f) {
+        wateringCanTimer -= frameTime;
+        if (wateringCanTimer < 0f) wateringCanTimer = 0f;
+    }
+}
+
+
+this.hitbox.setLinearVelocity(xVelocity, yVelocity);
+this.moving = (xVelocity != 0f) || (yVelocity != 0f);
+}
+
+
+
+
+
 
     public Direction getFacing() { //check direction and return the facing direction
         return facing;
@@ -270,6 +276,26 @@ public class Player implements Drawable {
         }
         return tileY;
     }
+
+    //scared modul
+    public void setScared(boolean scared) {
+    this.scared = scared;
+    if (!scared) {
+        forcedVX = 0f;
+        forcedVY = 0f;
+    }
+}
+
+public boolean isScared() {
+    return scared;
+}
+
+public void setForcedVelocity(float vx, float vy) {
+    this.forcedVX = vx;
+    this.forcedVY = vy;
+}
+    //
+
 
 
     @Override

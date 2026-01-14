@@ -23,21 +23,19 @@ public class WildlifeVisitor {
     private float animTime = 0f;
 
     // ----------------------------
-    // Decision timer: when to choose the next tile step
-    // (this is NOT the walking animation time)
+    // Decision timer
     // ----------------------------
     private float moveTimer = 0f;
 
-    private static final float WANDER_DECISION_INTERVAL = 0.55f; // 中等自然：游荡时多久决定走一步
-    private static final float CHASE_DECISION_INTERVAL  = 0.35f; // 中等自然：追逐时更频繁决定走一步
+    private static final float WANDER_DECISION_INTERVAL = 0.55f;
+    private static final float CHASE_DECISION_INTERVAL  = 0.35f;
 
     // ----------------------------
-    // Walk animation (tile-to-tile walking)
-    // Each move step plays for WALK_TIME_* seconds
+    // Walk animation timing
     // ----------------------------
-    private static final float WALK_TIME_WANDER = 0.22f; // 中等自然：走一格耗时
-    private static final float WALK_TIME_CHASE  = 0.16f; // 追菜略快
-    private static final float WALK_TIME_FLEE   = 0.12f; // 逃跑更快
+    private static final float WALK_TIME_WANDER = 0.22f;
+    private static final float WALK_TIME_CHASE  = 0.16f;
+    private static final float WALK_TIME_FLEE   = 0.12f;
 
     // Render position in tile units (smooth walking)
     private float renderX;
@@ -70,8 +68,8 @@ public class WildlifeVisitor {
     // ----------------------------
     // Flee behavior
     // ----------------------------
-    private static final float FLEE_DURATION = 1.2f; // 跑多久后消失
-    private static final float FLEE_DECISION_INTERVAL = 0.18f; // 逃跑时多久走一步
+    private static final float FLEE_DURATION = 1.2f;
+    private static final float FLEE_DECISION_INTERVAL = 0.18f;
     private float fleeTimeLeft = 0f;
     private int fleeFromX = -1;
     private int fleeFromY = -1;
@@ -80,7 +78,6 @@ public class WildlifeVisitor {
         this.x = x;
         this.y = y;
 
-        // init render at current tile
         this.renderX = x;
         this.renderY = y;
 
@@ -89,7 +86,6 @@ public class WildlifeVisitor {
         this.stepToX = x;
         this.stepToY = y;
 
-        // offset different chickens
         this.moveTimer = MathUtils.random(0f, WANDER_DECISION_INTERVAL);
     }
 
@@ -101,7 +97,6 @@ public class WildlifeVisitor {
         alive = false;
     }
 
-    // logical coordinates (for collisions/logic)
     public int getX() {
         return x;
     }
@@ -110,7 +105,6 @@ public class WildlifeVisitor {
         return y;
     }
 
-    // render coordinates (for drawing)
     public float getRenderX() {
         return renderX;
     }
@@ -123,10 +117,6 @@ public class WildlifeVisitor {
         return Animations.CHICKEN_WALK.getKeyFrame(animTime, true);
     }
 
-    /**
-     * Called when the player successfully shoos the wildlife.
-     * The chicken will run away for a short while and then disappear.
-     */
     public void startFleeFrom(int playerTileX, int playerTileY) {
         if (!alive) {
             return;
@@ -136,10 +126,8 @@ public class WildlifeVisitor {
         fleeFromY = playerTileY;
         fleeTimeLeft = FLEE_DURATION;
 
-        // start fleeing immediately
         moveTimer = 0f;
 
-        // clear chase target
         targetX = -1;
         targetY = -1;
     }
@@ -151,13 +139,13 @@ public class WildlifeVisitor {
 
         animTime += dt;
 
-        // 1) update walking animation every frame
+        // 1) update smooth walking animation
         updateStepAnimation(dt);
 
-        // 2) collision check (tile-based)
+        // 2) collision check
         checkPlayerCollision(map);
 
-        // 3) state updates / decisions
+        // 3) fleeing behavior
         if (state == State.FLEE) {
             tickFlee(dt, map);
             return;
@@ -182,7 +170,6 @@ public class WildlifeVisitor {
 
         moveTimer = (state == State.CHASE) ? CHASE_DECISION_INTERVAL : WANDER_DECISION_INTERVAL;
 
-        // move one tile step
         if (state == State.CHASE) {
             moveChaseOneStep(map);
         } else {
@@ -195,15 +182,15 @@ public class WildlifeVisitor {
             crop.harvest();
         }
 
+        // collision again after movement
         checkPlayerCollision(map);
     }
 
     // ----------------------------
-    // Walking animation: from -> to within stepDuration seconds
+    // Walking animation
     // ----------------------------
     private void updateStepAnimation(float dt) {
         if (stepTimeLeft <= 0f) {
-            // not walking currently
             renderX = stepToX;
             renderY = stepToY;
             return;
@@ -224,14 +211,11 @@ public class WildlifeVisitor {
         if (t < 0f) t = 0f;
         if (t > 1f) t = 1f;
 
-        // Linear walk: looks like "walk", not "float"
         renderX = stepFromX + (stepToX - stepFromX) * t;
         renderY = stepFromY + (stepToY - stepFromY) * t;
     }
 
-    // start a tile-to-tile walking step
     private void beginStepTo(int nx, int ny, float walkTime) {
-        // start from current render position (so it stays smooth even if interrupted)
         stepFromX = renderX;
         stepFromY = renderY;
 
@@ -241,7 +225,6 @@ public class WildlifeVisitor {
         stepDuration = walkTime;
         stepTimeLeft = walkTime;
 
-        // update logical position immediately
         x = nx;
         y = ny;
     }
@@ -303,7 +286,6 @@ public class WildlifeVisitor {
 
         int[] next = map.nextStepBfs(x, y, targetX, targetY);
         if (next == null) {
-            // fallback
             moveWanderOneStep(map);
             state = State.WANDER;
             targetX = -1;
@@ -331,7 +313,6 @@ public class WildlifeVisitor {
             int dx = dirs[i][0];
             int dy = dirs[i][1];
 
-            // avoid instant backtracking most of the time
             if (dx == -lastDx && dy == -lastDy && MathUtils.randomBoolean(0.7f)) {
                 continue;
             }
@@ -355,12 +336,20 @@ public class WildlifeVisitor {
     }
 
     // ----------------------------
-    // Collision
+    // Collision (IMPORTANT CHANGE)
     // ----------------------------
     private void checkPlayerCollision(GameMap map) {
+        // If map already losing or player already scared, do nothing
+        if (map.isLostByWildlife()) {
+            return;
+        }
+
         int px = map.worldToTile(map.getPlayer().getX());
         int py = map.worldToTile(map.getPlayer().getY());
+
         if (px == x && py == y) {
+            // ✅ DO NOT end game instantly here.
+            // We only "trigger scare", and GameMap will handle the run-out-of-map loss.
             map.loseByWildlife();
         }
     }

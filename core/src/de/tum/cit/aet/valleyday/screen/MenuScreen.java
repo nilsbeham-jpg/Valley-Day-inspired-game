@@ -44,7 +44,7 @@ public class MenuScreen implements Screen {
 
         // Add a label as a title
         table.add(new Label("Valley Day", game.getSkin(), "title")).padBottom(80).row();
-        //这个控件下面留 80 像素空白（把按钮和标题拉开）
+      
 
         // Create and add a button to go to the game screen
         TextButton goToGameButton = new TextButton("Start new Game", game.getSkin());
@@ -95,7 +95,7 @@ public class MenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of the stage when screen is disposed 释放资源
+        // Dispose of the stage when screen is disposed 
         stage.dispose();
     }
 
