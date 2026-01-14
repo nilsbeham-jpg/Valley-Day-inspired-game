@@ -17,7 +17,8 @@ public class Fertilizer extends Item {
 
     @Override
     public void onPickup(GameMap map) {
-        map.getPlayer().activateFertilizer(5f); // 5 seconds
+        map.advanceAllCrops();
+        map.getPlayer().activateFertilizer(5f);// 5 seconds
     }
 
 }

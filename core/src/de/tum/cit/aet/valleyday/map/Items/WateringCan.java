@@ -17,6 +17,7 @@ public class WateringCan extends Item {
 
     @Override
     public void onPickup(GameMap map) {
+        map.applyWateringCan();
         map.getPlayer().activateWateringCan(5f); // 5 seconds
     }
 

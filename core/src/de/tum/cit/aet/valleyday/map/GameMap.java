@@ -481,6 +481,7 @@ for (int x = 0; x < mapWidth; x++) {
     }
 
 
+
     public void restoreAllCrops() {
         if (crops == null) return;
 
@@ -492,6 +493,21 @@ for (int x = 0; x < mapWidth; x++) {
             }
         }
     }
+
+    public void applyWateringCan() {
+        if (crops == null) return;
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                CropTile c = crops[x][y];
+                if (c != null) {
+                    c.restoreIfRotted();   // existing logic
+                    c.resetRotTimer(60f);  // new logic
+                }
+            }
+        }
+    }
+
 
 
 

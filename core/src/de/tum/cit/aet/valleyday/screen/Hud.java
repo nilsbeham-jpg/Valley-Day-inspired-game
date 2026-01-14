@@ -70,7 +70,7 @@ public class Hud {
         y -= 20;
 
         if (player.hasShovel()) {
-            font.draw(spriteBatch, "- Shovel", 10, y);
+            font.draw(spriteBatch, "Shovel", 10, y);
             y -= 20;
         }
         if (player.isFertilizerActive()) {

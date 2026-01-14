@@ -58,6 +58,14 @@ public void harvest(){
     matureTime=0f;
 }
 
+
+    public void resetRotTimer(float seconds) {
+        if (stage == CropStage.MATURE) {
+            matureTime = Math.max(0f, MATURE_TO_ROTTEN - seconds);
+        }
+    }
+
+
 public void tick(float frameTime){ //do nothing if it is empty
     if(stage==CropStage.EMPTY){
         return;
@@ -93,6 +101,7 @@ public void tick(float frameTime){ //do nothing if it is empty
     }
 
 
-    
+
+
 }
 }
