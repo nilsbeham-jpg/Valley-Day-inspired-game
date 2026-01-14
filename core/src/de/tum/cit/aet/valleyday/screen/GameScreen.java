@@ -15,6 +15,12 @@ import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
+
+import de.tum.cit.aet.valleyday.map.CropTile;
+import de.tum.cit.aet.valleyday.map.CropStage;
+import de.tum.cit.aet.valleyday.texture.Textures;
+
+
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
  * It handles the game logic and rendering of the game elements.
@@ -40,7 +46,7 @@ public class GameScreen implements Screen {
     private final GameMap map;
     private final Hud hud;
     private final OrthographicCamera mapCamera;
-
+    
     /**
      * Constructor for GameScreen. Sets up the camera and font.
      *
@@ -166,6 +172,43 @@ public class GameScreen implements Screen {
         // Render everything in the map here, in order from lowest to highest (later things appear on top)
         // You may want to add a method to GameMap to return all the drawables in the correct order
         //画画面的顺序 先花后箱子后玩家
+
+CropTile[][] crops = map.getCrops();
+if (crops != null) {
+    for (int x = 0; x < map.getMapWidth(); x++) {
+        for (int y = 0; y < map.getMapHeight(); y++) {
+
+            CropTile crop = crops[x][y];
+            if (crop == null) {
+                continue;
+            }
+
+            CropStage stage = crop.getStage();
+            if (stage == CropStage.EMPTY) {
+                continue;
+            }
+
+            TextureRegion tex = switch (stage) {
+                case SEED -> Textures.CROP_SEED;
+                case SPROUT -> Textures.CROP_SPROUT;
+                case MATURE -> Textures.CROP_MATURE;
+                case ROTTEN -> Textures.CROP_ROTTEN;
+                default -> null;
+            };
+
+            if (tex != null) {
+                float px = x * TILE_SIZE_PX * SCALE;
+                float py = y * TILE_SIZE_PX * SCALE;
+                float w = tex.getRegionWidth() * SCALE;
+                float h = tex.getRegionHeight() * SCALE;
+                spriteBatch.draw(tex, px, py, w, h);
+            }
+        }
+    }
+}
+
+
+
 
         draw(spriteBatch, map.getPlayer());
         

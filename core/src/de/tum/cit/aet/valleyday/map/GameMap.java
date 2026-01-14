@@ -308,7 +308,7 @@ public class GameMap {
         tickCrops(frameTime);
         doPhysicsStep(frameTime);
     }
-    //-----------------------------------------------------------------------------
+    //----------------------------------------------------------------------------- 
     private void handleAKey() {
     if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
         return;
@@ -416,6 +416,9 @@ private void tickCrops(float dt) {
         return player;
     }
 
+    public CropTile[][] getCrops() {
+    return crops;
+    }
 
     public Tile[][] getTiles() {
         return tiles;
