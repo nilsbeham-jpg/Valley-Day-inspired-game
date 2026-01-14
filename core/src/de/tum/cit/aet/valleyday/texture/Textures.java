@@ -23,10 +23,11 @@ public class Textures {
     public static final TextureRegion DEBRIS = SpriteSheet.BASIC_TILES.at(8, 8);
     public static final TextureRegion EXIT   = SpriteSheet.BASIC_TILES.at(7, 3);
 
-    public static final TextureRegion CROP_SEED=  SpriteSheet.CROPS.at(1, 1); // the Texture of the crops
-    public static final TextureRegion CROP_SPROUT=SpriteSheet.CROPS.at(2, 1);
-    public static final TextureRegion CROP_MATURE=SpriteSheet.CROPS.at(4, 1);
-    public static final TextureRegion CROP_ROTTEN=SpriteSheet.CROPS.at(5, 1);
+public static final TextureRegion CROP_SEED = SpriteSheet.CROPS.at(0, 0); 
+public static final TextureRegion CROP_SPROUT = SpriteSheet.CROPS.at(1, 0);
+public static final TextureRegion CROP_MATURE = SpriteSheet.CROPS.at(3, 0);
+public static final TextureRegion CROP_ROTTEN = SpriteSheet.CROPS.at(4, 0);
+
 
     public static final TextureRegion GRASS  = SpriteSheet.BASIC_TILES.at(9,1);
 }
