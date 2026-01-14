@@ -142,7 +142,7 @@ public class GameScreen implements Screen {
 
 
 
-
+        /*
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
                 Tile tile = tiles[x][y];
@@ -173,6 +173,34 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+         */
+
+
+        for (int x = 0; x < map.getMapWidth(); x++) {
+            for (int y = 0; y < map.getMapHeight(); y++) {
+                Tile tile = tiles[x][y];
+                TileObject obj = tile.getObject();
+
+                if (obj == null) continue;
+
+                TextureRegion texture = obj.getTexture();
+                if (texture == null) continue; //invisible object
+
+
+                float drawX = x * TILE_SIZE_PX * SCALE;
+                float drawY = y * TILE_SIZE_PX * SCALE;
+
+                spriteBatch.draw(
+                        texture,
+                        drawX,
+                        drawY,
+                        TILE_SIZE_PX * SCALE,
+                        TILE_SIZE_PX * SCALE
+                );
+            }
+        }
+
 
 
 

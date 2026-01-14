@@ -16,7 +16,7 @@ public abstract class Item extends TileObject {
 
     @Override
     public boolean isDestructible() {
-        return false;
+        return true;
     }
 
     public abstract void onPickup(GameMap map);
