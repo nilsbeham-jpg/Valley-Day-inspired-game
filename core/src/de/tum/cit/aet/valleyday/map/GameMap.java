@@ -59,7 +59,7 @@ public class GameMap {
     private final List<WildlifeVisitor> wildlife = new ArrayList<>();
     private static final int MAX_WILDLIFE = 3;
     private float wildlifeRespawnTimer = 0f;
-    private static final float WILDLIFE_RESPAWN_COOLDOWN = 3.0f;
+    private static final float WILDLIFE_RESPAWN_COOLDOWN = 10.0f;
 
     // -------------------------
     // SCARED 
