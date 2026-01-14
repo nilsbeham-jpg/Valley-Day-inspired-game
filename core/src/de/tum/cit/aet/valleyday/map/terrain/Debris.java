@@ -1,4 +1,6 @@
-package de.tum.cit.aet.valleyday.map;
+package de.tum.cit.aet.valleyday.map.terrain;
+
+import de.tum.cit.aet.valleyday.map.TileObject;
 
 public class Debris extends TileObject {
     public Debris(int x, int y) {

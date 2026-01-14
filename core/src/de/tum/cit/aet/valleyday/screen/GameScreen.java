@@ -10,10 +10,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.map.*;
+import de.tum.cit.aet.valleyday.map.crops.CropStage;
+import de.tum.cit.aet.valleyday.map.crops.CropTile;
+import de.tum.cit.aet.valleyday.map.structures.Exit;
+import de.tum.cit.aet.valleyday.map.terrain.Debris;
+import de.tum.cit.aet.valleyday.map.terrain.Fence;
 import de.tum.cit.aet.valleyday.texture.Drawable;
-import de.tum.cit.aet.valleyday.texture.Textures;
-
-
 import de.tum.cit.aet.valleyday.texture.Textures;
 
 

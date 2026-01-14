@@ -1,4 +1,4 @@
-package de.tum.cit.aet.valleyday.map;
+package de.tum.cit.aet.valleyday.map.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -6,9 +6,9 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
+import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.texture.Animations;
 import de.tum.cit.aet.valleyday.texture.Drawable;
-import de.tum.cit.aet.valleyday.texture.Textures;
 
 /**
  * Represents the player character in the game.

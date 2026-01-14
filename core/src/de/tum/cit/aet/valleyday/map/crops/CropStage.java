@@ -1,4 +1,4 @@
-package de.tum.cit.aet.valleyday.map;
+package de.tum.cit.aet.valleyday.map.crops;
 
 public enum CropStage {
 

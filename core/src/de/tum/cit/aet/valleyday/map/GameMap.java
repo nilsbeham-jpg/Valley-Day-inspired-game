@@ -10,17 +10,19 @@ import de.tum.cit.aet.valleyday.map.Items.WateringCan;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
 
 
-import java.util.Arrays;
-import java.util.List;
-
 import java.io.IOException;
 import java.util.Properties;
 import java.util.ArrayList;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 
 import com.badlogic.gdx.Input;
+import de.tum.cit.aet.valleyday.map.crops.CropTile;
+import de.tum.cit.aet.valleyday.map.player.Player;
+import de.tum.cit.aet.valleyday.map.structures.Entrance;
+import de.tum.cit.aet.valleyday.map.structures.Exit;
+import de.tum.cit.aet.valleyday.map.terrain.Debris;
+import de.tum.cit.aet.valleyday.map.terrain.Fence;
 
 
 /**
@@ -194,7 +196,7 @@ public class GameMap {
     private int[] findEntrancePosition() { // finds the entrance of the map
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
-                if (tiles[x][y].getObject() instanceof  Entrance) {
+                if (tiles[x][y].getObject() instanceof Entrance) {
                     return new int[]{x, y};
                 }
             }

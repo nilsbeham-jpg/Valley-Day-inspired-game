@@ -1,4 +1,4 @@
-package de.tum.cit.aet.valleyday.map;
+package de.tum.cit.aet.valleyday.map.structures;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
