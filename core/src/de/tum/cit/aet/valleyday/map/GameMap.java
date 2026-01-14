@@ -354,6 +354,7 @@ for (int x = 0; x < mapWidth; x++) {
         tickCrops(frameTime);
         doPhysicsStep(frameTime);
         checkItemPickup();
+        handleSKey(frameTime); 
     }
 
 
@@ -431,6 +432,59 @@ for (int x = 0; x < mapWidth; x++) {
     );
 }
 //--------------------------------------------------------------------------------------------
+
+//-----------------------------------
+// PRESS S TO SHOO WILDLIFE (only the single tile in front of the player)
+private float shooCooldown = 0f;
+private static final float SHOO_COOLDOWN = 0.4f; // 你可以调短/调长
+
+private void handleSKey(float dt) {
+    // cooldown tick
+    if (shooCooldown > 0f) {
+        shooCooldown -= dt;
+        if (shooCooldown < 0f) {
+            shooCooldown = 0f;
+        }
+    }
+
+    if (!Gdx.input.isKeyJustPressed(Input.Keys.S)) {
+        return;
+    }
+
+    if (shooCooldown > 0f) {
+        return;
+    }
+
+    // Use the same precise front-tile logic as SPACE
+    int[] front = getFrontTile(player);
+    int fx = front[0];
+    int fy = front[1];
+
+    // bounds check
+    if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
+        return;
+    }
+
+    // "Does not work through fences or debris":
+    // If the front tile is blocked, do nothing.
+    if (isBlocked(fx, fy)) {
+        return;
+    }
+
+    // Find a wildlife on exactly that tile
+    for (WildlifeVisitor w : wildlife) {
+        if (w.isAlive() && w.getX() == fx && w.getY() == fy) {
+            w.despawn(); // instantly disappears
+            shooCooldown = SHOO_COOLDOWN;
+            System.out.println("Shoo wildlife at (" + fx + "," + fy + ")");
+            return;
+        }
+    }
+
+    // No wildlife there -> just consume cooldown or not?
+    // Requirement doesn't force it. Usually better NOT to consume cooldown if miss.
+}
+//------------------------
 
 
     private void tickCrops(float dt) {
