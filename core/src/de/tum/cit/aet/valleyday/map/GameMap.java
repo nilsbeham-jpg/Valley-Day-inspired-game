@@ -58,9 +58,11 @@ public class GameMap {
 
     private final List<WildlifeVisitor> wildlife = new ArrayList<>();
     private static final int MAX_WILDLIFE = 3;
+    private float wildlifeRespawnTimer = 0f;
+    private static final float WILDLIFE_RESPAWN_COOLDOWN = 3.0f;
 
     // -------------------------
-    // SCARED (SIMPLIFIED)
+    // SCARED 
     // -------------------------
     private boolean scared = false;
     private float fleeDirX = 0f;
@@ -380,45 +382,60 @@ public class GameMap {
     private float shooCooldown = 0f;
     private static final float SHOO_COOLDOWN = 0.4f;
 
-    private void handleSKey(float dt) {
-        if (shooCooldown > 0f) {
-            shooCooldown -= dt;
-            if (shooCooldown < 0f) {
-                shooCooldown = 0f;
-            }
-        }
-
-        if (!Gdx.input.isKeyJustPressed(Input.Keys.S)) {
-            return;
-        }
-
-        if (shooCooldown > 0f) {
-            return;
-        }
-
-        int[] front = getFrontTile(player);
-        int fx = front[0];
-        int fy = front[1];
-
-        if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
-            return;
-        }
-
-        if (isBlocked(fx, fy)) {
-            return;
-        }
-
-        int px = worldToTile(player.getX());
-        int py = worldToTile(player.getY());
-
-        for (WildlifeVisitor w : wildlife) {
-            if (w.isAlive() && w.getX() == fx && w.getY() == fy) {
-                w.startFleeFrom(px, py);
-                shooCooldown = SHOO_COOLDOWN;
-                return;
-            }
+  private void handleSKey(float dt) {
+    // cooldown tick
+    if (shooCooldown > 0f) {
+        shooCooldown -= dt;
+        if (shooCooldown < 0f) {
+            shooCooldown = 0f;
         }
     }
+
+    if (!Gdx.input.isKeyJustPressed(Input.Keys.S)) {
+        return;
+    }
+
+    if (shooCooldown > 0f) {
+        return;
+    }
+
+   
+    int[] front = getFrontTile(player);
+    int fx = front[0];
+    int fy = front[1];
+
+   
+    if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
+        return;
+    }
+
+    
+    if (isBlocked(fx, fy)) {
+        return;
+    }
+
+    
+    int px = worldToTile(player.getX());
+    int py = worldToTile(player.getY());
+
+    
+    for (WildlifeVisitor w : wildlife) {
+        if (!w.isAlive()) {
+            continue;
+        }
+
+        
+        int wx = (int) Math.floor(w.getRenderX() + 0.5f);
+        int wy = (int) Math.floor(w.getRenderY() + 0.5f);
+
+        if (wx == fx && wy == fy) {
+            w.startFleeFrom(px, py);
+            shooCooldown = SHOO_COOLDOWN;
+            return;
+        }
+    }
+}
+
 
     // ---------------------------------
     // CROPS/WILDLIFE TICK
@@ -437,11 +454,41 @@ public class GameMap {
     }
 
     private void tickWildlife(float dt) {
-        for (WildlifeVisitor w : wildlife) {
-            w.tick(dt, this);
-        }
-        wildlife.removeIf(w -> !w.isAlive());
+    // 1) tick all
+    for (WildlifeVisitor w : wildlife) {
+        w.tick(dt, this);
     }
+
+    // 2) remove dead
+    int before = wildlife.size();
+    wildlife.removeIf(w -> !w.isAlive());
+    int after = wildlife.size();
+
+    // 3) if removed, start cooldown
+    if (after < before) {
+        wildlifeRespawnTimer = WILDLIFE_RESPAWN_COOLDOWN;
+    }
+
+    // 4) timer tick
+    if (wildlifeRespawnTimer > 0f) {
+        wildlifeRespawnTimer -= dt;
+        if (wildlifeRespawnTimer < 0f) {
+            wildlifeRespawnTimer = 0f;
+        }
+    }
+
+    // 5) respawn (补到 MAX_WILDLIFE)
+    if (wildlifeRespawnTimer == 0f) {
+        while (wildlife.size() < MAX_WILDLIFE) {
+            if (!spawnOneWildlifeRandomly()) {
+                break;
+            }
+            // 连刷多只时，给一点点间隔避免瞬间刷满很突兀
+            wildlifeRespawnTimer = 0.2f;
+        }
+    }
+}
+
 
     // ---------------------------------
     // PHYSICS
@@ -582,6 +629,39 @@ public class GameMap {
     // ---------------------------------
     // You had these methods; kept for compatibility
     // ---------------------------------
+    private boolean spawnOneWildlifeRandomly() {
+    for (int tries = 0; tries < 80; tries++) {
+        int x = MathUtils.random(0, mapWidth - 1);
+        int y = MathUtils.random(0, mapHeight - 1);
+
+        if (isBlocked(x, y)) {
+            continue;
+        }
+
+        int px = worldToTile(player.getX());
+        int py = worldToTile(player.getY());
+        if (x == px && y == py) {
+            continue;
+        }
+
+        boolean occupied = false;
+        for (WildlifeVisitor w : wildlife) {
+            if (w.isAlive() && w.getX() == x && w.getY() == y) {
+                occupied = true;
+                break;
+            }
+        }
+        if (occupied) {
+            continue;
+        }
+
+        wildlife.add(new WildlifeVisitor(x, y));
+        return true;
+    }
+    return false;
+}
+
+
     public void advanceAllCrops() {
         if (crops == null) return;
         for (int x = 0; x < mapWidth; x++) {
