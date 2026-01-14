@@ -22,15 +22,24 @@ public class Tile {
     }
 
     public void interact() {
-        if (hiddenObject != null) {
-            object = hiddenObject;
-            hiddenObject = null;
-        } else {
-            object = null;
+        if (object == null) return;
+
+        if (object.isDestructible()) {
+            if (hiddenObject != null) {
+                object = hiddenObject;     //  reveal
+                hiddenObject = null;
+            } else {
+                object = null;             //  just clear debris
+            }
         }
     }
+
 
     public TileObject getObject() {
         return object;
     }
+    public TileObject getHiddenObject() {
+        return hiddenObject;
+    }
+
 }

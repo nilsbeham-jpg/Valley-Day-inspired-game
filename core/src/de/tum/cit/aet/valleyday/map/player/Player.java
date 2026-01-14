@@ -32,7 +32,7 @@ public class Player implements Drawable {
 
     private final GameMap map;
 
-    private static final float RADIUS = 0.25f;
+    private static final float RADIUS = 0.2f;
 
     private boolean hasShovel = false;
 

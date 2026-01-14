@@ -261,9 +261,30 @@ public class GameMap {
         Tile tile = tiles[x][y];
 
         if (tile.getObject() != null && tile.getObject().isDestructible()) {
+
+            String objName = tile.getObject().getClass().getSimpleName();
+
+            String hiddenName = tile.getHiddenObject() != null
+                    ? tile.getHiddenObject().getClass().getSimpleName()
+                    : null;
+
+            if (hiddenName != null) {
+                System.out.println(
+                        "Interacted with " + objName +
+                                " at (" + x + ", " + y + "), revealed " + hiddenName
+                );
+            } else {
+                System.out.println(
+                        "Interacted with " + objName +
+                                " at (" + x + ", " + y + ")"
+                );
+            }
+
             tile.interact();
         }
     }
+
+
 
 
 

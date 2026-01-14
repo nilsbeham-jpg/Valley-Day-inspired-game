@@ -1,6 +1,8 @@
 package de.tum.cit.aet.valleyday.map.Items;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.aet.valleyday.map.GameMap;
+import de.tum.cit.aet.valleyday.texture.Textures;
 
 public class WateringCan extends Item {
 
@@ -9,7 +11,13 @@ public class WateringCan extends Item {
     }
 
     @Override
+    public TextureRegion getTexture() {
+        return Textures.WATERCAN;
+    }
+
+    @Override
     public void onPickup(GameMap map) {
         map.restoreAllCrops();
     }
 }
+

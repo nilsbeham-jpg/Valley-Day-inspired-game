@@ -29,4 +29,7 @@ public class Textures {
     public static final TextureRegion CROP_ROTTEN=SpriteSheet.CROPS.at(5, 1);
 
     public static final TextureRegion GRASS  = SpriteSheet.BASIC_TILES.at(9,1);
+    public static final TextureRegion SHOVEL  = SpriteSheet.BASICS.at(4,6);
+    public static final TextureRegion FERTILIZER  = SpriteSheet.HARVEST.at(1,5);
+    public static final TextureRegion WATERCAN  = SpriteSheet.HARVEST.at(1,7);
 }
