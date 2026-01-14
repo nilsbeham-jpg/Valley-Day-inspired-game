@@ -5,9 +5,9 @@ public class CropTile {
     private float stageTime=0f; //Initialize the stageTime
     private float matureTime=0f; //Initialize the maturetime
     
-    private static final float SEED_TO_SPROUT= 5f; // Initialize the seed to sprout time
-    private static final float SPROUT_TO_MATURE= 5f; // Initialize the sprout to mature time
-    private static final float MATURE_TO_ROTTEN= 5f; // Initialize the mature to rooten time
+    private static final float SEED_TO_SPROUT= 10f; // Initialize the seed to sprout time
+    private static final float SPROUT_TO_MATURE= 10f; // Initialize the sprout to mature time
+    private static final float MATURE_TO_ROTTEN= 10f; // Initialize the mature to rooten time
 
 public CropStage getStage(){
     return stage;
