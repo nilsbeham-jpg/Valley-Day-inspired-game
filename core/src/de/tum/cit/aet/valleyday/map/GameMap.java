@@ -344,46 +344,57 @@ for (int x = 0; x < mapWidth; x++) {
      * Checks player-facing tile
      * Plants / harvests crops
      */
-    private void handleAKey() {
+    //PRESS A TO PLANT AND HARVEST
+   private void handleAKey() {
     if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
         return;
     }
 
-    int fx = worldToTile(player.getX());
-    int fy = worldToTile(player.getY());
+    
+    int x = worldToTile(player.getX());
+    int y = worldToTile(player.getY());
 
-
-    if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
+    
+    if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
         return;
     }
 
-    Tile tile = tiles[fx][fy];
+    Tile tile = tiles[x][y];
 
     
     if (tile.getObject() != null) {
         return;
     }
 
-    CropTile crop = tile.getCrop(); 
+    CropTile crop = crops[x][y];
     if (crop == null) {
         return;
     }
 
+    // empty to plant
     if (crop.isEmpty()) {
         crop.plant();
-        System.out.println("Plant at (" + fx + "," + fy + ")");
+        System.out.println("Plant at (" + x + "," + y + ")");
         return;
     }
 
+    //  Mature to harvest
     if (crop.isMature()) {
         crop.harvest();
         harvested += 1;
-        System.out.println("Harvest at (" + fx + "," + fy + "), harvested=" + harvested);
+
+        System.out.println(
+            "Harvest at (" + x + "," + y + "), harvested = " + harvested
+        );
         return;
     }
 
-    System.out.println("A pressed but stage=" + crop.getStage() + " at (" + fx + "," + fy + ")");
+    
+    System.out.println(
+        "A pressed but crop stage = " + crop.getStage() + " at (" + x + "," + y + ")"
+    );
 }
+//--------------------------------------------------------------------------------------------
 
 
     private void tickCrops(float dt) {
