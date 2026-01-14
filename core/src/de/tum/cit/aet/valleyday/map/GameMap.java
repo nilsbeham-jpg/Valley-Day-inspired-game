@@ -190,12 +190,24 @@ public class GameMap {
         //  Initialize crops grid AFTER tiles are ready
     crops = new CropTile[mapWidth][mapHeight];
 
-    for (int x = 0; x < mapWidth; x++) {
+for (int x = 0; x < mapWidth; x++) {
     for (int y = 0; y < mapHeight; y++) {
 
-        // 暂时约定：EMPTY = 可种植的地
-        if (tiles[x][y].getObject() == null) {
-            crops[x][y] = new CropTile();
+        Tile tile = tiles[x][y];
+
+      
+        if (tile.getObject() == null) {
+            CropTile ct = new CropTile();
+
+           
+            tile.setCrop(ct);
+
+     
+            crops[x][y] = ct;
+        } else {
+    
+            tile.setCrop(null);
+            crops[x][y] = null;
         }
     }
 }
@@ -318,15 +330,15 @@ public class GameMap {
     if (fx < 0 || fy < 0 || fx >= mapWidth || fy >= mapHeight) {
         return;
     }
-        Tile tile = tiles[fx][fy];
 
-       // Only allow planting/harvesting on empty ground
-        if (tile.getObject() != null) {
-            return;
-        }
+    Tile tile = tiles[fx][fy];
 
+    
+    if (tile.getObject() != null) {
+        return;
+    }
 
-    CropTile crop = crops[fx][fy];
+    CropTile crop = tile.getCrop(); 
     if (crop == null) {
         return;
     }
@@ -346,6 +358,7 @@ public class GameMap {
 
     System.out.println("A pressed but stage=" + crop.getStage() + " at (" + fx + "," + fy + ")");
 }
+
 
     private void tickCrops(float dt) {
         if (crops == null) {

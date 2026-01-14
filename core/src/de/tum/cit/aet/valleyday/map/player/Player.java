@@ -195,20 +195,7 @@ public class Player implements Drawable {
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
         this.moving= (xVelocity!=0f)||(yVelocity!=0f);
 
-/*if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
 
-    int tileX = getTileX();
-    int tileY = getTileY();
-
-    int frontX = getFrontTileX();
-    int frontY = getFrontTileY();
-
-    System.out.println("=== A KEY DEBUG ===");
-    System.out.println("player pos = (" + getX() + ", " + getY() + ")");
-    System.out.println("player tile = (" + tileX + ", " + tileY + ")");
-    System.out.println("facing = " + facing);
-    System.out.println("front tile = (" + frontX + ", " + frontY + ")");
-}/* */
 
     }
     public Direction getFacing(){ //check direction and return the facing direction
