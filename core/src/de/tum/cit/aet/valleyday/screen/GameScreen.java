@@ -254,10 +254,13 @@ public class GameScreen implements Screen {
 //RRAW Chicken
 for (WildlifeVisitor w : map.getWildlife()) {
     TextureRegion tex = w.getCurrentAppearance();
-    float px = w.getX() * TILE_SIZE_PX * SCALE;
-    float py = w.getY() * TILE_SIZE_PX * SCALE;
+
+    float px = w.getRenderX() * TILE_SIZE_PX * SCALE;
+    float py = w.getRenderY() * TILE_SIZE_PX * SCALE;
+
     spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
 }
+
 
 
 

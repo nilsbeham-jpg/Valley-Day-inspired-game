@@ -381,30 +381,35 @@ for (int x = 0; x < mapWidth; x++) {
      * Checks player-facing tile
      * Plants / harvests crops
      */
+    
     //PRESS A TO PLANT AND HARVEST
-   private void handleAKey() {
+private void handleAKey() {
     if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
         return;
     }
 
-    
     int x = worldToTile(player.getX());
     int y = worldToTile(player.getY());
 
-    
     if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
         return;
     }
 
     Tile tile = tiles[x][y];
 
-    
     if (tile.getObject() != null) {
         return;
     }
 
     CropTile crop = crops[x][y];
     if (crop == null) {
+        return;
+    }
+
+   
+    if (crop.isRotten()) {
+        crop.clearToEmpty();
+        System.out.println("Clear rotten crop at (" + x + "," + y + ")");
         return;
     }
 
@@ -415,7 +420,7 @@ for (int x = 0; x < mapWidth; x++) {
         return;
     }
 
-    //  Mature to harvest
+    // Mature to harvest
     if (crop.isMature()) {
         crop.harvest();
         harvested += 1;
@@ -426,11 +431,11 @@ for (int x = 0; x < mapWidth; x++) {
         return;
     }
 
-    
     System.out.println(
         "A pressed but crop stage = " + crop.getStage() + " at (" + x + "," + y + ")"
     );
 }
+
 //--------------------------------------------------------------------------------------------
 
 //-----------------------------------
@@ -471,20 +476,26 @@ private void handleSKey(float dt) {
         return;
     }
 
+    // Player tile position (used to flee away from player)
+    int px = worldToTile(player.getX());
+    int py = worldToTile(player.getY());
+
     // Find a wildlife on exactly that tile
     for (WildlifeVisitor w : wildlife) {
         if (w.isAlive() && w.getX() == fx && w.getY() == fy) {
-            w.despawn(); // instantly disappears
+
+            
+            w.startFleeFrom(px, py);
+
             shooCooldown = SHOO_COOLDOWN;
             System.out.println("Shoo wildlife at (" + fx + "," + fy + ")");
             return;
         }
     }
 
-    // No wildlife there -> just consume cooldown or not?
-    // Requirement doesn't force it. Usually better NOT to consume cooldown if miss.
+    // No wildlife there -> miss does not consume cooldown (your choice)
 }
-//------------------------
+//---------------------------
 
 
     private void tickCrops(float dt) {

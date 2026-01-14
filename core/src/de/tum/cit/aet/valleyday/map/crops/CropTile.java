@@ -19,6 +19,15 @@ public boolean isEmpty(){
 public boolean isMature(){
     return stage == CropStage.MATURE; // know if the Tile is Mature
 }
+public boolean isRotten() {
+    return stage == CropStage.ROTTEN;
+}
+
+public void clearToEmpty() {
+    stage = CropStage.EMPTY;
+    stageTime = 0f;
+    matureTime = 0f;
+}
 
 
 
@@ -104,4 +113,5 @@ public void tick(float frameTime){ //do nothing if it is empty
 
 
 }
+
 }
