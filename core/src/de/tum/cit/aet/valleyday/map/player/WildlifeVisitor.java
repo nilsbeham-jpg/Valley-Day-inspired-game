@@ -48,9 +48,13 @@ public class WildlifeVisitor {
     private int fleeFromX = -1;
     private int fleeFromY = -1;
 
-    // tiny anti-backtrack
+    // tiny anti-backtrack + facing
     private int lastDx = 0;
     private int lastDy = 0;
+
+    // cache for flipping (avoid flipping original regions)
+    private TextureRegion cachedFrame;
+    private TextureRegion cachedFlipX;
 
     public WildlifeVisitor(int x, int y) {
         this.x = x;
@@ -90,8 +94,22 @@ public class WildlifeVisitor {
         return renderY;
     }
 
+    /**
+     */
     public TextureRegion getCurrentAppearance() {
-        return Animations.CHICKEN_WALK.getKeyFrame(animTime, true);
+        TextureRegion frame = Animations.CHICKEN_WALK.getKeyFrame(animTime, true);
+
+        // refresh cache when animation frame changes
+        if (cachedFrame != frame) {
+            cachedFrame = frame;
+
+            // make a flipped copy (DO NOT flip original)
+            cachedFlipX = new TextureRegion(frame);
+            cachedFlipX.flip(true, false);
+        }
+
+        // moving left -> flipped
+        return (lastDx < 0) ? cachedFlipX : cachedFrame;
     }
 
     // called by S key
@@ -114,7 +132,7 @@ public class WildlifeVisitor {
         animTime += dt;
         updateStepAnimation(dt);
 
-        // collision (important: triggers "scared", not instant gameover in your GameMap)
+        // collision (triggers scared-run in GameMap)
         checkPlayerCollision(map);
 
         // flee behavior
@@ -191,6 +209,7 @@ public class WildlifeVisitor {
         stepDuration = walkTime;
         stepTimeLeft = walkTime;
 
+        // update direction for facing
         lastDx = nx - x;
         lastDy = ny - y;
 
@@ -310,7 +329,7 @@ public class WildlifeVisitor {
         int py = map.worldToTile(map.getPlayer().getY());
 
         if (px == x && py == y) {
-            map.loseByWildlife(); // triggers scared-run (your GameMap handles actual lose)
+            map.loseByWildlife(); // triggers scared-run (GameMap handles actual lose)
         }
     }
 }
