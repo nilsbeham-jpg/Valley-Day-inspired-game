@@ -209,6 +209,7 @@ public class GameScreen implements Screen {
         // You may want to add a method to GameMap to return all the drawables in the correct order
         //画画面的顺序 先花后箱子后玩家
 
+        //DRAW CROPS
 CropTile[][] crops = map.getCrops();
 if (crops != null) {
     for (int x = 0; x < map.getMapWidth(); x++) {
@@ -233,12 +234,15 @@ if (crops != null) {
             };
 
             if (tex != null) {
-                float px = x * TILE_SIZE_PX * SCALE;
-                float py = y * TILE_SIZE_PX * SCALE;
-                float w = tex.getRegionWidth() * SCALE;
-                float h = tex.getRegionHeight() * SCALE;
-                spriteBatch.draw(tex, px, py, w, h);
-            }
+            float px = x * TILE_SIZE_PX * SCALE;
+            float py = y * TILE_SIZE_PX * SCALE;
+
+            float w = TILE_SIZE_PX * SCALE;
+            float h = TILE_SIZE_PX * SCALE;
+
+        spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
+    
+}
         }
     }
 }
