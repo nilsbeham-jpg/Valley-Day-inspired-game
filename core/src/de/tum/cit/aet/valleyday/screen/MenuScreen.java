@@ -43,7 +43,7 @@ public class MenuScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Hello World from the Menu!", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("Valley Day", game.getSkin(), "title")).padBottom(80).row();
         //这个控件下面留 80 像素空白（把按钮和标题拉开）
 
         // Create and add a button to go to the game screen

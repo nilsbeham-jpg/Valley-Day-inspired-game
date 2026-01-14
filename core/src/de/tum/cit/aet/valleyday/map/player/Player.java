@@ -36,6 +36,17 @@ public class Player implements Drawable {
 
     private boolean hasShovel = false;
 
+    // interaction state
+    private float interactionTimer = 0f;
+    private int interactingX = -1;
+    private int interactingY = -1;
+    private boolean interacting = false;
+    private float getRequiredInteractionTime() {
+        return hasShovel ? 0.5f : 1.0f;
+    }
+
+
+
     public void enableShovel() {
         hasShovel = true;
     }
@@ -176,10 +187,36 @@ public class Player implements Drawable {
 
 
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+
             int[] front = map.getFrontTile(this);
-            map.interactWithTile(front[0], front[1]);
+            int fx = front[0];
+            int fy = front[1];
+
+            // If starting interaction or switching target
+            if (!interacting || fx != interactingX || fy != interactingY) {
+                interacting = true;
+                interactingX = fx;
+                interactingY = fy;
+                interactionTimer = 0f;
+            }
+
+            interactionTimer += frameTime;
+
+            if (interactionTimer >= getRequiredInteractionTime()) {
+                map.interactWithTile(interactingX, interactingY);
+
+                // reset after success
+                interacting = false;
+                interactionTimer = 0f;
+            }
+
+        } else {
+            // key released → cancel interaction
+            interacting = false;
+            interactionTimer = 0f;
         }
+
 
 
 
