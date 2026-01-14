@@ -271,6 +271,10 @@ public class GameMap {
 
 
 
+
+
+
+
     public GameMap(ValleyDayGame game) {
         this.game = game;
         this.world = new World(Vector2.Zero, true); //Vector2.Zero：重力向量为 (0,0)，表示无重力（俯视角游戏常这样）。
@@ -385,8 +389,10 @@ public class GameMap {
     public boolean hasPlayerReachedExit() {
         if (gameWon) return true;
 
-        int px = worldToTile(player.getX());
-        int py = worldToTile(player.getY());
+        int[] tile = worldToTile(player.getX(), player.getY());
+        int px = tile[0];
+        int py = tile[1];
+
 
         if (isExit(px, py)) {
             gameWon = true;
@@ -461,9 +467,35 @@ public class GameMap {
         return mapHeight;
     }
 
-    private int worldToTile(float value) {
+    public int worldToTile(float value) {
         return (int) Math.floor(value);
     }
+
+
+    public int[] worldToTile(float worldX, float worldY) {
+        return new int[] {
+                worldToTile(worldX),
+                worldToTile(worldY)
+        };
+    }
+
+    public int[] getFrontTile(Player player) {
+        int[] tile = worldToTile(player.getX(), player.getY());
+
+        int tx = tile[0];
+        int ty = tile[1];
+
+        switch (player.getFacing()) {
+            case UP -> ty += 1;
+            case DOWN -> ty -= 1;
+            case LEFT -> tx -= 1;
+            case RIGHT -> tx += 1;
+        }
+
+        return new int[] { tx, ty };
+    }
+
+
 
 
 }

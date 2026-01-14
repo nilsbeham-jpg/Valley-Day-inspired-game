@@ -11,8 +11,12 @@ import de.tum.cit.aet.valleyday.texture.Animations;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 
 /**
- * Represents the player character in the game.
- * The player has a hitbox, so it can collide with other objects in the game.
+
+ * Player is:
+ * a world entity
+ * with physics
+ * with input-driven intentions
+ * that asks the map: “May I move here?”
  */
 public class Player implements Drawable {
     
@@ -76,9 +80,7 @@ public class Player implements Drawable {
         return body;
     }
 
-    private int worldToTile(float value) {
-        return (int) Math.floor(value);
-    }
+
 
 
     /**
@@ -127,9 +129,10 @@ public class Player implements Drawable {
 
 // --- Horizontal collision ---
         if (xVelocity > 0) { // right
-            int tileX = worldToTile(nextX + RADIUS);
-            int tileY1 = worldToTile(currentY + RADIUS * 0.9f);
-            int tileY2 = worldToTile(currentY - RADIUS * 0.9f);
+            int tileX = map.worldToTile(nextX + RADIUS);
+            int tileY1 = map.worldToTile(currentY + RADIUS* 0.9f);
+            int tileY2 =map.worldToTile(currentY - RADIUS * 0.9f);
+
 
             if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
                 xVelocity = 0;
@@ -137,9 +140,9 @@ public class Player implements Drawable {
         }
 
         if (xVelocity < 0) { // left
-            int tileX = worldToTile(nextX - RADIUS);
-            int tileY1 = worldToTile(currentY + RADIUS * 0.9f);
-            int tileY2 = worldToTile(currentY - RADIUS * 0.9f);
+            int tileX = map.worldToTile(nextX - RADIUS);
+            int tileY1 = map.worldToTile(currentY + RADIUS* 0.9f);
+            int tileY2 =map.worldToTile(currentY - RADIUS * 0.9f);
 
             if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
                 xVelocity = 0;
@@ -149,9 +152,9 @@ public class Player implements Drawable {
 
 // --- Vertical collision ---
         if (yVelocity > 0) { // up
-            int tileY = worldToTile(nextY + RADIUS);
-            int tileX1 = worldToTile(currentX + RADIUS * 0.9f);
-            int tileX2 = worldToTile(currentX - RADIUS * 0.9f);
+            int tileY = map.worldToTile(nextY + RADIUS);
+            int tileX1 = map.worldToTile(currentX + RADIUS* 0.9f);
+            int tileX2 =map.worldToTile(currentX - RADIUS * 0.9f);
 
             if (map.isBlocked(tileX1, tileY) || map.isBlocked(tileX2, tileY)) {
                 yVelocity = 0;
@@ -159,9 +162,9 @@ public class Player implements Drawable {
         }
 
         if (yVelocity < 0) { // down
-            int tileY = worldToTile(nextY - RADIUS);
-            int tileX1 = worldToTile(currentX + RADIUS * 0.9f);
-            int tileX2 = worldToTile(currentX - RADIUS * 0.9f);
+            int tileY = map.worldToTile(nextY - RADIUS);
+            int tileX1 = map.worldToTile(currentX + RADIUS* 0.9f);
+            int tileX2 =map.worldToTile(currentX - RADIUS * 0.9f);
 
             if (map.isBlocked(tileX1, tileY) || map.isBlocked(tileX2, tileY)) {
                 yVelocity = 0;
@@ -174,22 +177,10 @@ public class Player implements Drawable {
 
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-
-            int px = worldToTile(hitbox.getPosition().x);
-            int py = worldToTile(hitbox.getPosition().y);
-
-            int tx = px;
-            int ty = py;
-
-            switch (facing) {
-                case UP -> ty += 1;
-                case DOWN -> ty -= 1;
-                case LEFT -> tx -= 1;
-                case RIGHT -> tx += 1;
-            }
-
-            map.interactWithTile(tx, ty); //Interaction is directional
+            int[] front = map.getFrontTile(this);
+            map.interactWithTile(front[0], front[1]);
         }
+
 
 
         this.hitbox.setLinearVelocity(xVelocity, yVelocity);
