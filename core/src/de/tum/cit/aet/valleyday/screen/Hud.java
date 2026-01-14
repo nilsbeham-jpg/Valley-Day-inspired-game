@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.tum.cit.aet.valleyday.GameState;
+import de.tum.cit.aet.valleyday.map.player.Player;
 
 /**
  * A Heads-Up Display (HUD) that displays information on the screen.
@@ -20,6 +21,11 @@ public class Hud {
     private final OrthographicCamera camera;
 
     private float remainingTime= 0f;
+    private Player player;
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 
     public void setRemainingTime(float time) {
         this.remainingTime = time;
@@ -58,7 +64,28 @@ public class Hud {
                 Gdx.graphics.getHeight() - 30
         );
 
+        int y = Gdx.graphics.getHeight() - 60;
+
+        font.draw(spriteBatch, "Tools:", 10, y);
+        y -= 20;
+
+        if (player.hasShovel()) {
+            font.draw(spriteBatch, "- Shovel", 10, y);
+            y -= 20;
+        }
+        if (player.isFertilizerActive()) {
+            font.draw(spriteBatch, "Fertilizer active!", 10, y);
+            y -= 20;
+        }
+
+        if (player.isWateringCanActive()) {
+            font.draw(spriteBatch, "Watering Can active!", 10, y);
+        }
+
+
+
         spriteBatch.end();
+
     }
 
 
@@ -96,6 +123,7 @@ public class Hud {
 
         spriteBatch.end();
     }
+
 
 
 }
