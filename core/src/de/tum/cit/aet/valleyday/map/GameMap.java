@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import de.tum.cit.aet.valleyday.Difficulty;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
+import de.tum.cit.aet.valleyday.audio.Effectmusic;
 import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
 import de.tum.cit.aet.valleyday.map.Items.Item;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
@@ -324,17 +325,37 @@ public class GameMap {
     // ---------------------------------
     // INTERACT WITH TILE (D)
     // ---------------------------------
-    public void interactWithTile(int x, int y) {
-        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
-            return;
-        }
-
-        Tile tile = tiles[x][y];
-
-        if (tile.getObject() != null && tile.getObject().isDestructible()) {
-            tile.interact();
-        }
+   public void interactWithTile(int x, int y) {
+    if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+        return;
     }
+
+    Tile tile = tiles[x][y];
+
+    if (tile.getObject() == null) {
+        return;
+    }
+
+    if (!tile.getObject().isDestructible()) {
+        return;
+    }
+
+   
+    boolean wasDebris =
+            tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
+
+   
+    tile.interact();
+
+    
+    boolean isDebrisNow =
+            tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
+
+    if (wasDebris && !isDebrisNow) {
+        Effectmusic.DebrisDestory.play();
+    }
+}
+
 
     private void checkItemPickup() {
         int px = worldToTile(player.getX());
@@ -349,6 +370,7 @@ public class GameMap {
         if (tile.getObject() instanceof Item item) {
             item.onPickup(this);
             tile.clearObject();
+            Effectmusic.CollectItem.play();
         }
     }
 
@@ -384,14 +406,18 @@ public class GameMap {
         }
 
         if (crop.isEmpty()) {
-            crop.plant();
-            return;
-        }
+        crop.plant();
+        Effectmusic.Plant.play();
+    return;
+}
+
 
         if (crop.isMature()) {
-            crop.harvest();
-            harvested += 1;
-        }
+    crop.harvest();
+    harvested += 1;
+    Effectmusic.Harvest.play();
+}
+
     }
 
     // ---------------------------------

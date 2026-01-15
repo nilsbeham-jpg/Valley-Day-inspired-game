@@ -2,6 +2,8 @@ package de.tum.cit.aet.valleyday.map.player;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+
+import de.tum.cit.aet.valleyday.audio.Effectmusic;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.crops.CropStage;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
@@ -177,6 +179,7 @@ public class WildlifeVisitor {
         CropTile crop = map.getCropAt(x, y);
         if (crop != null && crop.getStage() == CropStage.MATURE) {
             crop.harvest();
+             //Effectmusic.ChickenPickup.play();
         }
 
         checkPlayerCollision(map);
