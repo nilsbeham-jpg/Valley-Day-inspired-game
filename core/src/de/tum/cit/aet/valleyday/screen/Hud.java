@@ -15,6 +15,8 @@ import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.player.Player;
 
+import static com.badlogic.gdx.scenes.scene2d.ui.Table.Debug.table;
+
 /**
  * A Heads-Up Display (HUD) that displays information on the screen.
  * It uses a separate camera so that it is always fixed on the screen.
@@ -34,6 +36,8 @@ public class Hud {
     private Stage endStage;
     private Table endTable;
     private final Skin skin;
+    private Label difficultyLabel;
+
 
 
 
@@ -55,6 +59,7 @@ public class Hud {
         endTable.setFillParent(true);
         endStage.addActor(endTable);
         this.skin = skin;
+
 
     }
     

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.tum.cit.aet.valleyday.Difficulty;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 
 import de.tum.cit.aet.valleyday.audio.MusicTrack;
@@ -34,6 +36,8 @@ public class MenuScreen implements Screen {
 
     private final Stage stage; // root container of everything UI-related.
     private final boolean canResume;
+    private Difficulty selectedDifficulty;
+
 
 
     /**
@@ -43,6 +47,7 @@ public class MenuScreen implements Screen {
      */
     public MenuScreen(ValleyDayGame game, boolean canResume) {
         this.canResume = canResume;
+        this.selectedDifficulty = game.getDifficulty();
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view 创建相机 Zoom代表视角远近
 
@@ -127,6 +132,49 @@ public class MenuScreen implements Screen {
             }
         });
 
+        Label difficultyLabel = new Label("Difficulty", game.getSkin());
+        table.add(difficultyLabel).padBottom(10).row();
+
+        Table diffTable = new Table();
+        table.add(diffTable).padBottom(30).row();
+        TextButton easyBtn   = new TextButton("Easy", game.getSkin());
+        TextButton normalBtn = new TextButton("Normal", game.getSkin());
+        TextButton hardBtn   = new TextButton("Hard", game.getSkin());
+
+        ButtonGroup<TextButton> difficultyGroup = new ButtonGroup<>(easyBtn, normalBtn, hardBtn);
+        difficultyGroup.setMinCheckCount(1);
+        difficultyGroup.setMaxCheckCount(1);
+        difficultyGroup.setUncheckLast(true);
+
+
+        diffTable.add(easyBtn).width(120).pad(5);
+        diffTable.add(normalBtn).width(120).pad(5);
+        diffTable.add(hardBtn).width(120).pad(5);
+
+        easyBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                selectDifficulty(game, Difficulty.EASY, easyBtn, normalBtn, hardBtn);
+            }
+        });
+
+        normalBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                selectDifficulty(game, Difficulty.NORMAL, easyBtn, normalBtn, hardBtn);
+            }
+        });
+
+        hardBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                selectDifficulty(game, Difficulty.HARD, easyBtn, normalBtn, hardBtn);
+            }
+        });
+
+        selectDifficulty(game, selectedDifficulty, easyBtn, normalBtn, hardBtn);
+
+
 
 
 
@@ -185,4 +233,14 @@ public class MenuScreen implements Screen {
     @Override
     public void hide() {
     }
+
+
+    private void selectDifficulty(ValleyDayGame game, Difficulty difficulty,
+                                  TextButton easy, TextButton normal, TextButton hard) {
+
+        this.selectedDifficulty = difficulty;
+        game.setDifficulty(difficulty);
+
+    }
+
 }

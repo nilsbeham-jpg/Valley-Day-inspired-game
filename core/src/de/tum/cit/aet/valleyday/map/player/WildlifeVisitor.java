@@ -56,10 +56,11 @@ public class WildlifeVisitor {
     private TextureRegion cachedFrame;
     private TextureRegion cachedFlipX;
 
-    //
-    //rivate final float speedMultiplier;
+    // difficulty scaling
+    private final float speedMultiplier;
 
-    public WildlifeVisitor(int x, int y) {
+
+    public WildlifeVisitor(int x, int y, float speedMultiplier) {
         this.x = x;
         this.y = y;
         this.renderX = x;
@@ -71,6 +72,8 @@ public class WildlifeVisitor {
         this.stepToY = y;
 
         this.moveTimer = MathUtils.random(0f, DECIDE_WANDER);
+        this.speedMultiplier = speedMultiplier;
+
     }
 
     public boolean isAlive() {
@@ -157,13 +160,13 @@ public class WildlifeVisitor {
         // 1) player near -> chase player (simple greedy)
         if (distPlayer <= PLAYER_CHASE_RANGE) {
             moveTimer = DECIDE_CHASE;
-            moveToward(px, py, map, WALK_CHASE);
+            moveToward(px, py, map, WALK_CHASE * speedMultiplier);
         } else {
             // 2) else: chase mature crop if seen, otherwise wander
             int[] cropPos = map.findNearestMatureCrop(x, y, CROP_VISION_RANGE);
             if (cropPos != null) {
                 moveTimer = DECIDE_CHASE;
-                moveToward(cropPos[0], cropPos[1], map, WALK_CHASE);
+                moveToward(cropPos[0], cropPos[1], map, WALK_CHASE * speedMultiplier);
             } else {
                 moveTimer = DECIDE_WANDER;
                 moveWanderOneStep(map);
@@ -256,7 +259,7 @@ public class WildlifeVisitor {
             }
         }
 
-        beginStepTo(bestNx, bestNy, WALK_FLEE);
+        beginStepTo(bestNx, bestNy, WALK_FLEE * speedMultiplier);
         checkPlayerCollision(map);
     }
 
@@ -284,7 +287,7 @@ public class WildlifeVisitor {
         if (map.isBlocked(nx, ny)) {
             return false;
         }
-        beginStepTo(nx, ny, walkTime);
+        beginStepTo(nx, ny, walkTime * speedMultiplier);
         return true;
     }
 
@@ -311,7 +314,7 @@ public class WildlifeVisitor {
                 continue;
             }
 
-            beginStepTo(nx, ny, WALK_WANDER);
+            beginStepTo(nx, ny, WALK_WANDER * speedMultiplier);
             return;
         }
 

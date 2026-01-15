@@ -25,9 +25,9 @@ public class ValleyDayGame extends Game {
 
     /** The game's UI skin. This is used to style the game's UI elements. */
     private Skin skin; //UI样式
-    
 
-    //private Difficulty difficulty= Difficulty.NORMAL; //Difficulty system;
+
+    private Difficulty difficulty = Difficulty.NORMAL;//Difficulty system;
     /**
      * The file chooser for loading map files from the user's computer.
      * This will give you access to a {@link com.badlogic.gdx.files.FileHandle} object,
@@ -112,17 +112,16 @@ public class ValleyDayGame extends Game {
         return map;
     }
     
-    /**
-     * Switches to the given screen and disposes of the previous screen.
-     * @param screen the new screen
-     */
- 
- 
-   // public void setDifficulty(Difficulty difficulty){ // difficulty system
-    //this.difficulty=difficulty;
- 
-   // public Difficulty getDifficulty(){
-    //return difficulty;
+
+
+
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
 
 
 

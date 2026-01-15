@@ -129,14 +129,24 @@ com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
-	default: {
-		font: font
-		up: button
-		over: button-hover
-		disabled: button-disabled
-	}
+  default: {
+    font: font
+
+    up: button
+    over: button-hover
+    down: button-hover
+
+    checked: button-hover
+    checkedOver: button-hover
+
+    fontColor: white
+    checkedFontColor: green
+
+    disabled: button-disabled
+  }
 }
-com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
+
+  com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: {
 		font: font
 		fontColor: white

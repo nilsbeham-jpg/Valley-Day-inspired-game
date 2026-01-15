@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import de.tum.cit.aet.valleyday.Difficulty;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
 import de.tum.cit.aet.valleyday.map.Items.Item;
@@ -57,10 +58,12 @@ public class GameMap {
 
     private CropTile[][] crops;
     private int harvested = 0;
-    private int quota = 5;
+    private final int quota;
+
 
     private final List<WildlifeVisitor> wildlife = new ArrayList<>();
-    private static final int MAX_WILDLIFE = 3;
+    private final int maxWildlife;
+
     private float wildlifeRespawnTimer = 0f;
     private static final float WILDLIFE_RESPAWN_COOLDOWN = 10.0f;
 
@@ -75,10 +78,19 @@ public class GameMap {
     // end state flags
     private boolean gameWon = false;
     private boolean lostWildlife = false;
+    private final float wildlifeSpeedMultiplier;
+
 
     public GameMap(ValleyDayGame game, String mapPath) {
         this.game = game;
         this.world = new World(Vector2.Zero, true);
+
+
+
+        Difficulty diff = game.getDifficulty();
+        this.quota = diff.exitQuota;
+        this.maxWildlife = diff.maxWildlife;
+        this.wildlifeSpeedMultiplier = diff.speedMultiplier;
 
         loadMap(mapPath);
 
@@ -220,8 +232,8 @@ public class GameMap {
             int value = Integer.parseInt(props.getProperty(key));
 
             if (value == 3) {
-                if (wildlife.size() < MAX_WILDLIFE) {
-                    wildlife.add(new WildlifeVisitor(x, y));
+                if (wildlife.size() < maxWildlife) {
+                    wildlife.add(new WildlifeVisitor(x, y, wildlifeSpeedMultiplier));
                 }
                 tiles[x][y] = new Tile(null);
             } else {
@@ -485,7 +497,7 @@ public class GameMap {
 
     // 5) respawn (补到 MAX_WILDLIFE)
     if (wildlifeRespawnTimer == 0f) {
-        while (wildlife.size() < MAX_WILDLIFE) {
+        while (wildlife.size() < maxWildlife) {
             if (!spawnOneWildlifeRandomly()) {
                 break;
             }
@@ -661,7 +673,7 @@ public class GameMap {
             continue;
         }
 
-        wildlife.add(new WildlifeVisitor(x, y));
+        wildlife.add(new WildlifeVisitor(x, y, wildlifeSpeedMultiplier));
         return true;
     }
     return false;
