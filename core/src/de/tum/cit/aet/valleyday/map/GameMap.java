@@ -12,9 +12,10 @@ import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
 import de.tum.cit.aet.valleyday.map.Items.Item;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
 import de.tum.cit.aet.valleyday.map.Items.WateringCan;
+import de.tum.cit.aet.valleyday.map.Waldlife.ChickenVisitor;
+import de.tum.cit.aet.valleyday.map.Waldlife.WildlifeBase;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
 import de.tum.cit.aet.valleyday.map.player.Player;
-import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Entrance;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
@@ -66,7 +67,7 @@ public class GameMap {
     private static final float PATH_CHANCE = 0.32f; // 32%
 
 
-    private final List<WildlifeVisitor> wildlife = new ArrayList<>();
+    private final List<WildlifeBase> wildlife = new ArrayList<>();
     private final int maxWildlife;
 
     private float wildlifeRespawnTimer = 0f;
@@ -155,7 +156,7 @@ public class GameMap {
         int px = worldToTile(player.getX());
         int py = worldToTile(player.getY());
 
-        for (WildlifeVisitor w : wildlife) {
+        for (WildlifeBase w : wildlife) {
             if (!w.isAlive()) {
                 continue;
             }
@@ -238,7 +239,7 @@ public class GameMap {
 
             if (value == 3) {
                 if (wildlife.size() < maxWildlife) {
-                    wildlife.add(new WildlifeVisitor(x, y, wildlifeSpeedMultiplier));
+                    wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
                 }
                 tiles[x][y] = new Tile(null);
             } else {
@@ -545,22 +546,24 @@ public class GameMap {
     int py = worldToTile(player.getY());
 
     
-    for (WildlifeVisitor w : wildlife) {
-        if (!w.isAlive()) {
-            continue;
-        }
-
-        
-        int wx = (int) Math.floor(w.getRenderX() + 0.5f);
-        int wy = (int) Math.floor(w.getRenderY() + 0.5f);
-
-        if (wx == fx && wy == fy) {
-            w.startFleeFrom(px, py);
-             Effectmusic.Hit.play();
-            shooCooldown = SHOO_COOLDOWN;
-            return;
-        }
+    for (WildlifeBase w : wildlife) {
+    if (!w.isAlive()) {
+        continue;
     }
+
+    int wx = (int) Math.floor(w.getRenderX() + 0.5f);
+    int wy = (int) Math.floor(w.getRenderY() + 0.5f);
+
+    if (wx == fx && wy == fy) {
+        if (w instanceof ChickenVisitor chicken) {
+            chicken.startFleeFrom(px, py);
+             Effectmusic.Hit.play();
+        }
+        shooCooldown = SHOO_COOLDOWN;
+        return;
+    }
+}
+
 }
 
 
@@ -582,7 +585,7 @@ public class GameMap {
 
     private void tickWildlife(float dt) {
     // 1) tick all
-    for (WildlifeVisitor w : wildlife) {
+    for (WildlifeBase w : wildlife) {
         w.tick(dt, this);
     }
 
@@ -694,9 +697,10 @@ public class GameMap {
         return player;
     }
 
-    public List<WildlifeVisitor> getWildlife() {
-        return wildlife;
+   public List<WildlifeBase> getWildlife() {
+    return wildlife;
     }
+
 
     public CropTile[][] getCrops() {
         return crops;
@@ -779,7 +783,7 @@ private boolean spawnOneWildlifeRandomly() {
         }
 
         boolean occupied = false;
-        for (WildlifeVisitor w : wildlife) {
+        for (WildlifeBase w : wildlife) {
             if (w.isAlive() && w.getX() == x && w.getY() == y) {
                 occupied = true;
                 break;
@@ -789,7 +793,7 @@ private boolean spawnOneWildlifeRandomly() {
             continue;
         }
 
-        wildlife.add(new WildlifeVisitor(x, y, wildlifeSpeedMultiplier));
+        wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
         return true;
     }
 
