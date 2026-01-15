@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 
 /**
  * The class is responsible for:
@@ -73,14 +76,16 @@ public class GameMap {
     private boolean gameWon = false;
     private boolean lostWildlife = false;
 
-    public GameMap(ValleyDayGame game) {
+    public GameMap(ValleyDayGame game, String mapPath) {
         this.game = game;
         this.world = new World(Vector2.Zero, true);
 
-        loadMap("maps/map-2.properties");
+        loadMap(mapPath);
+
         int[] entrance = findEntrancePosition();
         this.player = new Player(this.world, this, entrance[0], entrance[1]);
     }
+
 
     // ---------------------------------
     // MAIN TICK
@@ -176,11 +181,12 @@ public class GameMap {
     // ---------------------------------
     private void loadMap(String path) {
         Properties props = new Properties();
-        try {
-            props.load(Gdx.files.internal(path).reader());
+        try (InputStream in = createMapInputStream(path)) {
+            props.load(in);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load map file: " + path, e);
         }
+
 
         int maxX = 0;
         int maxY = 0;
@@ -800,4 +806,15 @@ public class GameMap {
     public Tile[][] getTiles() {
         return tiles;
     }
+
+    private InputStream createMapInputStream(String path) throws IOException {
+        // absolute or relative filesystem path
+        if (new java.io.File(path).exists()) {
+            return new FileInputStream(path);
+        }
+
+        // fallback: internal asset (for default maps)
+        return Gdx.files.internal(path).read();
+    }
+
 }

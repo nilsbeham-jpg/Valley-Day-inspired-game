@@ -2,6 +2,7 @@ package de.tum.cit.aet.valleyday.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -14,6 +15,15 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
+
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+
+
+import java.io.File;
+import java.io.FilenameFilter;
+
+
 
 /**
  * The MenuScreen class is responsible for displaying the main menu of the game.
@@ -67,6 +77,51 @@ public class MenuScreen implements Screen {
                 }
             });
         }
+        TextButton loadMapButton = new TextButton("Load Map", game.getSkin());
+        table.add(loadMapButton).width(300).padBottom(20).row();
+        loadMapButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+                NativeFileChooserConfiguration config =
+                        new NativeFileChooserConfiguration();
+
+                config.title = "Select map file";
+                config.directory = Gdx.files.absolute(System.getProperty("user.home"));
+                config.nameFilter = (dir, name) -> name.endsWith(".properties");
+
+                game.getFileChooser().chooseFile(config,
+                        new NativeFileChooserCallback() {
+
+                            @Override
+                            public void onFileChosen(FileHandle file) {
+                                String path = file.file().getAbsolutePath();
+
+                                // 🔑 THIS is the key integration point
+                                game.setSelectedMapPath(path);
+                                game.goToGame();
+                            }
+
+                            @Override
+                            public void onCancellation() {
+                                System.out.println("Map loading cancelled");
+                            }
+
+                            @Override
+                            public void onError(Exception exception) {
+                                exception.printStackTrace();
+                            }
+                        }
+                );
+            }
+        });
+
+
+
+
+
+
+
 
     }
     

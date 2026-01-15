@@ -41,6 +41,8 @@ public class ValleyDayGame extends Game {
     private GameMap map;
 
     private GameScreen currentGameScreen;
+    private String selectedMapPath = "maps/map-1.properties"; // default
+
 
 
     /**
@@ -62,7 +64,7 @@ public class ValleyDayGame extends Game {
     public void create() {
         this.spriteBatch = new SpriteBatch(); // Create SpriteBatch for rendering
         this.skin = new Skin(Gdx.files.internal("skin/craftacular/craftacular-ui.json")); // Load UI skin
-        this.map = new GameMap(this); // Create a new game map (you should change this to load the map from a file instead)
+        this.map = new GameMap(this, selectedMapPath); // Create a new game map (you should change this to load the map from a file instead)
         MusicTrack.BACKGROUND.play(); // Play some background music
         goToMenu(); // Navigate to the menu screen
     }
@@ -79,7 +81,7 @@ public class ValleyDayGame extends Game {
      * Switches to the game screen.
      */
     public void goToGame() {
-        this.map = new GameMap(this);              // NEW world
+        map = new GameMap(this, selectedMapPath);             // NEW world
         this.currentGameScreen = new GameScreen(this); // NEW screen
         this.setScreen(currentGameScreen);
     }
@@ -130,4 +132,20 @@ public class ValleyDayGame extends Game {
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
     }
+
+    public void setSelectedMapPath(String path) {
+        this.selectedMapPath = path;
+    }
+
+    public String getSelectedMapPath() {
+        return selectedMapPath;
+    }
+    public NativeFileChooser getFileChooser() {
+        return fileChooser;
+    }
+    //public void startGameWithMap(String mapPath) {
+     //   setScreen(new GameScreen(this, mapPath));
+    //}
+
+
 }
