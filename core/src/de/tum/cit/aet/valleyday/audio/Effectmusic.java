@@ -6,13 +6,14 @@ import com.badlogic.gdx.audio.Sound;
 public enum Effectmusic {
 
     Plant("plant.ogg", 2f),
-    //SHOO("shoo.wav", 0.2f),
     Harvest("harvest.ogg", 2f),
     //CLEAR_ROTTEN("clear.wav", 0.2f),
     Walking("Walking.ogg",3f),
+    Hit("hit.ogg",1f),
     DebrisDestory("debris_destory.ogg",2f),
-    CollectItem("collect_items.ogg", 1.0f);
-    //ChickenPickup("chicken_pickup",1.0f);
+    CollectItem("collect_items.ogg", 1.0f),
+    OhNo("ohno.ogg", 3.0f),
+    ChickenPickup("wildlife_pickup.ogg",1.0f);
 
     private final Sound sound;
     private final float volume;

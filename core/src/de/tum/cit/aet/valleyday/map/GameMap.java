@@ -513,6 +513,7 @@ public class GameMap {
 
         if (wx == fx && wy == fy) {
             w.startFleeFrom(px, py);
+             Effectmusic.Hit.play();
             shooCooldown = SHOO_COOLDOWN;
             return;
         }
@@ -638,6 +639,7 @@ public class GameMap {
         // if not yet scared, start scared and compute direction
         if (!scared) {
             scared = true;
+            Effectmusic.OhNo.play();
             computeFleeDirectionToNearestBorder();
             return;
         }
@@ -712,7 +714,12 @@ public class GameMap {
     // ---------------------------------
     // You had these methods; kept for compatibility
     // ---------------------------------
-    private boolean spawnOneWildlifeRandomly() {
+private static final int MIN_SPAWN_DISTANCE = 4; 
+
+private boolean spawnOneWildlifeRandomly() {
+    int px = worldToTile(player.getX());
+    int py = worldToTile(player.getY());
+
     for (int tries = 0; tries < 80; tries++) {
         int x = MathUtils.random(0, mapWidth - 1);
         int y = MathUtils.random(0, mapHeight - 1);
@@ -721,9 +728,10 @@ public class GameMap {
             continue;
         }
 
-        int px = worldToTile(player.getX());
-        int py = worldToTile(player.getY());
-        if (x == px && y == py) {
+        // ✅ 不在玩家周围4格（方形区域：9x9）生成
+        int dx = Math.abs(x - px);
+        int dy = Math.abs(y - py);
+        if (dx <= MIN_SPAWN_DISTANCE && dy <= MIN_SPAWN_DISTANCE) {
             continue;
         }
 
@@ -741,8 +749,10 @@ public class GameMap {
         wildlife.add(new WildlifeVisitor(x, y, wildlifeSpeedMultiplier));
         return true;
     }
+
     return false;
 }
+
 
 
     public void advanceAllCrops() {

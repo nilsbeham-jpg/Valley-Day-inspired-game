@@ -179,7 +179,7 @@ public class WildlifeVisitor {
         CropTile crop = map.getCropAt(x, y);
         if (crop != null && crop.getStage() == CropStage.MATURE) {
             crop.harvest();
-             //Effectmusic.ChickenPickup.play();
+             Effectmusic.ChickenPickup.play();
         }
 
         checkPlayerCollision(map);
