@@ -17,13 +17,17 @@ import de.tum.cit.aet.valleyday.map.Waldlife.SnailVisitor;
 import de.tum.cit.aet.valleyday.map.Waldlife.WildlifeBase;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
 import de.tum.cit.aet.valleyday.map.player.Player;
-import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Entrance;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
 import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 import de.tum.cit.aet.valleyday.map.terrain.RockDebris;
+import de.tum.cit.aet.valleyday.map.crops.CropType;
+import de.tum.cit.aet.valleyday.map.crops.BasicCrop;
+import de.tum.cit.aet.valleyday.map.crops.PremiumCrop;
+import de.tum.cit.aet.valleyday.map.crops.SlowCrop;
+
 
 
 import java.io.IOException;
@@ -517,11 +521,12 @@ if (value == 3) {
             return;
         }
         if (crop.isMature()) {
-    crop.harvest();
-            harvested += crop.getHarvestValue();
-
+            int value = crop.getHarvestValue(); // read FIRST
+            crop.harvest();                     // then clear
+            harvested += value;
             Effectmusic.Harvest.play();
-}
+        }
+
 
     }
 

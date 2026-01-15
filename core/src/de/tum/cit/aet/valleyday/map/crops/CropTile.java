@@ -7,9 +7,7 @@ public class CropTile {
     private float stageTime=0f; //Initialize the stageTime
     private float matureTime=0f; //Initialize the maturetime
     
-    private static final float SEED_TO_SPROUT= 5f; // Initialize the seed to sprout time
-    private static final float SPROUT_TO_MATURE= 5f; // Initialize the sprout to mature time
-    private static final float MATURE_TO_ROTTEN= 10f; // Initialize the mature to rooten time
+
 
     private CropType type;
 
@@ -74,63 +72,63 @@ public void clearToEmpty() {
 
 
 
-public void harvest(){
-    if(stage!=CropStage.MATURE){
-        return;
+    public void harvest() {
+        if (stage != CropStage.MATURE) return;
+
+        stage = CropStage.EMPTY;
+        stageTime = 0f;
+        matureTime = 0f;
+        type = null;
     }
-    stage=CropStage.EMPTY;
-    stageTime=0f;
-    matureTime=0f;
-}
+
 
 
     public void resetRotTimer(float seconds) {
+        if (stage == CropStage.MATURE && type != null) {
+            matureTime = Math.max(0f, type.matureToRotten() - seconds);
+        }
+    }
+
+
+
+    public void tick(float frameTime) {
+        if (stage == CropStage.EMPTY) return;
+
+        if (stage == CropStage.SEED) {
+            stageTime += frameTime;
+            if (stageTime >= type.seedToSprout()) {
+                stage = CropStage.SPROUT;
+                stageTime = 0f;
+            }
+            return;
+        }
+
+        if (stage == CropStage.SPROUT) {
+            stageTime += frameTime;
+            if (stageTime >= type.sproutToMature()) {
+                stage = CropStage.MATURE;
+                matureTime = 0f;
+                stageTime = 0f;
+            }
+            return;
+        }
+
         if (stage == CropStage.MATURE) {
-            matureTime = Math.max(0f, MATURE_TO_ROTTEN - seconds);
-        }
-    }
-
-
-public void tick(float frameTime){ //do nothing if it is empty
-    if(stage==CropStage.EMPTY){
-        return;
-    }
-
-
-    if(stage==CropStage.SEED){ //seed period
-        stageTime+=frameTime;
-
-        if (stageTime >= type.seedToSprout()) { //  caculate the time from seed to sprout period
-        stage=CropStage.SPROUT;
-        stageTime=0f;
-    }
-    return;
-    }
-
-    if(stage==CropStage.SPROUT){ //sprout period
-        stageTime+=frameTime;
-        if(stageTime>=SPROUT_TO_MATURE){ //caculate the time from sprout to mature period
-            stage=CropStage.MATURE;
-            matureTime=0f;
-            stageTime=0f;
-        }
-        return;
-    }
-
-    if(stage==CropStage.MATURE){ //mature period
-        matureTime+=frameTime;
-        if (matureTime >= MATURE_TO_ROTTEN) { //caculate the time from mature to rotten
+            matureTime += frameTime;
+            if (matureTime >= type.matureToRotten()) {
                 stage = CropStage.ROTTEN;
+            }
+        }
     }
-    
-    }
-    }
+
 
     public int getHarvestValue() {
+        if (type == null) {
+            return 0;
+        }
         return type.harvestValue();
+    }
 
-
-}
 
     public TextureRegion getTexture() {
         if (type == null) return null;

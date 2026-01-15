@@ -270,32 +270,23 @@ public class GameScreen implements Screen {
         if (crops != null) {
             for (int x = 0; x < map.getMapWidth(); x++) {
                 for (int y = 0; y < map.getMapHeight(); y++) {
+
                     CropTile crop = crops[x][y];
-                    if (crop == null) {
-                        continue;
-                    }
+                    if (crop == null) continue;
 
-                    CropStage stage = crop.getStage();
-                    if (stage == CropStage.EMPTY) {
-                        continue;
-                    }
-
-                    TextureRegion tex = switch (stage) {
-                        case SEED -> Textures.CROP_SEED;
-                        case SPROUT -> Textures.CROP_SPROUT;
-                        case MATURE -> Textures.CROP_MATURE;
-                        case ROTTEN -> Textures.CROP_ROTTEN;
-                        default -> null;
-                    };
-
-                    if (tex == null) {
-                        continue;
-                    }
+                    TextureRegion tex = crop.getTexture();
+                    if (tex == null) continue;
 
                     float px = x * TILE_SIZE_PX * SCALE;
                     float py = y * TILE_SIZE_PX * SCALE;
 
-                    spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
+                    spriteBatch.draw(
+                            tex,
+                            px,
+                            py,
+                            TILE_SIZE_PX * SCALE,
+                            TILE_SIZE_PX * SCALE
+                    );
                 }
             }
         }
