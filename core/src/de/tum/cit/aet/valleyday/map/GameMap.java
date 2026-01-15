@@ -18,6 +18,7 @@ import de.tum.cit.aet.valleyday.map.structures.Entrance;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
+import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class GameMap {
     private CropTile[][] crops;
     private int harvested = 0;
     private final int quota;
+    private static final float PATH_CHANCE = 0.32f; // 32%
 
 
     private final List<WildlifeVisitor> wildlife = new ArrayList<>();
@@ -279,6 +281,23 @@ public class GameMap {
                 }
             }
         }
+
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+
+                Tile tile = tiles[x][y];
+
+                // only on empty grass tiles
+                if (tile.getObject() != null) continue;
+                if (tile.getSoilType() != SoilType.FARMLAND) continue;
+
+                if (Math.random() < PATH_CHANCE) {
+                    tile.setSoilType(SoilType.NON_FARMLAND);
+                }
+            }
+        }
+
     }
 
     private int[] findEntrancePosition() {
@@ -295,28 +314,41 @@ public class GameMap {
     private Tile createTileFromValue(int value, int x, int y) {
         return switch (value) {
             case 0 -> new Tile(new Fence(x, y));
-            case 1 -> new Tile(new Debris(x, y));
-            case 2 -> new Tile(new Entrance(x, y));
-            case 4 -> {
+            case 1 -> {
+                Tile t = new Tile(new Debris(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
+                yield t;
+            }
+            case 2 -> { // Entrance
+                Tile t = new Tile(new Entrance(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
+                yield t;
+            }
+            case 4 -> { // Debris hiding Exit
                 Tile t = new Tile(new Debris(x, y));
                 t.setHiddenObject(new Exit(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
-            case 5 -> {
+            case 5 -> { // Debris hiding Fertilizer
                 Tile t = new Tile(new Debris(x, y));
                 t.setHiddenObject(new Fertilizer(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
-            case 6 -> {
+            case 6 -> { // Debris hiding WateringCan
                 Tile t = new Tile(new Debris(x, y));
                 t.setHiddenObject(new WateringCan(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
-            case 7 -> {
+            case 7 -> { // Debris hiding Shovel
                 Tile t = new Tile(new Debris(x, y));
                 t.setHiddenObject(new Shovel(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
+
             default -> new Tile(null);
         };
     }
@@ -368,12 +400,8 @@ public class GameMap {
         }
 
         Tile tile = tiles[x][y];
+        CropTile crop = tile.getCrop();
 
-        if (tile.getObject() != null) {
-            return;
-        }
-
-        CropTile crop = crops[x][y];
         if (crop == null) {
             return;
         }
@@ -383,7 +411,7 @@ public class GameMap {
             return;
         }
 
-        if (crop.isEmpty()) {
+        if (tile.canPlantCrop()) {
             crop.plant();
             return;
         }
@@ -393,6 +421,8 @@ public class GameMap {
             harvested += 1;
         }
     }
+
+
 
     // ---------------------------------
     // S KEY (SHOO)

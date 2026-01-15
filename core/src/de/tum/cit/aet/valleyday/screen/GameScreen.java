@@ -18,6 +18,7 @@ import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
+import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
@@ -222,40 +223,33 @@ public class GameScreen implements Screen {
         }
 
 
-
-        /*
+        // DRAW NON-FARMLAND GROUND (paths, entrance ground, debris ground)
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
+
                 Tile tile = tiles[x][y];
 
-                TileObject obj = tile.getObject();
-
-                TextureRegion texture = null;
-
-                if (obj instanceof Fence) {
-                    texture = Textures.FENCE;
-                } else if (obj instanceof Debris) {
-                    texture = Textures.DEBRIS;
-                } else if (obj instanceof Exit) {
-                    texture = Textures.EXIT;
+                if (tile.getSoilType() != SoilType.NON_FARMLAND) {
+                    continue;
                 }
 
+                float drawX = x * TILE_SIZE_PX * SCALE;
+                float drawY = y * TILE_SIZE_PX * SCALE;
 
-                if (texture != null) {
-                    float drawX = x * TILE_SIZE_PX * SCALE;
-                    float drawY = y * TILE_SIZE_PX * SCALE;
-                    spriteBatch.draw(
-                            texture,
-                            drawX,
-                            drawY,
-                            TILE_SIZE_PX * SCALE,
-                            TILE_SIZE_PX * SCALE
-                    );
-                }
+                spriteBatch.draw(
+                        Textures.NON_FARMLAND,
+                        drawX,
+                        drawY,
+                        TILE_SIZE_PX * SCALE,
+                        TILE_SIZE_PX * SCALE
+                );
             }
         }
 
-         */
+
+
+
+
 
 
         for (int x = 0; x < map.getMapWidth(); x++) {

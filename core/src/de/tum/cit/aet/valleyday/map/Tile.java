@@ -1,6 +1,7 @@
 package de.tum.cit.aet.valleyday.map;
 
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
+import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 
 public class Tile {
 
@@ -8,10 +9,32 @@ public class Tile {
     private TileObject hiddenObject;
     private CropTile crop;
 
+
+    private SoilType soilType;
+
+    // Default constructor: grass / farmland
     public Tile(TileObject object) {
         this.object = object;
-        this.crop=null;
+        this.crop = null;
+        this.hiddenObject = null;
+        this.soilType = SoilType.FARMLAND;
     }
+
+    /* ---------- soil / ground logic ---------- */
+
+    public SoilType getSoilType() {
+        return soilType;
+    }
+
+    public void setSoilType(SoilType soilType) {
+        this.soilType = soilType;
+    }
+
+    public boolean isPlantable() {
+        return soilType == SoilType.FARMLAND && crop == null;
+    }
+
+    /* ---------- object logic ---------- */
 
     public boolean isBlocked() {
         return object != null && !object.isWalkable();
@@ -30,17 +53,25 @@ public class Tile {
 
         if (object.isDestructible()) {
             if (hiddenObject != null) {
-                object = hiddenObject;     //  reveal
+                object = hiddenObject;   // reveal
                 hiddenObject = null;
             } else {
-                object = null;             //  just clear debris
+                object = null;           // clear debris
             }
+            // ❗ soilType is intentionally NOT changed
         }
     }
 
     public TileObject getObject() {
         return object;
     }
+
+    public void clearObject() {
+        object = null;
+    }
+
+    /* ---------- crop logic ---------- */
+
     public CropTile getCrop() {
         return crop;
     }
@@ -56,8 +87,18 @@ public class Tile {
     public TileObject getHiddenObject() {
         return hiddenObject;
     }
-    public void clearObject() {
-        object = null;
+
+    public boolean canPlantCrop() {
+        return soilType == SoilType.FARMLAND   // grass only
+                && object == null              // nothing blocking
+                && crop != null                // crop slot exists
+                && crop.isEmpty();             // not already planted
     }
+
+    public boolean hasCrop() {
+        return crop != null;
+    }
+
+
 
 }
