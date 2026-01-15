@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import de.tum.cit.aet.valleyday.map.GameMap;
 
-
 public abstract class WildlifeBase {
 
     // tile position (logic)
@@ -76,18 +75,24 @@ public abstract class WildlifeBase {
         return renderY;
     }
 
+    // Subclass provides raw (non-flipped) frame
     protected abstract TextureRegion getFrame(float animTime);
 
-  
+    // Subclass AI decision
     protected abstract void decide(float dt, GameMap map);
-
-   
+    public void shoo(int playerTileX, int playerTileY) {
+    // default: ignore
+}
+    // Optional: e.g., steal crop
     protected void onStealOrInteract(GameMap map) {
         // default: do nothing
     }
 
     public TextureRegion getCurrentAppearance() {
         TextureRegion frame = getFrame(animTime);
+        if (frame == null) {
+            return null;
+        }
 
         // refresh cache when animation frame changes
         if (cachedFrame != frame) {
@@ -108,21 +113,20 @@ public abstract class WildlifeBase {
         animTime += dt;
         updateStepAnimation(dt);
 
-        // collision (triggers scared-run in GameMap)
+        // collision check (dangerous only)
         checkPlayerCollision(map);
 
-       
+        // AI
         decide(dt, map);
 
-        
+        // Interaction (e.g., eat crop)
         onStealOrInteract(map);
 
+        // check again (keeps your original behavior)
         checkPlayerCollision(map);
     }
 
-    // ----------------------------
     // Smooth walking animation
-    // ----------------------------
     protected void updateStepAnimation(float dt) {
         if (stepTimeLeft <= 0f) {
             renderX = stepToX;
@@ -169,9 +173,8 @@ public abstract class WildlifeBase {
         return true;
     }
 
-   
     protected void moveToward(int tx, int ty, GameMap map, float walkTime, Runnable fallbackIfStuck) {
-        int dx = Integer.compare(tx, x); // -1/0/1
+        int dx = Integer.compare(tx, x);
         int dy = Integer.compare(ty, y);
 
         boolean tryXFirst = Math.abs(tx - x) >= Math.abs(ty - y);
@@ -194,6 +197,11 @@ public abstract class WildlifeBase {
             return;
         }
 
+        // ✅ harmless wildlife won't trigger lose
+        if (!isDangerousToPlayer()) {
+            return;
+        }
+
         int px = map.worldToTile(map.getPlayer().getX());
         int py = map.worldToTile(map.getPlayer().getY());
 
@@ -205,5 +213,10 @@ public abstract class WildlifeBase {
     protected int rand01() {
         return MathUtils.random(0, 1);
     }
+
+    // Default: dangerous
+   public boolean isDangerousToPlayer() {
+    return true;
 }
 
+}

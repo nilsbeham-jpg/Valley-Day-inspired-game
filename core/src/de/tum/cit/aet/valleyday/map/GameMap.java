@@ -13,6 +13,7 @@ import de.tum.cit.aet.valleyday.map.Items.Item;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
 import de.tum.cit.aet.valleyday.map.Items.WateringCan;
 import de.tum.cit.aet.valleyday.map.Waldlife.ChickenVisitor;
+import de.tum.cit.aet.valleyday.map.Waldlife.SnailVisitor;
 import de.tum.cit.aet.valleyday.map.Waldlife.WildlifeBase;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
 import de.tum.cit.aet.valleyday.map.player.Player;
@@ -112,7 +113,7 @@ public class GameMap {
     public void tick(float frameTime) {
         // 1) wildlife moves
         tickWildlife(frameTime);
-
+      
         // 2) check collision with wildlife (tile-based)
         checkTouchWildlife();
 
@@ -150,26 +151,31 @@ public class GameMap {
     // SCARED: collision trigger
     // ---------------------------------
     private void checkTouchWildlife() {
-        if (lostWildlife || scared) {
+    if (lostWildlife || scared) {
+        return;
+    }
+
+    int px = worldToTile(player.getX());
+    int py = worldToTile(player.getY());
+
+    for (WildlifeBase w : wildlife) {
+        if (!w.isAlive()) {
+            continue;
+        }
+
+
+        if (!w.isDangerousToPlayer()) {
+            continue;
+        }
+
+        if (w.getX() == px && w.getY() == py) {
+            scared = true;
+            computeFleeDirectionToNearestBorder();
             return;
         }
-
-        int px = worldToTile(player.getX());
-        int py = worldToTile(player.getY());
-
-        for (WildlifeBase w : wildlife) {
-            if (!w.isAlive()) {
-                continue;
-            }
-
-            // Your wildlife uses tile coordinates (you also compare in handleSKey)
-            if (w.getX() == px && w.getY() == py) {
-                scared = true;
-                computeFleeDirectionToNearestBorder();
-                return;
-            }
-        }
     }
+}
+
 
     private void computeFleeDirectionToNearestBorder() {
         float px = player.getX();
@@ -229,7 +235,7 @@ public class GameMap {
                 tiles[x][y] = new Tile(null);
             }
         }
-
+boolean spawnedSnail = false;
         for (String key : props.stringPropertyNames()) {
             if (!key.contains(",")) continue;
 
@@ -237,15 +243,30 @@ public class GameMap {
             int x = Integer.parseInt(parts[0]);
             int y = Integer.parseInt(parts[1]);
             int value = Integer.parseInt(props.getProperty(key));
+if (value == 3) {
+    if (wildlife.size() < maxWildlife) {
 
-            if (value == 3) {
-                if (wildlife.size() < maxWildlife) {
-                    wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
-                }
-                tiles[x][y] = new Tile(null);
-            } else {
-                tiles[x][y] = createTileFromValue(value, x, y);
-            }
+        // ✅ guarantee at least one snail if possible
+        boolean spawnSnail;
+        if (!spawnedSnail) {
+            spawnSnail = true;
+            spawnedSnail = true;
+        } else {
+            spawnSnail = MathUtils.randomBoolean(0.30f); // 30%
+        }
+
+        if (spawnSnail) {
+            wildlife.add(new SnailVisitor(x, y, wildlifeSpeedMultiplier));
+        } else {
+            wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
+        }
+    }
+    tiles[x][y] = new Tile(null);
+} else {
+    tiles[x][y] = createTileFromValue(value, x, y);
+}
+
+
         }
 
         boolean exitFound = false;
@@ -557,13 +578,12 @@ public class GameMap {
     int wy = (int) Math.floor(w.getRenderY() + 0.5f);
 
     if (wx == fx && wy == fy) {
-        if (w instanceof ChickenVisitor chicken) {
-            chicken.startFleeFrom(px, py);
-             Effectmusic.Hit.play();
-        }
-        shooCooldown = SHOO_COOLDOWN;
-        return;
-    }
+    w.shoo(px, py);        
+    Effectmusic.Hit.play(); 
+    shooCooldown = SHOO_COOLDOWN;
+    return;
+}
+
 }
 
 }
@@ -794,7 +814,13 @@ private boolean spawnOneWildlifeRandomly() {
             continue;
         }
 
-        wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
+        boolean spawnSnail = MathUtils.randomBoolean(0.30f);
+if (spawnSnail) {
+    wildlife.add(new SnailVisitor(x, y, wildlifeSpeedMultiplier));
+} else {
+    wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
+}
+
         return true;
     }
 

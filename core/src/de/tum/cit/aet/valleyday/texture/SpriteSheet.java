@@ -25,8 +25,8 @@ public enum SpriteSheet {
     FARM_THINGS("farmthings.png", 16, 16),
     BASICS("basics.png",19,19),
     HARVEST("Harvest.png",16,16),
-    CROPS("crops.png",32,32);
-
+    CROPS("crops.png",32,32),
+    SNAIL("snail.png", 41, 32);
     
     private final Texture spritesheet;
     private final int width;
@@ -67,4 +67,16 @@ public enum SpriteSheet {
         );
     }
     
+     public TextureRegion[] rowFrames(int row, int startColumn, int count) {
+        TextureRegion[] frames = new TextureRegion[count];
+        for (int i = 0; i < count; i++) {
+            frames[i] = at(row, startColumn + i);
+        }
+        return frames;
+    }
+
+    public TextureRegion[] rowFrames(int row, int count) {
+        return rowFrames(row, 1, count);
+    }
 }
+
