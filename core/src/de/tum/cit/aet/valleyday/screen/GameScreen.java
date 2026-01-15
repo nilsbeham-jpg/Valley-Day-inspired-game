@@ -11,37 +11,32 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.audio.MusicTrack;
-import de.tum.cit.aet.valleyday.map.*;
+import de.tum.cit.aet.valleyday.map.GameMap;
+import de.tum.cit.aet.valleyday.screen.Hud;
+import de.tum.cit.aet.valleyday.map.Tile;
+import de.tum.cit.aet.valleyday.map.TileObject;
 import de.tum.cit.aet.valleyday.map.Waldlife.WildlifeBase;
 import de.tum.cit.aet.valleyday.map.crops.CropStage;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
-import de.tum.cit.aet.valleyday.map.structures.Exit;
-import de.tum.cit.aet.valleyday.map.terrain.Debris;
-import de.tum.cit.aet.valleyday.map.terrain.Fence;
 import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.texture.Textures;
-
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
  * It handles the game logic and rendering of the game elements.
  */
 public class GameScreen implements Screen {
-    
+
     /**
-     * The size of a grid cell in pixels.
-     * This allows us to think of coordinates in terms of square grid tiles
-     * (e.g. x=1, y=1 is the bottom left corner of the map)
-     * rather than absolute pixel coordinates.
+     * 1 tile = 16 pixels (before SCALE).
      */
-    public static final int TILE_SIZE_PX = 16; // your world logic thinks in tiles, your screen thinks in pixels 1 tile = 16 pixels
-    
+    public static final int TILE_SIZE_PX = 16;
+
     /**
-     * The scale of the game.
-     * This is used to make everything in the game look bigger or smaller.
+     * Render scale.
      */
-    public static final int SCALE = 4; //SCALE = 4：把所有贴图放大 4 倍显示（16×16 变成 64×64），画面更大更清晰
+    public static final int SCALE = 4;
 
     private final ValleyDayGame game;
     private final SpriteBatch spriteBatch;
@@ -50,31 +45,14 @@ public class GameScreen implements Screen {
     private final OrthographicCamera mapCamera;
 
     private GameState gameState = GameState.PLAYING;
+    private float remainingTime = 320f; // seconds
 
-    private float remainingTime = 320f; // remeber to change total time in HUD if you change this
+    private static final Color Play_Color = new Color(0.2f, 0.5f, 0.2f, 1f);
+    private static final Color WIN_Color  = new Color(0.2f, 0.6f, 0.2f, 1f);
+    private static final Color LOSE_Color = new Color(0.6f, 0.1f, 0.1f, 1f);
 
-// seconds
+    private static final Color PATH_GREEN = new Color(0.55f, 0.55f, 0.50f, 1f);
 
-    private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
-    private static final Color WIN_Color = new Color (0.2f,0.6f,0.2f,1f);
-    private static final Color LOSE_Color = new Color (0.6f,0.1f,0.1f,1f);
-    private static final Color PATH_GREEN =
-            new Color(0.55f, 0.55f, 0.50f, 1f);
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Constructor for GameScreen. Sets up the camera and font.
-     *
-     * @param game The main game class, used to access global resources and methods.
-     */
     public GameScreen(ValleyDayGame game) {
         this.game = game;
         this.spriteBatch = game.getSpriteBatch();
@@ -82,30 +60,24 @@ public class GameScreen implements Screen {
         this.hud = new Hud(spriteBatch, game.getSkin().getFont("font"), game.getSkin());
         hud.setPlayer(map.getPlayer());
         hud.setMap(map);
-        // Create and configure the camera for the game view
-        this.mapCamera = new OrthographicCamera(); //创建正交相机
-        this.mapCamera.setToOrtho(false);
 
+        this.mapCamera = new OrthographicCamera();
+        this.mapCamera.setToOrtho(false);
     }
-    
-    /**
-     * The render method is called every frame to render the game.
-     * @param deltaTime The time in seconds since the last render.
-     *///deltaTime：上一帧到这一帧过去了多少秒（秒数）
+
     @Override
     public void render(float deltaTime) {
-        // Check for escape key press to go back to the menu //按ESC到菜单界面
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.setScreen(new MenuScreen(game, true));
             return;
         }
 
-        if (gameState != GameState.PLAYING &&
-                Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        if (gameState != GameState.PLAYING && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             game.setScreen(new MenuScreen(game, false));
             return;
         }
-        if (gameState != GameState.PLAYING){
+
+        if (gameState != GameState.PLAYING) {
             switch (gameState) {
                 case VICTORY -> MusicTrack.playExclusive(MusicTrack.VICTORY);
                 case GAME_OVER -> MusicTrack.playExclusive(MusicTrack.GAME_OVER);
@@ -113,44 +85,29 @@ public class GameScreen implements Screen {
             }
         }
 
-
-        // Clear the previous frame from the screen, or else the picture smears
-        //ScreenUtils.clear(new Color(0.2f, 0.5f, 0.2f, 1f)); // dark green
-        //清屏：避免“拖影/涂抹”
-        switch(gameState){
-            case PLAYING->ScreenUtils.clear(Play_Color);
-            case VICTORY->ScreenUtils.clear(WIN_Color);
-            case GAME_OVER->ScreenUtils.clear(LOSE_Color);
+        switch (gameState) {
+            case PLAYING -> ScreenUtils.clear(Play_Color);
+            case VICTORY -> ScreenUtils.clear(WIN_Color);
+            case GAME_OVER -> ScreenUtils.clear(LOSE_Color);
         }
-    
 
+        float frameTime = Math.min(deltaTime, 0.250f);
 
-
-        // Cap frame time to 250ms to prevent spiral of death
-        float frameTime = Math.min(deltaTime, 0.250f); //如果某一帧卡顿（比如 deltaTime=2秒），物理会需要做很多步来追赶，会导致更卡，进入“死亡螺旋”
-        
-        
-
-        
         if (gameState == GameState.PLAYING) {
-        map.tick(frameTime);
+            map.tick(frameTime);
 
-    
-    if (map.isLostByWildlife()) { //meet wildlife= gameover
-        remainingTime = 0f;
-        gameState = GameState.GAME_OVER;
-        return; 
-    }
+            if (map.isLostByWildlife()) {
+                remainingTime = 0f;
+                gameState = GameState.GAME_OVER;
+                return;
+            }
 
- 
-    remainingTime -= frameTime; //remainingTime empty=gameover
-    if (remainingTime <= 0f) {
-        remainingTime = 0f;
-        gameState = GameState.GAME_OVER;
-    }
-}
-
-
+            remainingTime -= frameTime;
+            if (remainingTime <= 0f) {
+                remainingTime = 0f;
+                gameState = GameState.GAME_OVER;
+            }
+        }
 
         if (map.hasPlayerReachedExit() && gameState == GameState.PLAYING) {
             gameState = GameState.VICTORY;
@@ -161,24 +118,13 @@ public class GameScreen implements Screen {
             renderMap();
             hud.setRemainingTime(remainingTime);
             hud.render();
-        }
-        else {
+        } else {
             hud.renderEndMessage(gameState);
         }
 
-
         hud.setPlayer(map.getPlayer());
-
-
-
     }
 
-
-
-    /**
-     * Updates the camera to match the current state of the game.
-     * Currently, this just centers the camera at the origin.
-     */
     private static final float DEAD_ZONE_FACTOR = 0.8f;
 
     private void updateCamera() {
@@ -205,22 +151,15 @@ public class GameScreen implements Screen {
 
     private static final int GRASS_PADDING = 10; // tiles
 
-
     private void renderMap() {
-        // This configures the spriteBatch to use the camera's perspective when rendering
         spriteBatch.setProjectionMatrix(mapCamera.combined);
-        
-        // Start drawing
         spriteBatch.begin();
 
-        
         Tile[][] tiles = map.getTiles();
 
-
-        // DRAW GRASS BACKGROUND WITH PADDING
+        // 1) Grass background with padding
         for (int x = -GRASS_PADDING; x < map.getMapWidth() + GRASS_PADDING; x++) {
             for (int y = -GRASS_PADDING; y < map.getMapHeight() + GRASS_PADDING; y++) {
-
                 float drawX = x * TILE_SIZE_PX * SCALE;
                 float drawY = y * TILE_SIZE_PX * SCALE;
 
@@ -234,12 +173,10 @@ public class GameScreen implements Screen {
             }
         }
 
-        // DRAW NON-FARMLAND AS DARKENED GRASS
+        // 2) Non-farmland overlay
         spriteBatch.setColor(PATH_GREEN);
-
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
-
                 Tile tile = tiles[x][y];
                 if (tile.getSoilType() != SoilType.NON_FARMLAND) {
                     continue;
@@ -257,29 +194,22 @@ public class GameScreen implements Screen {
                 );
             }
         }
-
-// IMPORTANT: reset color!
         spriteBatch.setColor(Color.WHITE);
 
-
-
-
-
-
-
-
-
-
+        // 3) Tile objects (fence, debris, items, etc.)
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
                 Tile tile = tiles[x][y];
                 TileObject obj = tile.getObject();
 
-                if (obj == null) continue;
+                if (obj == null) {
+                    continue;
+                }
 
                 TextureRegion texture = obj.getTexture();
-                if (texture == null) continue; //invisible object
-
+                if (texture == null) {
+                    continue;
+                }
 
                 float drawX = x * TILE_SIZE_PX * SCALE;
                 float drawY = y * TILE_SIZE_PX * SCALE;
@@ -294,78 +224,95 @@ public class GameScreen implements Screen {
             }
         }
 
-//RRAW Chicken
-for (WildlifeBase w : map.getWildlife()) {
-    TextureRegion tex = w.getCurrentAppearance();
+        // 4) Crops (draw before wildlife, so wildlife stays on top)
+        CropTile[][] crops = map.getCrops();
+        if (crops != null) {
+            for (int x = 0; x < map.getMapWidth(); x++) {
+                for (int y = 0; y < map.getMapHeight(); y++) {
+                    CropTile crop = crops[x][y];
+                    if (crop == null) {
+                        continue;
+                    }
 
-    float px = w.getRenderX() * TILE_SIZE_PX * SCALE;
-    float py = w.getRenderY() * TILE_SIZE_PX * SCALE;
+                    CropStage stage = crop.getStage();
+                    if (stage == CropStage.EMPTY) {
+                        continue;
+                    }
 
-    spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
-}
+                    TextureRegion tex = switch (stage) {
+                        case SEED -> Textures.CROP_SEED;
+                        case SPROUT -> Textures.CROP_SPROUT;
+                        case MATURE -> Textures.CROP_MATURE;
+                        case ROTTEN -> Textures.CROP_ROTTEN;
+                        default -> null;
+                    };
 
+                    if (tex == null) {
+                        continue;
+                    }
 
+                    float px = x * TILE_SIZE_PX * SCALE;
+                    float py = y * TILE_SIZE_PX * SCALE;
 
-
-
-
-        // Render everything in the map here, in order from lowest to highest (later things appear on top)
-        // You may want to add a method to GameMap to return all the drawables in the correct order
-        //画画面的顺序 先花后箱子后玩家
-
-        //DRAW CROPS
-CropTile[][] crops = map.getCrops();
-if (crops != null) {
-    for (int x = 0; x < map.getMapWidth(); x++) {
-        for (int y = 0; y < map.getMapHeight(); y++) {
-
-            CropTile crop = crops[x][y];
-            if (crop == null) {
-                continue;
+                    spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
+                }
             }
-
-            CropStage stage = crop.getStage();
-            if (stage == CropStage.EMPTY) {
-                continue;
-            }
-
-            TextureRegion tex = switch (stage) {
-                case SEED -> Textures.CROP_SEED;
-                case SPROUT -> Textures.CROP_SPROUT;
-                case MATURE -> Textures.CROP_MATURE;
-                case ROTTEN -> Textures.CROP_ROTTEN;
-                default -> null;
-            };
-
-            if (tex != null) {
-            float px = x * TILE_SIZE_PX * SCALE;
-            float py = y * TILE_SIZE_PX * SCALE;
-
-            float w = TILE_SIZE_PX * SCALE;
-            float h = TILE_SIZE_PX * SCALE;
-
-        spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
-    
-}
         }
-    }
-}
 
+        // 5) Wildlife (draw AFTER crops so snails on crops are visible)
+        drawWildlife(spriteBatch);
 
-
-
+        // 6) Player
         draw(spriteBatch, map.getPlayer());
-        
-        // Finish drawing, i.e. send the drawn items to the graphics card
+
         spriteBatch.end();
     }
-    
+
     /**
-     * Draws this object on the screen.
-     * The texture will be scaled by the game scale and the tile size.
-     * This should only be called between spriteBatch.begin() and spriteBatch.end(), e.g. in the renderMap() method.
-     * @param spriteBatch The SpriteBatch to draw with.
+     * Draw wildlife with sprite-based size (supports non-16x16 frames like 41x32 snail).
+     * Also draws after crops so they are not hidden.
      */
+    // Put this field in GameScreen (class level)
+private float wildlifeDebugTimer = 0f;
+
+private void drawWildlife(SpriteBatch batch) {
+    // print once per second to avoid spam
+    wildlifeDebugTimer -= Gdx.graphics.getDeltaTime();
+    boolean doPrint = false;
+    if (wildlifeDebugTimer <= 0f) {
+        wildlifeDebugTimer = 1.0f;
+        doPrint = true;
+    }
+
+    int index = 0;
+    for (WildlifeBase w : map.getWildlife()) {
+    TextureRegion tex = w.getCurrentAppearance();
+    if (tex == null) {
+        continue;
+    }
+
+    float baseSize = TILE_SIZE_PX * SCALE;
+
+    // default: full tile (for chicken)
+    float drawW = baseSize;
+    float drawH = baseSize;
+
+    // 🐌 snail is smaller
+    if (w.getClass().getSimpleName().contains("Snail")) {
+        drawW = baseSize * 0.6f;
+        drawH = baseSize * 0.6f;
+    }
+
+    // center the sprite in the tile
+    float px = w.getRenderX() * baseSize + (baseSize - drawW) * 0.5f;
+    float py = w.getRenderY() * baseSize + (baseSize - drawH) * 0.5f;
+
+    spriteBatch.draw(tex, px, py, drawW, drawH);
+}
+
+}
+
+
     private static void draw(SpriteBatch spriteBatch, Drawable drawable) {
         TextureRegion texture = drawable.getCurrentAppearance();
 
@@ -375,19 +322,12 @@ if (crops != null) {
         float x = worldX * TILE_SIZE_PX * SCALE;
         float y = worldY * TILE_SIZE_PX * SCALE;
 
-        float width  = TILE_SIZE_PX * SCALE;
+        float width = TILE_SIZE_PX * SCALE;
         float height = TILE_SIZE_PX * SCALE;
 
         spriteBatch.draw(texture, x, y, width, height);
     }
 
-
-    /**
-     * Called when the window is resized.
-     * This is where the camera is updated to match the new window size.
-     * @param width The new window width.
-     * @param height The new window height.
-     */
     @Override
     public void resize(int width, int height) {
         mapCamera.viewportWidth = width;
@@ -397,8 +337,6 @@ if (crops != null) {
         hud.resize(width, height);
     }
 
-
-    // Unused methods from the Screen interface
     @Override
     public void pause() {
     }
@@ -410,20 +348,18 @@ if (crops != null) {
     @Override
     public void show() {
         MusicTrack.playExclusive(MusicTrack.BACKGROUND);
-        // Set viewport size in WORLD UNITS (pixels in your case)
+
         mapCamera.setToOrtho(false,
                 Gdx.graphics.getWidth(),
                 Gdx.graphics.getHeight()
         );
 
-        // Center camera on player ONCE
         float px = map.getPlayer().getX() * TILE_SIZE_PX * SCALE;
         float py = map.getPlayer().getY() * TILE_SIZE_PX * SCALE;
 
         mapCamera.position.set(px, py, 0);
         mapCamera.update();
     }
-
 
     @Override
     public void hide() {
@@ -432,5 +368,4 @@ if (crops != null) {
     @Override
     public void dispose() {
     }
-
 }

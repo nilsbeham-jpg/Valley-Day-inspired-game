@@ -180,4 +180,9 @@ public class ChickenVisitor extends WildlifeBase {
         lastWanderDx = 0;
         lastWanderDy = 0;
     }
+    @Override
+public void shoo(int playerTileX, int playerTileY) {
+    startFleeFrom(playerTileX, playerTileY);
+}
+
 }

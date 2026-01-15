@@ -1,5 +1,7 @@
 package de.tum.cit.aet.valleyday.texture;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -53,4 +55,26 @@ public class Animations {
     static {
         CHICKEN_WALK.setPlayMode(Animation.PlayMode.LOOP);
     }
+
+
+//SNAIL WALK 
+// ----------------------------
+public static final com.badlogic.gdx.graphics.g2d.Animation<TextureRegion> SNAIL_WALK;
+
+static {
+    Texture snailTexture = new Texture(Gdx.files.internal("texture/snail.png"));
+
+    TextureRegion[] snailFrames = new TextureRegion[] {
+            new TextureRegion(snailTexture, 0,   0, 41, 32),
+            new TextureRegion(snailTexture, 41,  0, 41, 32),
+            new TextureRegion(snailTexture, 82,  0, 41, 32)
+    };
+
+    SNAIL_WALK = new com.badlogic.gdx.graphics.g2d.Animation<>(
+            0.35f,          // slow animation → snail feeling
+            snailFrames
+    );
 }
+
+}
+
