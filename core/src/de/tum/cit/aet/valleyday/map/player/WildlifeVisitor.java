@@ -56,12 +56,15 @@ public class WildlifeVisitor {
     private TextureRegion cachedFrame;
     private TextureRegion cachedFlipX;
 
+    //
+    //rivate final float speedMultiplier;
+
     public WildlifeVisitor(int x, int y) {
         this.x = x;
         this.y = y;
         this.renderX = x;
         this.renderY = y;
-
+    
         this.stepFromX = x;
         this.stepFromY = y;
         this.stepToX = x;
