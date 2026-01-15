@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
+import de.tum.cit.aet.valleyday.audio.MusicTrack;
 import de.tum.cit.aet.valleyday.map.*;
 import de.tum.cit.aet.valleyday.map.crops.CropStage;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
@@ -48,6 +49,7 @@ public class GameScreen implements Screen {
     private final OrthographicCamera mapCamera;
 
     private GameState gameState = GameState.PLAYING;
+
     private float remainingTime = 320f; // seconds
 
     private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
@@ -89,6 +91,13 @@ public class GameScreen implements Screen {
                 Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             game.setScreen(new MenuScreen(game, false));
             return;
+        }
+        if (gameState != GameState.PLAYING){
+            switch (gameState) {
+                case VICTORY -> MusicTrack.playExclusive(MusicTrack.VICTORY);
+                case GAME_OVER -> MusicTrack.playExclusive(MusicTrack.GAME_OVER);
+                case PLAYING -> MusicTrack.playExclusive(MusicTrack.BACKGROUND);
+            }
         }
 
 
@@ -388,6 +397,7 @@ if (crops != null) {
 
     @Override
     public void show() {
+        MusicTrack.playExclusive(MusicTrack.BACKGROUND);
         // Set viewport size in WORLD UNITS (pixels in your case)
         mapCamera.setToOrtho(false,
                 Gdx.graphics.getWidth(),

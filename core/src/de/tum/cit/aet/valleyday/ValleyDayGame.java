@@ -65,9 +65,9 @@ public class ValleyDayGame extends Game {
         this.spriteBatch = new SpriteBatch(); // Create SpriteBatch for rendering
         this.skin = new Skin(Gdx.files.internal("skin/craftacular/craftacular-ui.json")); // Load UI skin
         this.map = new GameMap(this, selectedMapPath); // Create a new game map (you should change this to load the map from a file instead)
-        MusicTrack.BACKGROUND.play(); // Play some background music
+
         goToMenu(); // Navigate to the menu screen
-    }
+    }//
 
     /**
      * Switches to the menu screen.

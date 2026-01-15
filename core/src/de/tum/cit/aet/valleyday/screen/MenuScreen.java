@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 
+import de.tum.cit.aet.valleyday.audio.MusicTrack;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
 
@@ -169,6 +170,7 @@ public class MenuScreen implements Screen {
     public void show() {
         // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
+        MusicTrack.playExclusive(MusicTrack.MENU);
     }
 
     // The following methods are part of the Screen interface but are not used in this screen.
