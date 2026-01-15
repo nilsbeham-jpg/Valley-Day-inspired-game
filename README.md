@@ -8,7 +8,7 @@ TODO:
         write Javadoc and Readme file
 
 
-        Bonus: - Already- inteligent animals, respwaning animals, different difficulty mode, sound effect for walking, start scoring system based on time efficiency, Rockdebris that can only be cleared with a shovel
+        Bonus: - Already- inteligent animals, respwaning animals, different difficulty mode, sound effect for walking, start scoring system based on time efficiency, Rockdebris that can only be cleared with a shovel, more wildlife visitors, differnt types of crops with different speeds and values
 
                 - more wildlife
                 - maybe scarecrow tool
