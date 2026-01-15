@@ -400,8 +400,18 @@ public class GameMap {
         }
 
         Tile tile = tiles[x][y];
-        CropTile crop = tile.getCrop();
 
+        // ❌ cannot interact if object is present
+        if (tile.getObject() != null) {
+            return;
+        }
+
+        // ❌ cannot plant on non-farmland (paths, entrance ground, debris ground)
+        if (tile.getSoilType() != SoilType.FARMLAND) {
+            return;
+        }
+
+        CropTile crop = crops[x][y];
         if (crop == null) {
             return;
         }
@@ -411,7 +421,7 @@ public class GameMap {
             return;
         }
 
-        if (tile.canPlantCrop()) {
+        if (crop.isEmpty()) {
             crop.plant();
             return;
         }
@@ -421,7 +431,6 @@ public class GameMap {
             harvested += 1;
         }
     }
-
 
 
     // ---------------------------------

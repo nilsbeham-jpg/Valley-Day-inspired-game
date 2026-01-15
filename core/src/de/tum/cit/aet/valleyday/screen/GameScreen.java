@@ -56,6 +56,16 @@ public class GameScreen implements Screen {
     private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
     private static final Color WIN_Color = new Color (0.2f,0.6f,0.2f,1f);
     private static final Color LOSE_Color = new Color (0.6f,0.1f,0.1f,1f);
+    private static final Color PATH_GREEN =
+            new Color(0.55f, 0.55f, 0.50f, 1f);
+
+
+
+
+
+
+
+
 
 
     /**
@@ -222,13 +232,13 @@ public class GameScreen implements Screen {
             }
         }
 
+        // DRAW NON-FARMLAND AS DARKENED GRASS
+        spriteBatch.setColor(PATH_GREEN);
 
-        // DRAW NON-FARMLAND GROUND (paths, entrance ground, debris ground)
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
 
                 Tile tile = tiles[x][y];
-
                 if (tile.getSoilType() != SoilType.NON_FARMLAND) {
                     continue;
                 }
@@ -237,7 +247,7 @@ public class GameScreen implements Screen {
                 float drawY = y * TILE_SIZE_PX * SCALE;
 
                 spriteBatch.draw(
-                        Textures.NON_FARMLAND,
+                        Textures.GRASS,
                         drawX,
                         drawY,
                         TILE_SIZE_PX * SCALE,
@@ -245,6 +255,12 @@ public class GameScreen implements Screen {
                 );
             }
         }
+
+// IMPORTANT: reset color!
+        spriteBatch.setColor(Color.WHITE);
+
+
+
 
 
 

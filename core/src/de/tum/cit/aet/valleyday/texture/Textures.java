@@ -1,5 +1,6 @@
 package de.tum.cit.aet.valleyday.texture;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -34,4 +35,6 @@ public class Textures {
     public static final TextureRegion FERTILIZER  = SpriteSheet.HARVEST.at(1,5);
     public static final TextureRegion WATERCAN  = SpriteSheet.HARVEST.at(1,7);
     public static TextureRegion NON_FARMLAND  = SpriteSheet.BASIC_TILES.at(2,1);
+
+
 }
