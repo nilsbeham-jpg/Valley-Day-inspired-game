@@ -12,7 +12,7 @@ import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
 import de.tum.cit.aet.valleyday.map.Items.Item;
 import de.tum.cit.aet.valleyday.map.Items.Shovel;
 import de.tum.cit.aet.valleyday.map.Items.WateringCan;
-import de.tum.cit.aet.valleyday.map.crops.CropTile;
+import de.tum.cit.aet.valleyday.map.crops.*;
 import de.tum.cit.aet.valleyday.map.player.Player;
 import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Entrance;
@@ -275,13 +275,14 @@ public class GameMap {
             for (int y = 0; y < mapHeight; y++) {
                 Tile tile = tiles[x][y];
                 if (tile.getObject() == null) {
-                    CropTile ct = new CropTile();
+                    CropTile ct = new CropTile(); // empty, no crop yet
                     tile.setCrop(ct);
                     crops[x][y] = ct;
                 } else {
                     tile.setCrop(null);
                     crops[x][y] = null;
                 }
+
             }
         }
 
@@ -487,16 +488,16 @@ public class GameMap {
         }
 
         if (crop.isEmpty()) {
-        crop.plant();
-        Effectmusic.Plant.play();
-    return;
-}
-
-
+            CropType type = randomCropType();
+            crop.plant(type);
+            Effectmusic.Plant.play();
+            return;
+        }
         if (crop.isMature()) {
     crop.harvest();
-    harvested += 1;
-    Effectmusic.Harvest.play();
+            harvested += crop.getHarvestValue();
+
+            Effectmusic.Harvest.play();
 }
 
     }
@@ -946,5 +947,19 @@ private boolean spawnOneWildlifeRandomly() {
         // fallback: internal asset (for default maps)
         return Gdx.files.internal(path).read();
     }
+
+
+    private CropType randomCropType() {
+        double r = Math.random();
+
+        if (r < 0.5) {
+            return new BasicCrop();      // fast, 1 point
+        } else if (r < 0.8) {
+            return new SlowCrop();       // slower, 2 points
+        } else {
+            return new PremiumCrop();    // slowest, 3 points
+        }
+    }
+
 
 }

@@ -1,5 +1,7 @@
 package de.tum.cit.aet.valleyday.map.crops;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
 public class CropTile {
     private CropStage stage=CropStage.EMPTY; //Initialize the stage is empty
     private float stageTime=0f; //Initialize the stageTime
@@ -9,7 +11,19 @@ public class CropTile {
     private static final float SPROUT_TO_MATURE= 5f; // Initialize the sprout to mature time
     private static final float MATURE_TO_ROTTEN= 10f; // Initialize the mature to rooten time
 
-public CropStage getStage(){
+    private CropType type;
+
+    public CropTile(CropType type) {
+        this.type = type;
+    }
+    public CropTile() {
+        this.type = null;   // no crop planted yet
+        this.stage = CropStage.EMPTY;
+    }
+
+
+
+    public CropStage getStage(){
     return stage;
 }
 public boolean isEmpty(){
@@ -49,14 +63,16 @@ public void clearToEmpty() {
 
 
 
-    public void plant(){
-    if(stage!=CropStage.EMPTY){
-        return;
+    public void plant(CropType type) {
+        if (stage != CropStage.EMPTY) return;
+
+        this.type = type;
+        stage = CropStage.SEED;
+        stageTime = 0f;
+        matureTime = 0f;
     }
-    stage=CropStage.SEED;
-    stageTime=0f;
-    matureTime=0f;
-}
+
+
 
 public void harvest(){
     if(stage!=CropStage.MATURE){
@@ -83,8 +99,8 @@ public void tick(float frameTime){ //do nothing if it is empty
 
     if(stage==CropStage.SEED){ //seed period
         stageTime+=frameTime;
-    
-    if(stageTime>=SEED_TO_SPROUT){ //  caculate the time from seed to sprout period
+
+        if (stageTime >= type.seedToSprout()) { //  caculate the time from seed to sprout period
         stage=CropStage.SPROUT;
         stageTime=0f;
     }
@@ -108,10 +124,25 @@ public void tick(float frameTime){ //do nothing if it is empty
     }
     
     }
+    }
 
-
+    public int getHarvestValue() {
+        return type.harvestValue();
 
 
 }
+
+    public TextureRegion getTexture() {
+        if (type == null) return null;
+
+        return switch (stage) {
+            case SEED    -> type.textureSeed();
+            case SPROUT  -> type.textureSprout();
+            case MATURE  -> type.textureMature();
+            case ROTTEN  -> type.textureRotten();
+            default      -> null;
+        };
+    }
+
 
 }

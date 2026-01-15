@@ -30,6 +30,17 @@ public class Textures {
     public static final TextureRegion CROP_MATURE = SpriteSheet.CROPS.at(8, 5);
     public static final TextureRegion CROP_ROTTEN = SpriteSheet.CROPS.at(10, 5);
 
+    public static final TextureRegion CROP_SEED2 = SpriteSheet.CROPS.at(2, 10);
+    public static final TextureRegion CROP_SPROUT2 = SpriteSheet.CROPS.at(6, 10);
+    public static final TextureRegion CROP_MATURE2 = SpriteSheet.CROPS.at(8, 10);
+    public static final TextureRegion CROP_ROTTEN2 = SpriteSheet.CROPS.at(10, 10);
+
+    public static final TextureRegion CROP_SEED3 = SpriteSheet.CROPS.at(2, 22);
+    public static final TextureRegion CROP_SPROUT3 = SpriteSheet.CROPS.at(6, 22);
+    public static final TextureRegion CROP_MATURE3 = SpriteSheet.CROPS.at(8, 22);
+    public static final TextureRegion CROP_ROTTEN3 = SpriteSheet.CROPS.at(10, 22);
+
+
 
     public static final TextureRegion GRASS  = SpriteSheet.BASIC_TILES.at(9,1);
     public static final TextureRegion SHOVEL  = SpriteSheet.BASICS.at(3,6);

@@ -314,39 +314,34 @@ for (WildlifeVisitor w : map.getWildlife()) {
         //画画面的顺序 先花后箱子后玩家
 
         //DRAW CROPS
-CropTile[][] crops = map.getCrops();
-if (crops != null) {
-    for (int x = 0; x < map.getMapWidth(); x++) {
-        for (int y = 0; y < map.getMapHeight(); y++) {
+        CropTile[][] crops = map.getCrops();
+        if (crops != null) {
+            for (int x = 0; x < map.getMapWidth(); x++) {
+                for (int y = 0; y < map.getMapHeight(); y++) {
 
-            CropTile crop = crops[x][y];
-            if (crop == null) {
-                continue;
-            }
+                    CropTile crop = crops[x][y];
+                    if (crop == null) {
+                        continue;
+                    }
 
-            CropStage stage = crop.getStage();
-            if (stage == CropStage.EMPTY) {
-                continue;
-            }
+                    TextureRegion tex = crop.getTexture();
+                    if (tex == null) {
+                        continue;
+                    }
 
-            TextureRegion tex = switch (stage) {
-                case SEED -> Textures.CROP_SEED;
-                case SPROUT -> Textures.CROP_SPROUT;
-                case MATURE -> Textures.CROP_MATURE;
-                case ROTTEN -> Textures.CROP_ROTTEN;
-                default -> null;
-            };
+                    float px = x * TILE_SIZE_PX * SCALE;
+                    float py = y * TILE_SIZE_PX * SCALE;
 
-            if (tex != null) {
-            float px = x * TILE_SIZE_PX * SCALE;
-            float py = y * TILE_SIZE_PX * SCALE;
+                    spriteBatch.draw(
+                            tex,
+                            px,
+                            py,
+                            TILE_SIZE_PX * SCALE,
+                            TILE_SIZE_PX * SCALE);
 
-            float w = TILE_SIZE_PX * SCALE;
-            float h = TILE_SIZE_PX * SCALE;
 
-        spriteBatch.draw(tex, px, py, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
     
-}
+
         }
     }
 }
