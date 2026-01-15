@@ -12,9 +12,9 @@ import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.audio.MusicTrack;
 import de.tum.cit.aet.valleyday.map.*;
+import de.tum.cit.aet.valleyday.map.Waldlife.WildlifeBase;
 import de.tum.cit.aet.valleyday.map.crops.CropStage;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
-import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
@@ -295,7 +295,7 @@ public class GameScreen implements Screen {
         }
 
 //RRAW Chicken
-for (WildlifeVisitor w : map.getWildlife()) {
+for (WildlifeBase w : map.getWildlife()) {
     TextureRegion tex = w.getCurrentAppearance();
 
     float px = w.getRenderX() * TILE_SIZE_PX * SCALE;
