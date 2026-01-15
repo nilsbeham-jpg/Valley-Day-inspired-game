@@ -5,19 +5,19 @@ public enum Difficulty {
     EASY(
             2,      // max wildlife
             1.2f,   // wildlife speed multiplier
-            3       // exit quota
+            10       // exit quota
     ),
 
     NORMAL(
             3,
             1.0f,
-            5
+            20
     ),
 
     HARD(
             5,
             0.75f,
-            8
+            35
     );
 
     public final int maxWildlife;

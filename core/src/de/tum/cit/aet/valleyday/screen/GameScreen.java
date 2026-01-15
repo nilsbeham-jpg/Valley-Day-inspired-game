@@ -51,7 +51,9 @@ public class GameScreen implements Screen {
 
     private GameState gameState = GameState.PLAYING;
 
-    private float remainingTime = 320f; // seconds
+    private float remainingTime = 320f; // remeber to change total time in HUD if you change this
+
+// seconds
 
     private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
     private static final Color WIN_Color = new Color (0.2f,0.6f,0.2f,1f);

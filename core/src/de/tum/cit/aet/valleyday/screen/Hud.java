@@ -17,6 +17,7 @@ import de.tum.cit.aet.valleyday.map.player.Player;
 
 import static com.badlogic.gdx.scenes.scene2d.ui.Table.Debug.table;
 
+
 /**
  * A Heads-Up Display (HUD) that displays information on the screen.
  * It uses a separate camera so that it is always fixed on the screen.
@@ -37,6 +38,7 @@ public class Hud {
     private Table endTable;
     private final Skin skin;
     private Label difficultyLabel;
+    private static final float TOTAL_TIME = 320f;
 
 
 
@@ -159,8 +161,28 @@ public class Hud {
         );
         subtitle.setAlignment(Align.center);
 
-        endTable.add(title).padBottom(20).row();
+        endTable.add(title).padBottom(15).row();
+
+        if (state == GameState.VICTORY) {
+            String stars = computeStars(remainingTime, TOTAL_TIME);
+
+            Label starLabel = new Label(
+                    stars,
+                    skin,
+                    "title"   // reuse big font
+            );
+            starLabel.setFontScale(1.5f);
+
+            // GOLD color
+            starLabel.setColor(1f, 0.85f, 0.2f, 1f);
+            starLabel.setAlignment(Align.center);
+
+
+            endTable.add(starLabel).padBottom(15).row();
+        }
+
         endTable.add(subtitle);
+
 
         endStage.act();
         endStage.draw();
@@ -169,6 +191,23 @@ public class Hud {
     public void setMap(GameMap map) {
         this.map = map;
     }
+
+
+    private String computeStars(float remainingTime, float totalTime) {
+        float ratio = remainingTime / totalTime;
+
+        if (ratio >= 2f / 3f) {
+            return "***";
+        } else if (ratio >= 1f / 3f) {
+            return "**-";
+        } else if (ratio > 0f) {
+            return "*--";
+        } else {
+            return "";
+        }
+    }
+
+
 
 
 }
