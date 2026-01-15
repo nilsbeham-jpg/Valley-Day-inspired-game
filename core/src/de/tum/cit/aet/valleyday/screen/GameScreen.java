@@ -18,6 +18,7 @@ import de.tum.cit.aet.valleyday.map.player.WildlifeVisitor;
 import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
+import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
@@ -55,6 +56,16 @@ public class GameScreen implements Screen {
     private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
     private static final Color WIN_Color = new Color (0.2f,0.6f,0.2f,1f);
     private static final Color LOSE_Color = new Color (0.6f,0.1f,0.1f,1f);
+    private static final Color PATH_GREEN =
+            new Color(0.55f, 0.55f, 0.50f, 1f);
+
+
+
+
+
+
+
+
 
 
     /**
@@ -221,41 +232,40 @@ public class GameScreen implements Screen {
             }
         }
 
+        // DRAW NON-FARMLAND AS DARKENED GRASS
+        spriteBatch.setColor(PATH_GREEN);
 
-
-        /*
         for (int x = 0; x < map.getMapWidth(); x++) {
             for (int y = 0; y < map.getMapHeight(); y++) {
+
                 Tile tile = tiles[x][y];
-
-                TileObject obj = tile.getObject();
-
-                TextureRegion texture = null;
-
-                if (obj instanceof Fence) {
-                    texture = Textures.FENCE;
-                } else if (obj instanceof Debris) {
-                    texture = Textures.DEBRIS;
-                } else if (obj instanceof Exit) {
-                    texture = Textures.EXIT;
+                if (tile.getSoilType() != SoilType.NON_FARMLAND) {
+                    continue;
                 }
 
+                float drawX = x * TILE_SIZE_PX * SCALE;
+                float drawY = y * TILE_SIZE_PX * SCALE;
 
-                if (texture != null) {
-                    float drawX = x * TILE_SIZE_PX * SCALE;
-                    float drawY = y * TILE_SIZE_PX * SCALE;
-                    spriteBatch.draw(
-                            texture,
-                            drawX,
-                            drawY,
-                            TILE_SIZE_PX * SCALE,
-                            TILE_SIZE_PX * SCALE
-                    );
-                }
+                spriteBatch.draw(
+                        Textures.GRASS,
+                        drawX,
+                        drawY,
+                        TILE_SIZE_PX * SCALE,
+                        TILE_SIZE_PX * SCALE
+                );
             }
         }
 
-         */
+// IMPORTANT: reset color!
+        spriteBatch.setColor(Color.WHITE);
+
+
+
+
+
+
+
+
 
 
         for (int x = 0; x < map.getMapWidth(); x++) {
