@@ -116,6 +116,17 @@ public class MenuScreen implements Screen {
             }
         });
 
+        TextButton exitButton = new TextButton("Exit Game", game.getSkin());
+        table.add(exitButton).width(300).padBottom(20).row();
+
+        exitButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.exit();
+            }
+        });
+
+
 
 
 

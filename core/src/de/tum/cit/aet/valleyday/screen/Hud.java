@@ -1,9 +1,16 @@
 package de.tum.cit.aet.valleyday.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.player.Player;
@@ -24,6 +31,11 @@ public class Hud {
 
     private float remainingTime= 0f;
     private Player player;
+    private Stage endStage;
+    private Table endTable;
+    private final Skin skin;
+
+
 
     public void setPlayer(Player player) {
         this.player = player;
@@ -34,10 +46,16 @@ public class Hud {
     }
 
 
-    public Hud(SpriteBatch spriteBatch, BitmapFont font) {
+    public Hud(SpriteBatch spriteBatch, BitmapFont font, Skin skin) {
         this.spriteBatch = spriteBatch;
         this.font = font;
         this.camera = new OrthographicCamera();
+        endStage = new Stage(new ScreenViewport());
+        endTable = new Table();
+        endTable.setFillParent(true);
+        endStage.addActor(endTable);
+        this.skin = skin;
+
     }
     
     /**
@@ -72,21 +90,32 @@ public class Hud {
         y -= 20;
 
         if (player.hasShovel()) {
+            font.setColor(Color.GRAY);
             font.draw(spriteBatch, "Shovel", 10, y);
             y -= 20;
+            font.setColor(Color.WHITE);
         }
         if (player.isFertilizerActive()) {
+            font.setColor(Color.BROWN);
             font.draw(spriteBatch, "Fertilizer active!", 10, y);
             y -= 20;
+            font.setColor(Color.WHITE);
         }
 
         if (player.isWateringCanActive()) {
+            font.setColor(Color.BLUE);
             font.draw(spriteBatch, "Watering Can active!", 10, y);
+            y -= 20;
+            font.setColor(Color.WHITE);
         }
         if (map.isExitUnlocked()) {
+            font.setColor(Color.GREEN);
             font.draw(spriteBatch, "Exit unlocked", 10, y);
+            font.setColor(Color.WHITE);
         } else {
+            font.setColor(Color.RED);
             font.draw(spriteBatch, "Exit locked (" + map.getHarvestedCount()+ "/" + map.getQuota() + ")", 10, y);
+            font.setColor(Color.WHITE);
         }
 
 
@@ -108,28 +137,28 @@ public class Hud {
     }
 
     public void renderEndMessage(GameState state) {
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
+        endStage.getViewport().apply();
 
-        String text = (state == GameState.VICTORY)
+        endTable.clear();
+
+        String titleText = (state == GameState.VICTORY)
                 ? "YOU WIN!"
                 : "GAME OVER";
 
-        font.draw(
-                spriteBatch,
-                text,
-                Gdx.graphics.getWidth() / 2f - 40,
-                Gdx.graphics.getHeight() / 2f
-        );
+        Label title = new Label(titleText, skin, "title");
+        title.setAlignment(Align.center);
 
-        font.draw(
-                spriteBatch,
+        Label subtitle = new Label(
                 "Press ENTER to return to menu",
-                Gdx.graphics.getWidth() / 2f - 140,
-                Gdx.graphics.getHeight() / 2f - 30
+                skin
         );
+        subtitle.setAlignment(Align.center);
 
-        spriteBatch.end();
+        endTable.add(title).padBottom(20).row();
+        endTable.add(subtitle);
+
+        endStage.act();
+        endStage.draw();
     }
 
     public void setMap(GameMap map) {

@@ -2,9 +2,7 @@
 
 Add your game description here!
 
-TODO: Fix watercan HUD
-        Load map file
-        exit button
+TODO:
         Better win loose window
         Ask tutor if our game is  80% and if the window change is fine
         differnt music for game and menu screen
