@@ -20,6 +20,8 @@ import de.tum.cit.aet.valleyday.map.structures.Exit;
 import de.tum.cit.aet.valleyday.map.terrain.Debris;
 import de.tum.cit.aet.valleyday.map.terrain.Fence;
 import de.tum.cit.aet.valleyday.map.terrain.SoilType;
+import de.tum.cit.aet.valleyday.map.terrain.RockDebris;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -315,36 +317,67 @@ public class GameMap {
     private Tile createTileFromValue(int value, int x, int y) {
         return switch (value) {
             case 0 -> new Tile(new Fence(x, y));
+
             case 1 -> {
-                Tile t = new Tile(new Debris(x, y));
+                Tile t;
+                if (Math.random() < 0.20f) {
+                    t = new Tile(new RockDebris(x, y));
+                } else {
+                    t = new Tile(new Debris(x, y));
+                }
                 t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
+
             case 2 -> { // Entrance
                 Tile t = new Tile(new Entrance(x, y));
                 t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
+
             case 4 -> { // Debris hiding Exit
-                Tile t = new Tile(new Debris(x, y));
+                Tile t;
+                if (Math.random() < 0.20f) {
+                    t = new Tile(new RockDebris(x, y));
+                } else {
+                    t = new Tile(new Debris(x, y));
+                }
                 t.setHiddenObject(new Exit(x, y));
                 t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
+
             case 5 -> { // Debris hiding Fertilizer
-                Tile t = new Tile(new Debris(x, y));
+                Tile t;
+                if (Math.random() < 0.20f) {
+                    t = new Tile(new RockDebris(x, y));
+                } else {
+                    t = new Tile(new Debris(x, y));
+                }
                 t.setHiddenObject(new Fertilizer(x, y));
                 t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
+
             case 6 -> { // Debris hiding WateringCan
-                Tile t = new Tile(new Debris(x, y));
+                Tile t;
+                if (Math.random() < 0.20f) {
+                    t = new Tile(new RockDebris(x, y));
+                } else {
+                    t = new Tile(new Debris(x, y));
+                }
                 t.setHiddenObject(new WateringCan(x, y));
                 t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
             }
+
             case 7 -> { // Debris hiding Shovel
-                Tile t = new Tile(new Debris(x, y));
+                Tile t;
+                if (Math.random() < 0.20f) {
+                    t = new Tile(new RockDebris(x, y));
+                } else {
+                    t = new Tile(new Debris(x, y));
+                }
                 t.setHiddenObject(new Shovel(x, y));
                 t.setSoilType(SoilType.NON_FARMLAND);
                 yield t;
@@ -353,6 +386,7 @@ public class GameMap {
             default -> new Tile(null);
         };
     }
+
 
     // ---------------------------------
     // INTERACT WITH TILE (D)
@@ -368,24 +402,33 @@ public class GameMap {
         return;
     }
 
-    if (!tile.getObject().isDestructible()) {
-        return;
-    }
+       TileObject obj = tile.getObject();
 
-   
-    boolean wasDebris =
-            tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
+       if (!obj.isDestructible()) {
+           return;
+       }
 
-   
-    tile.interact();
+// NEW: rock debris requires shovel
+       if (obj instanceof de.tum.cit.aet.valleyday.map.terrain.RockDebris
+               && !player.hasShovel()) {
+           return;
+       }
 
-    
-    boolean isDebrisNow =
-            tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
+       boolean wasDebris =
+               obj instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
-    if (wasDebris && !isDebrisNow) {
-        Effectmusic.DebrisDestory.play();
-    }
+       tile.interact();
+
+       boolean isDebrisNow =
+               tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
+
+       if (wasDebris && !isDebrisNow) {
+           Effectmusic.DebrisDestory.play();
+       }
+
+
+
+
 }
 
 

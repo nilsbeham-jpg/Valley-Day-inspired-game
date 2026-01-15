@@ -21,7 +21,8 @@ public class Textures {
 
 
     public static final TextureRegion FENCE  = SpriteSheet.BASIC_TILES.at(8,4);
-    public static final TextureRegion DEBRIS = SpriteSheet.BASIC_TILES.at(8, 8);
+    public static final TextureRegion DEBRIS = SpriteSheet.BASIC_TILES.at(8, 3);
+    public static final TextureRegion ROCK = SpriteSheet.BASIC_TILES.at(8, 8);
     public static final TextureRegion EXIT   = SpriteSheet.BASIC_TILES.at(7, 3);
 
     public static final TextureRegion CROP_SEED = SpriteSheet.CROPS.at(2, 5); 
