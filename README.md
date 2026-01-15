@@ -11,7 +11,6 @@ TODO:
         Bonus: - Already- inteligent animals, respwaning animals, different difficulty mode, sound effect for walking, start scoring system based on time efficiency, Rockdebris that can only be cleared with a shovel
 
                 - more wildlife
-                -Additional debris types
                 - maybe scarecrow tool
                 - Different crop types with distinct growth times and values
 
