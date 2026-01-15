@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
+import de.tum.cit.aet.valleyday.audio.Effectmusic;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.texture.Animations;
 import de.tum.cit.aet.valleyday.texture.Drawable;
@@ -32,6 +33,9 @@ public class Player implements Drawable {
     private boolean scared = false; //player can be scared
     private float forcedVX = 0f;
     private float forcedVY = 0f;
+
+    private float walkSoundTimer = 0f;
+    private static final float WALK_SOUND_INTERVAL = 0.35f;
 
     /**
      * The Box2D hitbox of the player, used for position and collision detection.
@@ -234,6 +238,16 @@ if (!scared) {
 
 this.hitbox.setLinearVelocity(xVelocity, yVelocity);
 this.moving = (xVelocity != 0f) || (yVelocity != 0f);
+if (moving && !scared) {
+    walkSoundTimer -= frameTime;
+    if (walkSoundTimer <= 0f) {
+        Effectmusic.Walking.play();
+        walkSoundTimer = WALK_SOUND_INTERVAL;
+    }
+} else {
+    walkSoundTimer = 0f;
+}
+
 }
 
 

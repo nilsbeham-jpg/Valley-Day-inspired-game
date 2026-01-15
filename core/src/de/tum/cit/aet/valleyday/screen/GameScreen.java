@@ -50,7 +50,9 @@ public class GameScreen implements Screen {
     private GameState gameState = GameState.PLAYING;
     private float remainingTime = 320f; // seconds
 
-
+    private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
+    private static final Color WIN_Color = new Color (0.2f,0.6f,0.2f,1f);
+    private static final Color LOSE_Color = new Color (0.6f,0.1f,0.1f,1f);
 
 
     /**
@@ -91,9 +93,17 @@ public class GameScreen implements Screen {
 
 
         // Clear the previous frame from the screen, or else the picture smears
-        ScreenUtils.clear(new Color(0.2f, 0.5f, 0.2f, 1f)); // dark green
+        //ScreenUtils.clear(new Color(0.2f, 0.5f, 0.2f, 1f)); // dark green
         //清屏：避免“拖影/涂抹”
-        
+        switch(gameState){
+            case PLAYING->ScreenUtils.clear(Play_Color);
+            case VICTORY->ScreenUtils.clear(WIN_Color);
+            case GAME_OVER->ScreenUtils.clear(LOSE_Color);
+        }
+    
+
+
+
         // Cap frame time to 250ms to prevent spiral of death
         float frameTime = Math.min(deltaTime, 0.250f); //如果某一帧卡顿（比如 deltaTime=2秒），物理会需要做很多步来追赶，会导致更卡，进入“死亡螺旋”
         
