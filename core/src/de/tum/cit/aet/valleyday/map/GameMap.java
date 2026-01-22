@@ -37,13 +37,15 @@ import java.io.InputStream;
 
 
 /**
- * The class is responsible for:
- * loading the map layout
- * owning tiles, crops, and terrain objects
- * owning the physics World
- * owning the Player
- * advancing world simulation (physics + crops)
- * answering questions like “is this blocked?”, “is this an exit?”
+ * Central world container of the game.
+ *
+ * This class owns and coordinates almost all core game systems that are bound
+ * to the map: tiles, crops, wildlife, the player, and the physics world.
+ * It is responsible for loading the map layout from file, updating all
+ * simulation elements each frame, and answering high-level queries such as
+ * collision checks or win/lose conditions.
+ *
+ * In short: this is the authoritative state holder of the playable world.
  */
 public class GameMap {
 
@@ -79,14 +81,12 @@ public class GameMap {
     private float wildlifeRespawnTimer = 0f;
     private static final float WILDLIFE_RESPAWN_COOLDOWN = 10.0f;
 
-    // -------------------------
-    // SCARED 
-    // -------------------------
+
     private boolean scared = false;
     private float fleeDirX = 0f;
     private float fleeDirY = 0f;
     private static final float FLEE_SPEED = 6.0f;
-    
+
     // Fog of War memory
     private boolean[][] explored;
 
@@ -96,6 +96,17 @@ public class GameMap {
     private final float wildlifeSpeedMultiplier;
 
 
+
+    /**
+     * Creates a new game map instance and loads the given map file.
+     *
+     * This constructor initializes the physics world, reads difficulty
+     * parameters, loads all tiles and entities from the map definition,
+     * and finally spawns the player at the entrance position.
+     *
+     * @param game     reference to the main game instance
+     * @param mapPath  path to the map properties file
+     */
     public GameMap(ValleyDayGame game, String mapPath) {
         this.game = game;
         this.world = new World(Vector2.Zero, true);
@@ -119,7 +130,15 @@ public class GameMap {
 
     // ---------------------------------
     // MAIN TICK
-    // ---------------------------------
+    /**
+     * Main update method called once per frame.
+     *
+     * Advances wildlife logic, player logic, crops, physics simulation,
+     * and checks for win/lose conditions. This method defines the
+     * high-level update order of the entire game world.
+     *
+     * @param frameTime time elapsed since last frame (in seconds)
+     */
     public void tick(float frameTime) {
         // 1) wildlife moves
         tickWildlife(frameTime);
@@ -157,36 +176,13 @@ public class GameMap {
         }
     }
 
-    // ---------------------------------
-    // SCARED: collision trigger
-    // ---------------------------------
-    private void checkTouchWildlife() {
-    if (lostWildlife || scared) {
-        return;
-    }
-
-    int px = worldToTile(player.getX());
-    int py = worldToTile(player.getY());
-
-    for (WildlifeBase w : wildlife) {
-        if (!w.isAlive()) {
-            continue;
-        }
 
 
-        if (!w.isDangerousToPlayer()) {
-            continue;
-        }
 
-        if (w.getX() == px && w.getY() == py) {
-            scared = true;
-            computeFleeDirectionToNearestBorder();
-            return;
-        }
-    }
-}
-
-
+    /**
+     * Computes a normalized flee direction pointing toward the closest
+     * map border. Used when the player is scared by wildlife.
+     */
     private void computeFleeDirectionToNearestBorder() {
         float px = player.getX();
         float py = player.getY();
@@ -211,10 +207,18 @@ public class GameMap {
         }
     }
 
-    // ---------------------------------
+
     // MAP LOADING
-    // ---------------------------------
+    /**
+     * Loads the map definition from a properties file.
+     *
+     * This method parses tile values, spawns terrain, wildlife, items,
+     * crops, and ensures that an exit exists somewhere on the map.
+     *
+     * @param path file system or internal asset path
+     */
     private void loadMap(String path) {
+
         Properties props = new Properties();
         try (InputStream in = createMapInputStream(path)) {
             props.load(in);
@@ -245,7 +249,7 @@ public class GameMap {
                 tiles[x][y] = new Tile(null);
             }
         }
-boolean spawnedSnail = false;
+        boolean spawnedSnail = false;
         for (String key : props.stringPropertyNames()) {
             if (!key.contains(",")) continue;
 
@@ -253,10 +257,10 @@ boolean spawnedSnail = false;
             int x = Integer.parseInt(parts[0]);
             int y = Integer.parseInt(parts[1]);
             int value = Integer.parseInt(props.getProperty(key));
-if (value == 3) {
-    if (wildlife.size() < maxWildlife) {
+        if (value == 3) {
+            if (wildlife.size() < maxWildlife) {
 
-        // ✅ guarantee at least one snail if possible
+        // guarantee at least one snail if possible
         boolean spawnSnail;
         if (!spawnedSnail) {
             spawnSnail = true;
@@ -339,6 +343,12 @@ if (value == 3) {
 
     }
 
+    /**
+     * Finds the entrance tile in the loaded map.
+     *
+     * @return integer array {x, y} of the entrance position
+     * @throws IllegalStateException if no entrance exists
+     */
     private int[] findEntrancePosition() {
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
@@ -350,6 +360,17 @@ if (value == 3) {
         throw new IllegalStateException("No entrance found in map!");
     }
 
+    /**
+     * Creates a tile instance based on the encoded map value.
+     *
+     * This method centralizes all tile decoding logic used by
+     * the map loader.
+     *
+     * @param value encoded tile value
+     * @param x     tile x coordinate
+     * @param y     tile y coordinate
+     * @return constructed tile
+     */
     private Tile createTileFromValue(int value, int x, int y) {
         return switch (value) {
             case 0 -> new Tile(new Fence(x, y));
@@ -438,9 +459,17 @@ if (value == 3) {
     }
 
 
-    // ---------------------------------
-    // INTERACT WITH TILE (D)
-    // ---------------------------------
+
+    // INTERACT WITH TILE
+    /**
+     * Interacts with a tile at the given position.
+     *
+     * Used for clearing debris, revealing hidden objects,
+     * and triggering item-specific behavior.
+     *
+     * @param x tile x coordinate
+     * @param y tile y coordinate
+     */
    public void interactWithTile(int x, int y) {
     if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
         return;
@@ -458,7 +487,7 @@ if (value == 3) {
            return;
        }
 
-// NEW: rock debris requires shovel
+        // rock debris requires shovel
        if (obj instanceof de.tum.cit.aet.valleyday.map.terrain.RockDebris
                && !player.hasShovel()) {
            return;
@@ -478,26 +507,19 @@ if (value == 3) {
            tile.setObject(revealed);
        }
 
-// 🔊 sound logic MUST always be reached
+        // sound logic must always be reached
        boolean isDebrisNow =
                tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
        if (wasDebris && !isDebrisNow) {
            Effectmusic.DebrisDestory.play();
        }
-
-
-
-
-
-
-
-
-
-
    }
 
-
+    /**
+     * Checks whether the player is standing on a pickable item
+     * and handles the pickup logic.
+     */
     private void checkItemPickup() {
         int px = worldToTile(player.getX());
         int py = worldToTile(player.getY());
@@ -510,9 +532,8 @@ if (value == 3) {
 
         if (tile.getObject() instanceof Item item) {
             if (!item.isPickable()) {
-                return; // 🚫 scaffold stays
+                return; // scaffold stays
             }
-
             item.onPickup(this);
             tile.clearObject();
             Effectmusic.CollectItem.play();
@@ -520,9 +541,14 @@ if (value == 3) {
         }
     }
 
-    // ---------------------------------
-    // A KEY (PLANT/HARVEST/CLEAR ROTTEN)
-    // ---------------------------------
+
+    // A KEY
+    /**
+     * Handles the A-key interaction.
+     *
+     * Used for planting crops, harvesting mature crops,
+     * and clearing rotten ones.
+     */
     private void handleAKey() {
         if (!Gdx.input.isKeyJustPressed(Input.Keys.A)) {
             return;
@@ -537,12 +563,12 @@ if (value == 3) {
 
         Tile tile = tiles[x][y];
 
-        // ❌ cannot interact if object is present
+        //  cannot interact if object is not present
         if (tile.getObject() != null) {
             return;
         }
 
-        // ❌ cannot plant on non-farmland (paths, entrance ground, debris ground)
+        //  cannot plant on non-farmland (paths, entrance ground, debris ground)
         if (tile.getSoilType() != SoilType.FARMLAND) {
             return;
         }
@@ -569,17 +595,20 @@ if (value == 3) {
             harvested += value;
             Effectmusic.Harvest.play();
         }
-
-
     }
 
 
-    // ---------------------------------
-    // S KEY (SHOO)
-    // ---------------------------------
+    // S KEY
     private float shooCooldown = 0f;
     private static final float SHOO_COOLDOWN = 0.4f;
 
+
+    /**
+     * Handles the S-key interaction used to shoo wildlife
+     * away from the player.
+     *
+     * @param dt frame delta time
+     */
   private void handleSKey(float dt) {
     // cooldown tick
     if (shooCooldown > 0f) {
@@ -637,9 +666,13 @@ if (value == 3) {
 }
 
 
-    // ---------------------------------
-    // CROPS/WILDLIFE TICK
-    // ---------------------------------
+
+    // CROPS TICK
+    /**
+     * Advances all crop growth timers.
+     *
+     * @param dt frame delta time
+     */
     private void tickCrops(float dt) {
         if (crops == null) {
             return;
@@ -653,46 +686,16 @@ if (value == 3) {
         }
     }
 
-    private void tickWildlife(float dt) {
-    // 1) tick all
-    for (WildlifeBase w : wildlife) {
-        w.tick(dt, this);
-    }
-
-    // 2) remove dead
-    int before = wildlife.size();
-    wildlife.removeIf(w -> !w.isAlive());
-    int after = wildlife.size();
-
-    // 3) if removed, start cooldown
-    if (after < before) {
-        wildlifeRespawnTimer = WILDLIFE_RESPAWN_COOLDOWN;
-    }
-
-    // 4) timer tick
-    if (wildlifeRespawnTimer > 0f) {
-        wildlifeRespawnTimer -= dt;
-        if (wildlifeRespawnTimer < 0f) {
-            wildlifeRespawnTimer = 0f;
-        }
-    }
-
-    // 5) respawn (补到 MAX_WILDLIFE)
-    if (wildlifeRespawnTimer == 0f) {
-        while (wildlife.size() < maxWildlife) {
-            if (!spawnOneWildlifeRandomly()) {
-                break;
-            }
-            // 连刷多只时，给一点点间隔避免瞬间刷满很突兀
-            wildlifeRespawnTimer = 0.2f;
-        }
-    }
-}
 
 
-    // ---------------------------------
+
+
     // PHYSICS
-    // ---------------------------------
+    /**
+     * Advances the Box2D physics simulation using a fixed timestep.
+     *
+     * @param frameTime frame delta time
+     */
     private void doPhysicsStep(float frameTime) {
         this.physicsTime += frameTime;
         while (this.physicsTime >= TIME_STEP) {
@@ -701,9 +704,10 @@ if (value == 3) {
         }
     }
 
-    // ---------------------------------
-    // HELPERS / GETTERS
-    // ---------------------------------
+
+    /**
+     * Checks whether a tile blocks movement.
+     */
     public boolean isBlocked(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return true;
@@ -711,6 +715,9 @@ if (value == 3) {
         return tiles[x][y].isBlocked();
     }
 
+    /**
+     * Checks whether a tile contains an exit.
+     */
     public boolean isExit(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return false;
@@ -718,6 +725,10 @@ if (value == 3) {
         return tiles[x][y].getObject() instanceof Exit;
     }
 
+    /**
+     * Determines whether the player has reached the exit
+     * and fulfilled the harvest quota.
+     */
     public boolean hasPlayerReachedExit() {
         if (gameWon) return true;
 
@@ -729,23 +740,112 @@ if (value == 3) {
             gameWon = true;
             return true;
         }
-
         return false;
     }
 
+
+    /**
+     * Checks whether the exit is unlocked based on harvest count.
+     */
     public boolean isExitUnlocked() {
         return harvested >= quota;
     }
 
+
+
+
+
+
+    // WILDLIFE LOGIC!!!!!!!!!!!!!!!!!!
+    //Wildlife Tick
+    /**
+     * Updates wildlife logic, handles death and respawning.
+     *
+     * @param dt frame delta time
+     */
+    private void tickWildlife(float dt) {
+        // 1) tick all
+        for (WildlifeBase w : wildlife) {
+            w.tick(dt, this);
+        }
+
+        // 2) remove dead
+        int before = wildlife.size();
+        wildlife.removeIf(w -> !w.isAlive());
+        int after = wildlife.size();
+
+        // 3) if removed, start cooldown
+        if (after < before) {
+            wildlifeRespawnTimer = WILDLIFE_RESPAWN_COOLDOWN;
+        }
+
+        // 4) timer tick
+        if (wildlifeRespawnTimer > 0f) {
+            wildlifeRespawnTimer -= dt;
+            if (wildlifeRespawnTimer < 0f) {
+                wildlifeRespawnTimer = 0f;
+            }
+        }
+
+        // 5) respawn (MAX_WILDLIFE)
+        if (wildlifeRespawnTimer == 0f) {
+            while (wildlife.size() < maxWildlife) {
+                if (!spawnOneWildlifeRandomly()) {
+                    break;
+                }
+                //
+                wildlifeRespawnTimer = 0.2f;
+            }
+        }
+    }
+    /**
+     * Checks whether the player is currently touching dangerous wildlife.
+     *
+     * If a collision is detected, the player enters the "scared" state and
+     * is forced to flee toward the nearest map border.
+     */
+    private void checkTouchWildlife() {
+        if (lostWildlife || scared) {
+            return;
+        }
+
+        int px = worldToTile(player.getX());
+        int py = worldToTile(player.getY());
+
+        for (WildlifeBase w : wildlife) {
+            if (!w.isAlive()) {
+                continue;
+            }
+
+
+            if (!w.isDangerousToPlayer()) {
+                continue;
+            }
+
+            if (w.getX() == px && w.getY() == py) {
+                scared = true;
+                computeFleeDirectionToNearestBorder();
+                return;
+            }
+        }
+    }
+
+
+    /**
+     * @return true if the player has lost due to wildlife
+     */
     public boolean isLostByWildlife() {
         return lostWildlife;
     }
 
+
+
     /**
-     * IMPORTANT:
-     * WildlifeVisitor may still call map.loseByWildlife().
-     * We DO NOT want instant game over. We want "run out of map then lose".
-     * So we convert that call into "trigger scared".
+     * Triggers the wildlife loss sequence.
+     *
+     * Wildlife does not immediately end the game; instead,
+     * the player is forced to flee and only loses when
+     * leaving the map bounds.
      */
     public void loseByWildlife() {
         // if already losing, ignore
@@ -763,11 +863,83 @@ if (value == 3) {
         // Actual loss happens only when player goes out of map (in tick()).
     }
 
+    private static final int MIN_SPAWN_DISTANCE = 4;
+
+
+    /**
+     * Attempts to spawn a single wildlife entity at a random valid position.
+     */
+    private boolean spawnOneWildlifeRandomly() {
+        int px = worldToTile(player.getX());
+        int py = worldToTile(player.getY());
+
+        for (int tries = 0; tries < 80; tries++) {
+            int x = MathUtils.random(0, mapWidth - 1);
+            int y = MathUtils.random(0, mapHeight - 1);
+
+            if (isBlocked(x, y)) {
+                continue;
+            }
+
+            if (blocksWildlife(x, y)) {
+                continue;
+            }
+
+
+
+            int dx = Math.abs(x - px);
+            int dy = Math.abs(y - py);
+            if (dx <= MIN_SPAWN_DISTANCE && dy <= MIN_SPAWN_DISTANCE) {
+                continue;
+            }
+
+            boolean occupied = false;
+            for (WildlifeBase w : wildlife) {
+                if (w.isAlive() && w.getX() == x && w.getY() == y) {
+                    occupied = true;
+                    break;
+                }
+            }
+            if (occupied) {
+                continue;
+            }
+
+            boolean spawnSnail = MathUtils.randomBoolean(0.30f);
+            if (spawnSnail) {
+                wildlife.add(new SnailVisitor(x, y, wildlifeSpeedMultiplier));
+            } else {
+                wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    //Getters
     public Player getPlayer() {
         return player;
     }
 
-   public List<WildlifeBase> getWildlife() {
+    public boolean[][] getExplored() {
+        return explored;
+    }
+
+    public Tile[][] getTiles(){
+        return tiles;
+    }
+
+    public int getHarvestedCount() {
+        return harvested;
+    }
+
+    public int getQuota() {
+        return quota;
+    }
+
+    public List<WildlifeBase> getWildlife() {
     return wildlife;
     }
 
@@ -797,6 +969,9 @@ if (value == 3) {
         return (int) Math.floor(value);
     }
 
+    /**
+     * Converts a world coordinate to tile space.
+     */
     public int[] worldToTile(float worldX, float worldY) {
         return new int[]{
                 worldToTile(worldX),
@@ -804,6 +979,11 @@ if (value == 3) {
         };
     }
 
+
+    /**
+     * Returns the tile directly in front of the player
+     * based on the current facing direction.
+     */
     public int[] getFrontTile(Player player) {
         int[] tile = worldToTile(player.getX(), player.getY());
         int tx = tile[0];
@@ -819,66 +999,9 @@ if (value == 3) {
         return new int[]{tx, ty};
     }
 
-    public int getHarvestedCount() {
-        return harvested;
-    }
-
-    public int getQuota() {
-        return quota;
-    }
-
-    // ---------------------------------
-    // You had these methods; kept for compatibility
-    // ---------------------------------
-private static final int MIN_SPAWN_DISTANCE = 4; 
-
-private boolean spawnOneWildlifeRandomly() {
-    int px = worldToTile(player.getX());
-    int py = worldToTile(player.getY());
-
-    for (int tries = 0; tries < 80; tries++) {
-        int x = MathUtils.random(0, mapWidth - 1);
-        int y = MathUtils.random(0, mapHeight - 1);
-
-        if (isBlocked(x, y)) {
-            continue;
-        }
-
-        if (blocksWildlife(x, y)) {
-            continue;
-        }
 
 
-        // ✅ 不在玩家周围4格（方形区域：9x9）生成
-        int dx = Math.abs(x - px);
-        int dy = Math.abs(y - py);
-        if (dx <= MIN_SPAWN_DISTANCE && dy <= MIN_SPAWN_DISTANCE) {
-            continue;
-        }
 
-        boolean occupied = false;
-        for (WildlifeBase w : wildlife) {
-            if (w.isAlive() && w.getX() == x && w.getY() == y) {
-                occupied = true;
-                break;
-            }
-        }
-        if (occupied) {
-            continue;
-        }
-
-        boolean spawnSnail = MathUtils.randomBoolean(0.30f);
-            if (spawnSnail) {
-                wildlife.add(new SnailVisitor(x, y, wildlifeSpeedMultiplier));
-            } else {
-                wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
-            }
-
-        return true;
-    }
-
-    return false;
-}
 
 
 
@@ -1018,9 +1141,7 @@ private boolean spawnOneWildlifeRandomly() {
         return null;
     }
 
-    public Tile[][] getTiles() {
-        return tiles;
-    }
+
 
     private InputStream createMapInputStream(String path) throws IOException {
         // absolute or relative filesystem path
@@ -1081,10 +1202,8 @@ private boolean spawnOneWildlifeRandomly() {
     public void blockWildlifeAt(int x, int y) {
         wildlifeBlocked[x][y] = true;
     }
-    
-    public boolean[][] getExplored() {
-    return explored;
-}
+
+
 
 
 
