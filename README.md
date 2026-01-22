@@ -207,6 +207,7 @@ This section gives an overview of the most important class hierarchies and their
 At the base of the world logic are generic classes representing entities that exist on the map.
 
 
+
 - **GameObject**  
   Base class for world-related entities.  
   Stores shared properties such as position and identity.
