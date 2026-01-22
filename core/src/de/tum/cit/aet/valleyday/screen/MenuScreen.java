@@ -29,9 +29,16 @@ import java.io.FilenameFilter;
 
 
 /**
- * The MenuScreen class is responsible for displaying the main menu of the game.
- * It extends the LibGDX Screen class and sets up the UI components for the menu.
+ * Main menu screen of the game.
+ *
+ * This screen is responsible for presenting the start menu to the player.
+ * It allows starting a new game, resuming an existing one, loading a custom
+ * map from disk, selecting the difficulty, and exiting the application.
+ *
+ * The MenuScreen itself does not contain game logic; it only configures
+ * global game state via {@link ValleyDayGame} and triggers screen transitions.
  */
+
 public class MenuScreen implements Screen {
 
     private final Stage stage; // root container of everything UI-related.
@@ -41,9 +48,13 @@ public class MenuScreen implements Screen {
 
 
     /**
-     * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
+     * Creates the menu screen and sets up all UI elements.
      *
-     * @param game The main game class, used to access global resources and methods.
+     * This includes buttons for starting/resuming the game,
+     * loading a map, difficulty selection, and exiting.
+     *
+     * @param game      main game instance
+     * @param canResume whether an existing game can be resumed
      */
     public MenuScreen(ValleyDayGame game, boolean canResume) {
         this.canResume = canResume;
@@ -184,11 +195,13 @@ public class MenuScreen implements Screen {
 
 
     }
-    
+
     /**
-     * The render method is called every frame to render the menu screen.
-     * It clears the screen and draws the stage.
-     * @param deltaTime The time in seconds since the last render.
+     * Renders the menu screen.
+     *
+     * Clears the screen and updates/draws the stage.
+     *
+     * @param deltaTime time since last frame in seconds
      */
     @Override
     public void render(float deltaTime) {
@@ -234,9 +247,16 @@ public class MenuScreen implements Screen {
     public void hide() {
     }
 
-
-    private void selectDifficulty(ValleyDayGame game, Difficulty difficulty,
-                                  TextButton easy, TextButton normal, TextButton hard) {
+    /**
+     * Applies the selected difficulty to the game.
+     *
+     * @param game       main game instance
+     * @param difficulty chosen difficulty
+     * @param easy       easy button
+     * @param normal     normal button
+     * @param hard       hard button
+     */
+    private void selectDifficulty(ValleyDayGame game, Difficulty difficulty, TextButton easy, TextButton normal, TextButton hard) {
 
         this.selectedDifficulty = difficulty;
         game.setDifficulty(difficulty);

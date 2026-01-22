@@ -12,8 +12,14 @@ import de.tum.cit.aet.valleyday.screen.MenuScreen;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**
- * The ValleyDayGame class represents the core of the Valley Day game.
- * It manages the screens and global resources like SpriteBatch and Skin.
+ * Central entry point and lifecycle manager of the game.
+ *
+ * This class owns all global resources such as the {@link SpriteBatch},
+ * UI {@link Skin}, the current {@link GameMap}, and handles transitions
+ * between different screens (menu, gameplay, etc.).
+ *
+ * It also stores global configuration such as the selected difficulty
+ * and the currently chosen map file.
  */
 public class ValleyDayGame extends Game {
 
@@ -89,7 +95,9 @@ public class ValleyDayGame extends Game {
     }
 
 
-
+    /**
+     * Resumes the currently paused game, if one exists.
+     */
     public void resumeGame() {
         if (currentGameScreen != null) {
             this.setScreen(currentGameScreen); // SAME screen
@@ -111,21 +119,35 @@ public class ValleyDayGame extends Game {
     public GameMap getMap() {
         return map;
     }
-    
 
 
 
+    /**
+     * Sets the active difficulty.
+     *
+     * @param difficulty new difficulty level
+     */
     public void setDifficulty(Difficulty difficulty) {
         this.difficulty = difficulty;
     }
 
+    /**
+     * @return the currently selected difficulty
+     */
     public Difficulty getDifficulty() {
         return difficulty;
     }
 
 
 
-
+    /**
+     * Overrides screen switching to control disposal behavior.
+     *
+     * Screens are disposed automatically when replaced, except for
+     * the active {@link GameScreen}, which may be resumed later.
+     *
+     * @param screen new screen to display
+     */
     @Override
     public void setScreen(Screen screen) {
         Screen previousScreen = super.screen;
@@ -145,13 +167,26 @@ public class ValleyDayGame extends Game {
         skin.dispose(); // Dispose the skin
     }
 
+
+    /**
+     * Sets the path of the map file to be loaded next.
+     *
+     * @param path absolute or relative file path
+     */
     public void setSelectedMapPath(String path) {
         this.selectedMapPath = path;
     }
 
+    /**
+     * @return the currently selected map path
+     */
     public String getSelectedMapPath() {
         return selectedMapPath;
     }
+
+    /**
+     * @return the native file chooser instance
+     */
     public NativeFileChooser getFileChooser() {
         return fileChooser;
     }

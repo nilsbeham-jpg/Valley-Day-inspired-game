@@ -19,8 +19,13 @@ import static com.badlogic.gdx.scenes.scene2d.ui.Table.Debug.table;
 
 
 /**
- * A Heads-Up Display (HUD) that displays information on the screen.
- * It uses a separate camera so that it is always fixed on the screen.
+ * Heads-Up Display (HUD) for the gameplay screen.
+ *
+ * This class is responsible for rendering all on-screen UI elements that
+ * should stay fixed relative to the screen, independent of the world camera.
+ * This includes timers, tool status, exit state, and end-of-game messages.
+ *
+ * The HUD does not modify game logic; it only visualizes the current state.
  */
 public class Hud {
     
@@ -41,17 +46,37 @@ public class Hud {
     private static final float TOTAL_TIME = 320f;
 
 
-
-
+    /**
+     * Assigns the player reference used by the HUD.
+     *
+     * @param player current player instance
+     */
     public void setPlayer(Player player) {
         this.player = player;
     }
 
+
+    /**
+     * Updates the remaining time displayed by the HUD.
+     *
+     * @param time remaining time in seconds
+     */
     public void setRemainingTime(float time) {
         this.remainingTime = time;
     }
 
 
+
+    /**
+     * Creates a new HUD instance.
+     *
+     * Initializes the HUD camera, end-of-game stage,
+     * and basic layout structures.
+     *
+     * @param spriteBatch shared sprite batch
+     * @param font        font used for text rendering
+     * @param skin        UI skin for labels
+     */
     public Hud(SpriteBatch spriteBatch, BitmapFont font, Skin skin) {
         this.spriteBatch = spriteBatch;
         this.font = font;
@@ -64,10 +89,12 @@ public class Hud {
 
 
     }
-    
+
     /**
-     * Renders the HUD on the screen.
-     * This uses a different OrthographicCamera so that the HUD is always fixed on the screen.
+     * Renders the in-game HUD.
+     *
+     * Displays controls hints, remaining time,
+     * tool states, and exit unlock status.
      */
     public void render() {
         spriteBatch.setProjectionMatrix(camera.combined);
@@ -134,15 +161,23 @@ public class Hud {
 
 
     /**
-     * Resizes the HUD when the screen size changes.
-     * This is called when the window is resized.
-     * @param width The new width of the screen.
-     * @param height The new height of the screen.
-     */ //Hud 随窗口变化
+     * Updates the HUD camera when the window size changes.
+     *
+     * @param width  new screen width
+     * @param height new screen height
+     */
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
     }
 
+    /**
+     * Renders the end-of-game overlay.
+     *
+     * Displays victory or game-over message,
+     * star rating (on victory), and return hint.
+     *
+     * @param state final game state
+     */
     public void renderEndMessage(GameState state) {
         endStage.getViewport().apply();
 
@@ -188,11 +223,24 @@ public class Hud {
         endStage.draw();
     }
 
+    /**
+    * Assigns the map reference used by the HUD.
+            *
+            * @param map current game map
+     */
     public void setMap(GameMap map) {
         this.map = map;
     }
 
 
+
+    /**
+     * Computes a star rating based on remaining time.
+     *
+     * @param remainingTime time left at level end
+     * @param totalTime     total level time
+     * @return star string representation
+     */
     private String computeStars(float remainingTime, float totalTime) {
         float ratio = remainingTime / totalTime;
 
