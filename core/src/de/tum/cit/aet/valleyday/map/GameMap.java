@@ -8,13 +8,11 @@ import com.badlogic.gdx.physics.box2d.World;
 import de.tum.cit.aet.valleyday.Difficulty;
 import de.tum.cit.aet.valleyday.ValleyDayGame;
 import de.tum.cit.aet.valleyday.audio.Effectmusic;
-import de.tum.cit.aet.valleyday.map.Items.Fertilizer;
-import de.tum.cit.aet.valleyday.map.Items.Item;
-import de.tum.cit.aet.valleyday.map.Items.Shovel;
-import de.tum.cit.aet.valleyday.map.Items.WateringCan;
-import de.tum.cit.aet.valleyday.map.Waldlife.ChickenVisitor;
-import de.tum.cit.aet.valleyday.map.Waldlife.SnailVisitor;
-import de.tum.cit.aet.valleyday.map.Waldlife.WildlifeBase;
+import de.tum.cit.aet.valleyday.map.Items.*;
+import de.tum.cit.aet.valleyday.map.Wildlife.ChickenVisitor;
+import de.tum.cit.aet.valleyday.map.Wildlife.SnailVisitor;
+import de.tum.cit.aet.valleyday.map.Wildlife.WildlifeBase;
+import de.tum.cit.aet.valleyday.map.Wildlife.WildlifeBlocker;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
 import de.tum.cit.aet.valleyday.map.player.Player;
 import de.tum.cit.aet.valleyday.map.structures.Entrance;
@@ -66,6 +64,8 @@ public class GameMap {
     private Tile[][] tiles;
     private int mapWidth;
     private int mapHeight;
+    private boolean[][] wildlifeBlocked;
+
 
     private CropTile[][] crops;
     private int harvested = 0;
@@ -328,6 +328,8 @@ if (value == 3) {
                 }
             }
         }
+        wildlifeBlocked = new boolean[mapWidth][mapHeight];
+
 
     }
 
@@ -411,6 +413,20 @@ if (value == 3) {
                 yield t;
             }
 
+
+            case 8 -> { // Debris hiding Scaffold
+                Tile t;
+                if (Math.random() < 0.20f) {
+                    t = new Tile(new RockDebris(x, y));
+                } else {
+                    t = new Tile(new Debris(x, y));
+                }
+                t.setHiddenObject(new ScaffoldItem(x, y));
+                t.setSoilType(SoilType.NON_FARMLAND);
+                yield t;
+            }
+
+
             default -> new Tile(null);
         };
     }
@@ -445,7 +461,23 @@ if (value == 3) {
        boolean wasDebris =
                obj instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
-       tile.interact();
+       TileObject revealed = tile.interact();
+
+       if (revealed != null) {
+
+           // If it's an Item with world effect (scaffold)
+           if (revealed instanceof Item item) {
+               item.onReveal(this, x, y);
+           }
+           // Otherwise (Exit, etc.) place it on the tile
+           else {
+               tile.clearObject();
+               tiles[x][y].setHiddenObject(null);
+               tiles[x][y].clearObject();
+               tiles[x][y] = new Tile(revealed);
+           }
+       }
+
 
        boolean isDebrisNow =
                tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
@@ -995,6 +1027,46 @@ if (spawnSnail) {
             return new PremiumCrop();    // slowest, 3 points
         }
     }
+
+    public WildlifeBase getWildlifeAt(int x, int y) {
+        for (WildlifeBase w : wildlife) {
+            if (w.isAlive() && w.getX() == x && w.getY() == y) {
+                return w;
+            }
+        }
+        return null;
+    }
+
+
+    public boolean blocksWildlife(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return true;
+        }
+        return wildlifeBlocked[x][y];
+    }
+
+
+    public void placeTileObject(int x, int y, TileObject obj) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return;
+        }
+
+        Tile tile = tiles[x][y];
+
+
+        if (tile.getObject() != null) {
+            return;
+        }
+
+        tile.setObject(obj);
+    }
+
+    public void blockWildlifeAt(int x, int y) {
+        wildlifeBlocked[x][y] = true;
+    }
+
+
+
 
 
 }

@@ -14,7 +14,7 @@ public class PremiumCrop extends CropType {
     public float sproutToMature() { return 25f; }
 
     @Override
-    public float matureToRotten() { return 30f; }
+    public float matureToRotten() { return 60f; }
 
     @Override
     public int harvestValue() { return 5; }

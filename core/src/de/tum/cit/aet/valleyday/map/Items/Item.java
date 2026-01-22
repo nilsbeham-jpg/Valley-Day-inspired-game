@@ -20,4 +20,9 @@ public abstract class Item extends TileObject {
     }
 
     public abstract void onPickup(GameMap map);
+
+    /** Called when revealed from debris */
+    public void onReveal(GameMap map, int x, int y) {
+        // default: do nothing
+    }
 }

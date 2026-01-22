@@ -1,5 +1,6 @@
 package de.tum.cit.aet.valleyday.map;
 
+import de.tum.cit.aet.valleyday.map.Items.Item;
 import de.tum.cit.aet.valleyday.map.crops.CropTile;
 import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 
@@ -48,19 +49,22 @@ public class Tile {
         this.hiddenObject = hidden;
     }
 
-    public void interact() {
-        if (object == null) return;
+    public TileObject interact() {
+        if (object == null) return null;
 
-        if (object.isDestructible()) {
-            if (hiddenObject != null) {
-                object = hiddenObject;   // reveal
-                hiddenObject = null;
-            } else {
-                object = null;           // clear debris
-            }
-            // ❗ soilType is intentionally NOT changed
+        if (!object.isDestructible()) return null;
+
+        if (hiddenObject != null) {
+            TileObject revealed = hiddenObject;
+            hiddenObject = null;
+            object = null; // IMPORTANT: do NOT place revealed automatically
+            return revealed;
+        } else {
+            object = null;
+            return null;
         }
     }
+
 
     public TileObject getObject() {
         return object;
@@ -98,6 +102,11 @@ public class Tile {
     public boolean hasCrop() {
         return crop != null;
     }
+
+    public void setObject(TileObject object) {
+        this.object = object;
+    }
+
 
 
 

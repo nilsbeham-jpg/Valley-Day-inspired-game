@@ -2,6 +2,7 @@ package de.tum.cit.aet.valleyday.map;
 
 public abstract class GameObject {
 // anything that has a position size... should extend Gameobject
+
     protected int x;
     protected int y;
 

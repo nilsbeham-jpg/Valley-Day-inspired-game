@@ -1,4 +1,4 @@
-package de.tum.cit.aet.valleyday.map.Waldlife;
+package de.tum.cit.aet.valleyday.map.Wildlife;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;

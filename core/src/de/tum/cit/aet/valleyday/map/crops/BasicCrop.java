@@ -13,7 +13,7 @@ public class BasicCrop extends CropType {
     public float sproutToMature() { return 5f; }
 
     @Override
-    public float matureToRotten() { return 10f; }
+    public float matureToRotten() { return 60f; }
 
     @Override
     public int harvestValue() { return 1; }

@@ -14,7 +14,7 @@ public class SlowCrop extends CropType {
     public float sproutToMature() { return 15f; }
 
     @Override
-    public float matureToRotten() { return 20f; }
+    public float matureToRotten() { return 60f; }
 
     @Override
     public int harvestValue() { return 3; }

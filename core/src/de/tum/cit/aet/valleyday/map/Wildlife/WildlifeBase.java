@@ -1,4 +1,4 @@
-package de.tum.cit.aet.valleyday.map.Waldlife;
+package de.tum.cit.aet.valleyday.map.Wildlife;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -169,6 +169,12 @@ public abstract class WildlifeBase {
         if (map.isBlocked(nx, ny)) {
             return false;
         }
+
+        //wildlife-specific blocking
+        if (map.blocksWildlife(nx, ny)) {
+            return false;
+        }
+
         beginStepTo(nx, ny, walkTime * speedMultiplier);
         return true;
     }
