@@ -12,12 +12,14 @@ import de.tum.cit.aet.valleyday.texture.Animations;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 
 /**
-
- * Player is:
- * a world entity
- * with physics
- * with input-driven intentions
- * that asks the map: “May I move here?”
+ * Represents the player character in the game world.
+ *
+ * The player is a physics-based entity that reacts to user input,
+ * queries the {@link GameMap} for collisions and interactions, and
+ * maintains its own movement, animation, and item-related state.
+ *
+ * This class is responsible only for player-side logic; it does not
+ * decide global game rules.
  */
 public class Player implements Drawable {
 
@@ -57,16 +59,30 @@ public class Player implements Drawable {
     private int interactingY = -1;
     private boolean interacting = false;
 
+
+    /**
+     * Returns the required interaction time for destroying objects.
+     * Having a shovel reduces the required time.
+     */
     private float getRequiredInteractionTime() {
         return hasShovel ? 0.5f : 1.0f;
     }
 
-
+    /**
+     * Enables shovel usage for the player.
+     */
     public void enableShovel() {
         hasShovel = true;
     }
 
-
+    /**
+     * Creates a new player instance and spawns it into the physics world.
+     *
+     * @param world Box2D world
+     * @param map   reference to the game map
+     * @param x     spawn x-coordinate
+     * @param y     spawn y-coordinate
+     */
     public Player(World world, GameMap map, float x, float y) {
         this.map = map;
         this.hitbox = createHitbox(world, x, y);
@@ -107,10 +123,12 @@ public class Player implements Drawable {
 
 
     /**
-     * Move the player around in a circle by updating the linear velocity of its hitbox every frame.
-     * This doesn't actually move the player, but it tells the physics engine how the player should move next frame.
+     * Main per-frame update of the player.
      *
-     * @param frameTime the time since the last frame.
+     * Processes input, applies collision checks, updates movement,
+     * handles interactions, sound effects, and animation timing.
+     *
+     * @param frameTime time since last frame (seconds)
      */
     public void tick(float frameTime) { // tick() tells physics how the player wants to move
         if (moving) {
@@ -124,59 +142,59 @@ public class Player implements Drawable {
         float xVelocity = 0f;
         float yVelocity = 0f;
 
-    if (scared) {
-    xVelocity = forcedVX;
-    yVelocity = forcedVY;
-    } else {
-    if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-        yVelocity = speed;
-        facing = Direction.UP;
-    }
-    if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-        yVelocity = -speed;
-        facing = Direction.DOWN;
-    }
-    if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-        xVelocity = -speed;
-        facing = Direction.LEFT;
-    }
-    if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-        xVelocity = speed;
-        facing = Direction.RIGHT;
-    }
-}
-        // calculate were the player is next
-        float nextX = hitbox.getPosition().x + xVelocity * frameTime;
-        float nextY = hitbox.getPosition().y + yVelocity * frameTime;
-
-
-        float currentX = hitbox.getPosition().x;
-        float currentY = hitbox.getPosition().y;
-if(!scared){
-// --- Horizontal collision ---
-        if (xVelocity > 0) { // right
-            int tileX = map.worldToTile(nextX + RADIUS);
-            int tileY1 = map.worldToTile(currentY + RADIUS * 0.9f);
-            int tileY2 = map.worldToTile(currentY - RADIUS * 0.9f);
-
-
-            if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
-                xVelocity = 0;
-            }
+        if (scared) {
+        xVelocity = forcedVX;
+        yVelocity = forcedVY;
+        } else {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            yVelocity = speed;
+            facing = Direction.UP;
         }
-
-        if (xVelocity < 0) { // left
-            int tileX = map.worldToTile(nextX - RADIUS);
-            int tileY1 = map.worldToTile(currentY + RADIUS * 0.9f);
-            int tileY2 = map.worldToTile(currentY - RADIUS * 0.9f);
-
-            if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
-                xVelocity = 0;
-            }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            yVelocity = -speed;
+            facing = Direction.DOWN;
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            xVelocity = -speed;
+            facing = Direction.LEFT;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            xVelocity = speed;
+            facing = Direction.RIGHT;
+        }
+    }
+            // calculate were the player is next
+            float nextX = hitbox.getPosition().x + xVelocity * frameTime;
+            float nextY = hitbox.getPosition().y + yVelocity * frameTime;
 
 
-// --- Vertical collision ---
+            float currentX = hitbox.getPosition().x;
+            float currentY = hitbox.getPosition().y;
+    if(!scared){
+    // --- Horizontal collision ---
+            if (xVelocity > 0) { // right
+                int tileX = map.worldToTile(nextX + RADIUS);
+                int tileY1 = map.worldToTile(currentY + RADIUS * 0.9f);
+                int tileY2 = map.worldToTile(currentY - RADIUS * 0.9f);
+
+
+                if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
+                    xVelocity = 0;
+                }
+            }
+
+            if (xVelocity < 0) { // left
+                int tileX = map.worldToTile(nextX - RADIUS);
+                int tileY1 = map.worldToTile(currentY + RADIUS * 0.9f);
+                int tileY2 = map.worldToTile(currentY - RADIUS * 0.9f);
+
+                if (map.isBlocked(tileX, tileY1) || map.isBlocked(tileX, tileY2)) {
+                    xVelocity = 0;
+                }
+            }
+
+
+        // --- Vertical collision ---
         if (yVelocity > 0) { // up
             int tileY = map.worldToTile(nextY + RADIUS);
             int tileX1 = map.worldToTile(currentX + RADIUS * 0.9f);
@@ -199,76 +217,83 @@ if(!scared){
     }
 
 
-if (!scared) {
-    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-        int[] front = map.getFrontTile(this);
-        int fx = front[0];
-        int fy = front[1];
+        if (!scared) {
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                int[] front = map.getFrontTile(this);
+                int fx = front[0];
+                int fy = front[1];
 
-        if (!interacting || fx != interactingX || fy != interactingY) {
-            interacting = true;
-            interactingX = fx;
-            interactingY = fy;
-            interactionTimer = 0f;
+                if (!interacting || fx != interactingX || fy != interactingY) {
+                    interacting = true;
+                    interactingX = fx;
+                    interactingY = fy;
+                    interactionTimer = 0f;
+                }
+
+                interactionTimer += frameTime;
+
+                if (interactionTimer >= getRequiredInteractionTime()) {
+                    map.interactWithTile(interactingX, interactingY);
+                    interacting = false;
+                    interactionTimer = 0f;
+                }
+            } else {
+                interacting = false;
+                interactionTimer = 0f;
+            }
+
+            if (fertilizerTimer > 0f) {
+                fertilizerTimer -= frameTime;
+                if (fertilizerTimer < 0f) fertilizerTimer = 0f;
+            }
+
+            if (wateringCanTimer > 0f) {
+                wateringCanTimer -= frameTime;
+                if (wateringCanTimer < 0f) wateringCanTimer = 0f;
+            }
         }
 
-        interactionTimer += frameTime;
 
-        if (interactionTimer >= getRequiredInteractionTime()) {
-            map.interactWithTile(interactingX, interactingY);
-            interacting = false;
-            interactionTimer = 0f;
+        this.hitbox.setLinearVelocity(xVelocity, yVelocity);
+        this.moving = (xVelocity != 0f) || (yVelocity != 0f);
+        if (moving && !scared) {
+            walkSoundTimer -= frameTime;
+            if (walkSoundTimer <= 0f) {
+                Effectmusic.Walking.play();
+                walkSoundTimer = WALK_SOUND_INTERVAL;
+            }
+        } else {
+            walkSoundTimer = 0f;
         }
-    } else {
-        interacting = false;
-        interactionTimer = 0f;
-    }
-
-    if (fertilizerTimer > 0f) {
-        fertilizerTimer -= frameTime;
-        if (fertilizerTimer < 0f) fertilizerTimer = 0f;
-    }
-
-    if (wateringCanTimer > 0f) {
-        wateringCanTimer -= frameTime;
-        if (wateringCanTimer < 0f) wateringCanTimer = 0f;
-    }
-}
-
-
-this.hitbox.setLinearVelocity(xVelocity, yVelocity);
-this.moving = (xVelocity != 0f) || (yVelocity != 0f);
-if (moving && !scared) {
-    walkSoundTimer -= frameTime;
-    if (walkSoundTimer <= 0f) {
-        Effectmusic.Walking.play();
-        walkSoundTimer = WALK_SOUND_INTERVAL;
-    }
-} else {
-    walkSoundTimer = 0f;
-}
 
 }
 
-
-
-
-
-
+    /**
+     * @return the direction the player is currently facing
+     */
     public Direction getFacing() { //check direction and return the facing direction
         return facing;
     }
 
 
-    //find the front x-coordinate of the player 
+    //find the front x-coordinate of the player
+    /**
+     * @return rounded tile x-coordinate of the player
+     */
     public int getTileX() {
         return (int) Math.round(getX());
     }
 
+    /**
+     * @return rounded tile y-coordinate of the player
+     */
     public int getTileY() {
         return (int) Math.round(getY());
     }
 
+    /**
+     * @return x-coordinate of the tile in front of the player
+     */
     public int getFrontTileX() {
         int tileX = getTileX();
         if (facing == Direction.LEFT) {
@@ -280,6 +305,9 @@ if (moving && !scared) {
         return tileX;
     }
 
+    /**
+     * @return y-coordinate of the tile in front of the player
+     */
     public int getFrontTileY() {
         int tileY = getTileY();
         if (facing == Direction.DOWN) {
@@ -291,7 +319,10 @@ if (moving && !scared) {
         return tileY;
     }
 
-    //scared modul
+    /**
+     * Sets whether the player is scared.
+     * Reset forced movement when calming down.
+     */
     public void setScared(boolean scared) {
     this.scared = scared;
     if (!scared) {
@@ -300,15 +331,21 @@ if (moving && !scared) {
     }
 }
 
-public boolean isScared() {
-    return scared;
-}
+    /**
+     * @return true if the player is currently scared
+     */
+    public boolean isScared() {
+        return scared;
+    }
 
-public void setForcedVelocity(float vx, float vy) {
-    this.forcedVX = vx;
-    this.forcedVY = vy;
-}
-    //
+
+    /**
+     * Forces a velocity on the player, ignoring input.
+     */
+    public void setForcedVelocity(float vx, float vy) {
+        this.forcedVX = vx;
+        this.forcedVY = vy;
+    }
 
 
 
@@ -360,7 +397,6 @@ public void setForcedVelocity(float vx, float vy) {
     public boolean isWateringCanActive() {
         return wateringCanTimer > 0f;
     }
-
 
 }
 
