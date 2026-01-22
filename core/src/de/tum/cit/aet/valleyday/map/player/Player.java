@@ -23,6 +23,78 @@ import de.tum.cit.aet.valleyday.texture.Drawable;
  */
 public class Player implements Drawable {
 
+
+      // --------------------
+// Tool inventory (new)
+// --------------------
+public enum SelectedTool {
+    NONE,
+    FERTILIZER,
+    WATERING_CAN
+}
+
+private int fertilizerCount = 0;
+private int wateringCanCount = 0;
+private SelectedTool selectedTool = SelectedTool.NONE;
+
+public void addFertilizer(int amount) {
+    if (amount <= 0) {
+        return;
+    }
+    fertilizerCount += amount;
+}
+
+public void addWateringCan(int amount) {
+    if (amount <= 0) {
+        return;
+    }
+    wateringCanCount += amount;
+}
+
+public int getFertilizerCount() {
+    return fertilizerCount;
+}
+
+public int getWateringCanCount() {
+    return wateringCanCount;
+}
+
+public SelectedTool getSelectedTool() {
+    return selectedTool;
+}
+
+public void cycleSelectedTool() {
+    if (selectedTool == SelectedTool.NONE) {
+        selectedTool = SelectedTool.FERTILIZER;
+    } else if (selectedTool == SelectedTool.FERTILIZER) {
+        selectedTool = SelectedTool.WATERING_CAN;
+    } else {
+        selectedTool = SelectedTool.NONE;
+    }
+}
+
+public boolean canUseSelectedTool() {
+    if (selectedTool == SelectedTool.FERTILIZER) {
+        return fertilizerCount > 0;
+    }
+    if (selectedTool == SelectedTool.WATERING_CAN) {
+        return wateringCanCount > 0;
+    }
+    return false;
+}
+
+public void consumeSelectedToolOnce() {
+    if (selectedTool == SelectedTool.FERTILIZER) {
+        if (fertilizerCount > 0) {
+            fertilizerCount -= 1;
+        }
+    } else if (selectedTool == SelectedTool.WATERING_CAN) {
+        if (wateringCanCount > 0) {
+            wateringCanCount -= 1;
+        }
+    }
+}
+
     /**
      * Total time elapsed since the game started. We use this for calculating the player movement and animating it.
      */

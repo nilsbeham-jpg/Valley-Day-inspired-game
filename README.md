@@ -6,13 +6,19 @@ A tile-based farming & survival game built with libGDX
 
 ## 1. Project Overview
 
-**Valley Day** is a tile-based farming and survival game built using libGDX.  
-The player must plant and harvest crops to unlock the exit while dealing with wildlife that interferes with progress.
+
+Valley Day is a tile-based farming and survival game built using libGDX.
+The player must plant and harvest crops to unlock the exit, while handling wildlife and managing limited tools.
 
 The project focuses on a clean separation between:
-- game logic (map, player, wildlife, crops),
-- rendering (screens, HUD),
-- and assets (textures, animations, audio).
+
+game logic (map, player, wildlife, crops),
+
+rendering (screens, HUD),
+
+assets (textures, animations, audio).
+
+The HUD is implemented using Scene2D (Stage + Label + Image) to provide clear feedback and controls without interfering with game logic.
 
 ---
 
@@ -46,11 +52,14 @@ This configuration internally launches the libGDX desktop backend.
 | Key        | Action                                               |
 |------------|------------------------------------------------------|
 | Arrow Keys | Move player                                          |
-| **a**      | Plant / Harvest / Clear rotten crops                 |
-| **d**      | Interact with terrain (destroy debris, reveal items) |
-| **s**      | Shot wildlife in front of the player                 |
+| **A**      | Plant / Harvest / Clear rotten crops                 |
+| **D**      | Interact with terrain (destroy debris, reveal items) |
+| **S**      | Shot wildlife in front of the player                 |
+| **Q**      | Switch selected tool                                 |
+| **E**      | Use selected tool                                    |
 | **ESC**    | Pause / return to menu                               |
 | **ENTER**  | Return to menu after win/lose                        |
+
 
 ---
 
@@ -318,6 +327,7 @@ The `WildlifeBlocker` interface is used by scaffold zones to restrict wildlife m
 - **Hud**
     - UI overlay for time, tools, exit status, and end screens
     - uses its own camera and stage
+    
 
 ---
 

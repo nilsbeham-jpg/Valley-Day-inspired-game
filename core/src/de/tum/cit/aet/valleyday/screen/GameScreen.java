@@ -82,11 +82,12 @@ public class GameScreen implements Screen {
         this.game = game;
         this.spriteBatch = game.getSpriteBatch();
         this.map = game.getMap();
-        this.hud = new Hud(spriteBatch, game.getSkin().getFont("font"), game.getSkin());
+        this.hud = new Hud(game.getSkin().getFont("font"), game.getSkin());
+
         hud.setPlayer(map.getPlayer());
         hud.setMap(map);
         // Create and configure the camera for the game view
-        this.mapCamera = new OrthographicCamera(); //创建正交相机
+        this.mapCamera = new OrthographicCamera(); 
         this.mapCamera.setToOrtho(false);
 
     }
@@ -381,7 +382,7 @@ spriteBatch.end();
 
 
 
-    private float wildlifeDebugTimer = 0f;
+
 
 
     /**

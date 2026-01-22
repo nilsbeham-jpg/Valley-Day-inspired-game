@@ -1,209 +1,204 @@
 package de.tum.cit.aet.valleyday.screen;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.player.Player;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
 /**
- * HUD shows simple game info on screen (top-left).
- * It uses Scene2D Table so it looks tidy.
+ * Simple HUD (labels + icons).
+ * It shows info, but it dont change game.
  */
 public class Hud {
 
-    private final SpriteBatch spriteBatch;
-    private final BitmapFont font; // kept for compatibility
     private final Skin skin;
+    private final Stage hudStage;
+    private final Stage endStage;
 
     private GameMap map;
     private Player player;
     private float remainingTime = 0f;
 
-    // ---------- HUD UI (top-left) ----------
-    private final Stage hudStage;
-    private final Table hudTable;
-
-    private final Label hintLabel;
-    private final Label timeLabel;
-    private final Label toolsTitleLabel;
-    private final Label exitLabel;
-
-    // tools (icons + text, always visible)
-    private final Image shovelIcon;
-    private final Image fertilizerIcon;
-    private final Image wateringIcon;
-
-    private final Label shovelLabel;
-    private final Label fertilizerLabel;
-    private final Label wateringLabel;
-
-    // ---------- END UI (center) ----------
-    private final Stage endStage;
-    private final Table endTable;
-
     private static final float TOTAL_TIME = 320f;
 
+    private final Label timeLeft;
+
+    private final Label shovelText;
+    private final Image shovelIcon;
+
+    private final Label fertText;
+    private final Label fertCount;
+    private final Image fertIcon;
+
+    private final Label waterText;
+    private final Label waterCount;
+    private final Image waterIcon;
+
+    private final Label exitLabel;
+
+    private final Label hintS;
+    private final Label hintQ;
+    private final Label hintE;
+    private final Label hintA;
+    private final Label hintD;
+    private final Label hintArrows;
+
+    private final Table endTable;
+
+    private final Color dim = new Color(1f, 1f, 1f, 0.45f);
+    private final Color sel = new Color(0.20f, 0.90f, 0.35f, 1f);
+
     /**
-     * Create a new HUD.
-     *
-     * @param spriteBatch shared batch
-     * @param font        font (not required, but keep it)
-     * @param skin        UI skin
+     * Make HUD.
+     * @param font hud font
+     * @param skin ui skin
      */
-    public Hud(SpriteBatch spriteBatch, BitmapFont font, Skin skin) {
-        this.spriteBatch = spriteBatch;
-        this.font = font;
+    public Hud(BitmapFont font, Skin skin) {
         this.skin = skin;
 
-        // Normal HUD stage
-        this.hudStage = new Stage(new ScreenViewport(), spriteBatch);
-        this.hudTable = new Table();
-        this.hudTable.setFillParent(true);
-        this.hudStage.addActor(hudTable);
+        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
+        
 
-        // Labels (use styles from skin)
-        hintLabel = new Label("Press Esc to Pause!", skin, "default");
-        timeLabel = new Label("Time left: 0", skin, "default");
-        toolsTitleLabel = new Label("Tools:", skin, "bold");
-        exitLabel = new Label("", skin, "default");
+        this.hudStage = new Stage(new ScreenViewport());
 
-        // IMPORTANT:
-        // Use "default" here, not "dim".
-        // Because Scene2D multiplies label color with style fontColor.
-        shovelLabel = new Label("Shovel", skin, "default");
-        fertilizerLabel = new Label("Fertilizer", skin, "default");
-        wateringLabel = new Label("Watering Can", skin, "default");
+        Table root = new Table();
+        root.setFillParent(true);
+        root.top().left().pad(10f);
+        hudStage.addActor(root);
 
-        // Icons
-        shovelIcon = new Image(new TextureRegionDrawable(Textures.SHOVEL));
-        fertilizerIcon = new Image(new TextureRegionDrawable(Textures.FERTILIZER));
-        wateringIcon = new Image(new TextureRegionDrawable(Textures.WATERCAN));
+        root.add(new Label("Press Esc to Pause!", style)).left().colspan(3).row();
+        timeLeft = new Label("Time left: 0", style);
+        root.add(timeLeft).left().colspan(3).padBottom(8f).row();
 
-        // Bigger icons
-        float iconSize = 32f;
+        root.add(new Label("Tools:", style)).left().colspan(3).padTop(4f).row();
 
-        // Layout: top-left
-        hudTable.top().left();
-        hudTable.pad(10);
+        shovelText = new Label("Shovel", style);
+        shovelIcon = new Image(toDrawable(getShovelIcon()));
+        applyImageVisible(shovelIcon);
 
-        // Slightly smaller text so it matches icons better
-        hintLabel.setFontScale(0.9f);
-        timeLabel.setFontScale(0.95f);
-        toolsTitleLabel.setFontScale(0.95f);
-        exitLabel.setFontScale(0.95f);
+        fertText = new Label("Fertilizer", style);
+        fertCount = new Label("x0", style);
+        fertIcon = new Image(toDrawable(Textures.FERTILIZER));
 
-        shovelLabel.setFontScale(0.9f);
-        fertilizerLabel.setFontScale(0.9f);
-        wateringLabel.setFontScale(0.9f);
+        waterText = new Label("Watering Can", style);
+        waterCount = new Label("x0", style);
+        waterIcon = new Image(toDrawable(Textures.WATERCAN));
 
-        hudTable.add(hintLabel).left().row();
-        hudTable.add(timeLabel).left().padTop(4).row();
+        // layout: text | count | icon (icon near count)
+        root.add(shovelText).left();
+        root.add(new Label("", style)).width(60f);
+        root.add(shovelIcon).size(22f).left().padLeft(8f).row();
 
-        // Tools block (aligned rows)
-        Table toolsBlock = new Table();
-        toolsBlock.left();
+        root.add(fertText).left();
+        root.add(fertCount).width(60f).left().padLeft(10f);
+        root.add(fertIcon).size(22f).left().padLeft(8f).row();
 
-        toolsBlock.add(toolsTitleLabel).left().row();
+        root.add(waterText).left();
+        root.add(waterCount).width(60f).left().padLeft(10f);
+        root.add(waterIcon).size(22f).left().padLeft(8f).row();
 
-        toolsBlock.add(shovelIcon).size(iconSize).left();
-        toolsBlock.add(shovelLabel).left().padLeft(8).row();
+        exitLabel = new Label("", style);
+        root.add(exitLabel).left().colspan(3).padTop(10f).row();
 
-        toolsBlock.add(fertilizerIcon).size(iconSize).left();
-        toolsBlock.add(fertilizerLabel).left().padLeft(8).row();
+        
+        hintS = new Label("S  - attack wildlife", style);
+        hintQ = new Label("Q  - switch tool", style);
+        hintE = new Label("E  - use tool", style);
+        hintA = new Label("A  - plant seed", style);
+        hintD = new Label("D  - remove obstacle", style);
+        hintArrows = new Label("Arrow Keys - move", style);
 
-        toolsBlock.add(wateringIcon).size(iconSize).left();
-        toolsBlock.add(wateringLabel).left().padLeft(8).row();
+        root.add(hintS).left().colspan(3).padTop(20f).row();
+        root.add(hintS).left().colspan(3).row();
+        root.add(hintQ).left().colspan(3).row();
+        root.add(hintE).left().colspan(3).row();
+        root.add(hintA).left().colspan(3).row();
+        root.add(hintD).left().colspan(3).row();
+        root.add(hintArrows).left().colspan(3).row();
 
-        hudTable.add(toolsBlock).left().padTop(10).row();
-
-        // Exit line
-        hudTable.add(exitLabel).left().padTop(8).row();
-
-        // End screen stage
-        this.endStage = new Stage(new ScreenViewport(), spriteBatch);
+        this.endStage = new Stage(new ScreenViewport());
         this.endTable = new Table();
         this.endTable.setFillParent(true);
-        this.endStage.addActor(endTable);
+        endStage.addActor(endTable);
     }
 
-    /**
-     * Set player for HUD.
-     */
+    private TextureRegionDrawable toDrawable(TextureRegion r) {
+        return r == null ? null : new TextureRegionDrawable(r);
+    }
+
+    private void applyImageVisible(Image img) {
+        img.setVisible(img.getDrawable() != null);
+    }
+
+    private TextureRegion getShovelIcon() {
+        try {
+            return (TextureRegion) Textures.class.getField("SHOVEL").get(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Set player ref. */
     public void setPlayer(Player player) {
         this.player = player;
     }
 
-    /**
-     * Set map for HUD.
-     */
+    /** Set map ref. */
     public void setMap(GameMap map) {
         this.map = map;
     }
 
-    /**
-     * Update remaining time.
-     */
+    /** Set time left (sec). */
     public void setRemainingTime(float time) {
         this.remainingTime = time;
     }
 
-    /**
-     * Render normal HUD.
-     */
+    /** Draw HUD (every frame). */
     public void render() {
-        updateHudState();
-
-        hudStage.getViewport().apply();
+        updateUi();
         hudStage.act();
         hudStage.draw();
     }
 
-    /**
-     * Update HUD texts and colors.
-     */
-    private void updateHudState() {
-        int secondsLeft = (int) Math.ceil(remainingTime);
-        timeLabel.setText("Time left: " + secondsLeft);
+    private void updateUi() {
+        timeLeft.setText("Time left: " + (int) Math.ceil(remainingTime));
 
-        if (player != null) {
-            // Shovel
-            if (player.hasShovel()) {
-                shovelLabel.setText("Shovel(AKTIV), Your faster!!");
-                shovelLabel.setColor(Color.WHITE);
-            } else {
-                shovelLabel.setText("Shovel");
-                shovelLabel.setColor(skin.getColor("gray"));
-            }
-
-            // Fertilizer
-            if (player.isFertilizerActive()) {
-                fertilizerLabel.setText("Fertilizer(AKTIV), Your plants have been fertilized once. ");
-                fertilizerLabel.setColor(Color.WHITE);
-            } else {
-                fertilizerLabel.setText("Fertilizer");
-                fertilizerLabel.setColor(skin.getColor("gray"));
-            }
-
-            // Watering Can
-            if (player.isWateringCanActive()) {
-                wateringLabel.setText("Watering Can(AKTIV), You used the Watering Can once.");
-                wateringLabel.setColor(Color.WHITE);
-            } else {
-                wateringLabel.setText("Watering Can");
-                wateringLabel.setColor(skin.getColor("gray"));
-            }
+        if (player == null) {
+            return;
         }
+
+        boolean hasShovel = player.hasShovel();
+        shovelText.setText(hasShovel ? "Shovel  \u2714" : "Shovel");
+        shovelText.setColor(hasShovel ? Color.WHITE : skin.getColor("gray"));
+        shovelIcon.setColor(hasShovel ? Color.WHITE : dim);
+
+        int f = player.getFertilizerCount();
+        int w = player.getWateringCanCount();
+
+        fertCount.setText("x" + f);
+        waterCount.setText("x" + w);
+
+        boolean fertAvail = f > 0;
+        boolean waterAvail = w > 0;
+
+        setAvail(fertText, fertCount, fertIcon, fertAvail);
+        setAvail(waterText, waterCount, waterIcon, waterAvail);
+
+        Player.SelectedTool st = player.getSelectedTool();
+        setSelected(st == Player.SelectedTool.FERTILIZER, fertText, fertCount, fertIcon);
+        setSelected(st == Player.SelectedTool.WATERING_CAN, waterText, waterCount, waterIcon);
 
         if (map != null) {
             if (map.isExitUnlocked()) {
@@ -213,75 +208,60 @@ public class Hud {
                 exitLabel.setColor(Color.RED);
                 exitLabel.setText("Exit locked (" + map.getHarvestedCount() + "/" + map.getQuota() + ")");
             }
-        } else {
-            exitLabel.setColor(Color.WHITE);
-            exitLabel.setText("");
         }
     }
 
-    /**
-     * Resize HUD.
-     */
+    private void setAvail(Label t, Label c, Image i, boolean ok) {
+        t.setColor(ok ? Color.WHITE : skin.getColor("gray"));
+        c.setColor(ok ? Color.WHITE : skin.getColor("gray"));
+        i.setColor(ok ? Color.WHITE : dim);
+    }
+
+    private void setSelected(boolean on, Label t, Label c, Image i) {
+        if (on) {
+            t.setColor(sel);
+            c.setColor(sel);
+            i.setColor(sel);
+        }
+    }
+
+    /** Resize when window change. */
     public void resize(int width, int height) {
         hudStage.getViewport().update(width, height, true);
         endStage.getViewport().update(width, height, true);
     }
 
-    /**
-     * Render end message overlay.
-     */
+    /** Draw end text (win/lose). */
     public void renderEndMessage(GameState state) {
         endStage.getViewport().apply();
-
         endTable.clear();
 
         String titleText = (state == GameState.VICTORY) ? "YOU WIN!" : "GAME OVER";
-
         Label title = new Label(titleText, skin, "title");
         title.setAlignment(Align.center);
-
-        Label subtitle = new Label("Press ENTER to return to menu", skin, "default");
-        subtitle.setAlignment(Align.center);
-
         endTable.add(title).padBottom(15).row();
 
         if (state == GameState.VICTORY) {
-            String stars = computeStars(remainingTime, TOTAL_TIME);
-
-            Label starLabel = new Label(stars, skin, "title");
-            starLabel.setFontScale(1.5f);
-            starLabel.setColor(1f, 0.85f, 0.2f, 1f);
-            starLabel.setAlignment(Align.center);
-
-            endTable.add(starLabel).padBottom(15).row();
+            Label stars = new Label(computeStars(remainingTime, TOTAL_TIME), skin, "title");
+            stars.setFontScale(1.5f);
+            stars.setColor(1f, 0.85f, 0.2f, 1f);
+            endTable.add(stars).padBottom(15).row();
         }
 
+        Label subtitle = new Label("Press ENTER to return to menu", skin);
+        subtitle.setAlignment(Align.center);
         endTable.add(subtitle);
 
         endStage.act();
         endStage.draw();
     }
 
-    /**
-     * Compute stars from remaining time.
-     */
-    private String computeStars(float remainingTime, float totalTime) {
-        float ratio = remainingTime / totalTime;
-
-        if (ratio >= 2f / 3f) {
-            return "***";
-        } else if (ratio >= 1f / 3f) {
-            return "**-";
-        } else if (ratio > 0f) {
-            return "*--";
-        } else {
-            return "";
-        }
+    private String computeStars(float r, float t) {
+        float k = r / t;
+        return k >= 2f / 3f ? "***" : k >= 1f / 3f ? "**-" : k > 0f ? "*--" : "";
     }
 
-    /**
-     * Free resources.
-     */
+    /** Free stuffs. */
     public void dispose() {
         hudStage.dispose();
         endStage.dispose();

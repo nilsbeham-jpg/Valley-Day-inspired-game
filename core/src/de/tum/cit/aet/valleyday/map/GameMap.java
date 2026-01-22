@@ -49,6 +49,9 @@ import java.io.InputStream;
  */
 public class GameMap {
 
+  
+
+
     static {
         com.badlogic.gdx.physics.box2d.Box2D.init();
     }
@@ -156,11 +159,16 @@ public class GameMap {
         player.tick(frameTime);
 
         // 5) disable interactions when scared
-        if (!scared && !lostWildlife) {
-            handleAKey();
-            handleSKey(frameTime);
-            checkItemPickup();
-        }
+      if (!scared && !lostWildlife) {
+        handleAKey();
+        handleSKey(frameTime);
+
+        handleQKey();        
+        handleEKey();        
+
+        checkItemPickup();
+}
+
 
         // 6) crops + physics
         tickCrops(frameTime);
@@ -680,6 +688,52 @@ public class GameMap {
 }
 
 }
+/**
+ * Q key: switch which tool is selected.
+ */
+private void handleQKey() {
+    if (!Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+        return;
+    }
+    player.cycleSelectedTool();
+}
+
+/**
+ * E key: use selected tool once.
+ *
+ * Fertilizer: advance crops 1 stage
+ * Watering can: restore crops + reset rot timer
+ */
+private void handleEKey() {
+    if (!Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+        return;
+    }
+
+    if (!player.canUseSelectedTool()) {
+        return;
+    }
+
+    if (player.getSelectedTool() == Player.SelectedTool.FERTILIZER) {
+        advanceAllCrops();
+        player.consumeSelectedToolOnce();
+
+        // keep your old "active" UI behavior
+        player.activateFertilizer(5f);
+
+        Effectmusic.Plant.play();
+        return;
+    }
+
+    if (player.getSelectedTool() == Player.SelectedTool.WATERING_CAN) {
+        applyWateringCan();
+        player.consumeSelectedToolOnce();
+
+        player.activateWateringCan(5f);
+
+        Effectmusic.CollectItem.play();
+    }
+}
+
 
 
 
