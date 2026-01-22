@@ -462,14 +462,14 @@ if (value == 3) {
                obj instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
        TileObject revealed = tile.interact();
-if(revealed==null){
-    return;
-}
-if(revealed instanceof Item item){
-    if( item.activatesOnReveal()){
-        item.onReveal(this, x, y);
-        tile.setObject(item);
+    if(revealed==null){
+        return;
     }
+    if(revealed instanceof Item item){
+        if( item.activatesOnReveal()){
+            item.onReveal(this, x, y);
+            tile.setObject(item);
+        }
     else{
         tile.setObject(item);
     }
@@ -506,9 +506,14 @@ if(revealed instanceof Item item){
         Tile tile = tiles[px][py];
 
         if (tile.getObject() instanceof Item item) {
+            if (!item.isPickable()) {
+                return; // 🚫 scaffold stays
+            }
+
             item.onPickup(this);
             tile.clearObject();
             Effectmusic.CollectItem.play();
+
         }
     }
 
@@ -836,6 +841,11 @@ private boolean spawnOneWildlifeRandomly() {
             continue;
         }
 
+        if (blocksWildlife(x, y)) {
+            continue;
+        }
+
+
         // ✅ 不在玩家周围4格（方形区域：9x9）生成
         int dx = Math.abs(x - px);
         int dy = Math.abs(y - py);
@@ -855,11 +865,11 @@ private boolean spawnOneWildlifeRandomly() {
         }
 
         boolean spawnSnail = MathUtils.randomBoolean(0.30f);
-if (spawnSnail) {
-    wildlife.add(new SnailVisitor(x, y, wildlifeSpeedMultiplier));
-} else {
-    wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
-}
+            if (spawnSnail) {
+                wildlife.add(new SnailVisitor(x, y, wildlifeSpeedMultiplier));
+            } else {
+                wildlife.add(new ChickenVisitor(x, y, wildlifeSpeedMultiplier));
+            }
 
         return true;
     }
@@ -975,6 +985,7 @@ if (spawnSnail) {
                 if (nx < 0 || ny < 0 || nx >= mapWidth || ny >= mapHeight) continue;
                 if (visited[nx][ny]) continue;
                 if (isBlocked(nx, ny)) continue;
+                if (blocksWildlife(nx, ny)) continue;
 
                 visited[nx][ny] = true;
                 prevX[nx][ny] = x;

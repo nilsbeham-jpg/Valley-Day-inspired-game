@@ -55,5 +55,10 @@ public boolean activatesOnReveal(){
         // scaffold is NOT picked up
     }
 
+    @Override
+    public boolean isPickable() {
+        return false; // 🚫 cannot be picked up
+    }
+
 
 }

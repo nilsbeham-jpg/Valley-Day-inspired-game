@@ -111,7 +111,7 @@ public abstract class WildlifeBase {
         }
 
         animTime += dt;
-        updateStepAnimation(dt);
+        updateStepAnimation(dt, map);
 
         // collision check (dangerous only)
         checkPlayerCollision(map);
@@ -127,7 +127,14 @@ public abstract class WildlifeBase {
     }
 
     // Smooth walking animation
-    protected void updateStepAnimation(float dt) {
+    protected void updateStepAnimation(float dt, GameMap map) {
+        if (stepTimeLeft > 0f && map.blocksWildlife(x, y)) {
+            stepTimeLeft = 0f;
+            renderX = x;
+            renderY = y;
+            return;
+        }
+
         if (stepTimeLeft <= 0f) {
             renderX = stepToX;
             renderY = stepToY;
@@ -224,5 +231,7 @@ public abstract class WildlifeBase {
    public boolean isDangerousToPlayer() {
     return true;
 }
+
+
 
 }

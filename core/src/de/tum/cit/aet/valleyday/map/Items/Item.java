@@ -28,4 +28,9 @@ public abstract class Item extends TileObject {
     public void onReveal(GameMap map, int x, int y) {
         // default: do nothing
     }
+    /** Can this item be picked up by the player? */
+    public boolean isPickable() {
+        return true;
+    }
+
 }
