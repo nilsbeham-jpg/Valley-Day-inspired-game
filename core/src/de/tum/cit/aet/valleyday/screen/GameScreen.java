@@ -315,8 +315,8 @@ private void drawVisionMask() {
 
     int r = VISION_RADIUS;
     int r2 = r * r;
-    int inner = Math.max(0, r - 1);       // 光晕宽度：1格
-    int inner2 = inner * inner;
+
+    boolean[][] explored = map.getExplored();
 
     for (int x = 0; x < map.getMapWidth(); x++) {
         for (int y = 0; y < map.getMapHeight(); y++) {
@@ -325,19 +325,30 @@ private void drawVisionMask() {
             int d2 = dx * dx + dy * dy;
 
             float alpha;
-            if (d2 > r2) {
-                alpha = FOG_ALPHA;       // 视野外：更暗
-            } else if (d2 > inner2) {
-                alpha = EDGE_ALPHA;      // 边缘一圈：更淡（光晕）
+
+            if (d2 <= r2) {
+                
+                explored[x][y] = true;
+                continue;
+            }
+
+            if (explored[x][y]) {
+                alpha = 0.75f; 
             } else {
-                continue;                // 视野内：不盖
+                alpha = 1.0f;  
             }
 
             float drawX = x * TILE_SIZE_PX * SCALE;
             float drawY = y * TILE_SIZE_PX * SCALE;
 
             spriteBatch.setColor(0f, 0f, 0f, alpha);
-            spriteBatch.draw(blackPixel, drawX, drawY, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
+            spriteBatch.draw(
+                    blackPixel,
+                    drawX,
+                    drawY,
+                    TILE_SIZE_PX * SCALE,
+                    TILE_SIZE_PX * SCALE
+            );
         }
     }
 
@@ -353,41 +364,49 @@ private void drawVisionMask() {
 private float wildlifeDebugTimer = 0f;
 
 private void drawWildlife(SpriteBatch batch) {
-    // print once per second to avoid spam
-    wildlifeDebugTimer -= Gdx.graphics.getDeltaTime();
-    boolean doPrint = false;
-    if (wildlifeDebugTimer <= 0f) {
-        wildlifeDebugTimer = 1.0f;
-        doPrint = true;
-    }
-
-    int index = 0;
-    for (WildlifeBase w : map.getWildlife()) {
-    TextureRegion tex = w.getCurrentAppearance();
-    if (tex == null) {
-        continue;
-    }
+    int playerTileX = map.worldToTile(map.getPlayer().getX());
+    int playerTileY = map.worldToTile(map.getPlayer().getY());
+    int r = VISION_RADIUS;
+    int r2 = r * r;
 
     float baseSize = TILE_SIZE_PX * SCALE;
 
-    // default: full tile (for chicken)
-    float drawW = baseSize;
-    float drawH = baseSize;
+    for (WildlifeBase w : map.getWildlife()) {
+        if (!w.isAlive()) {
+            continue;
+        }
 
-    // 🐌 snail is smaller
-    if (w.getClass().getSimpleName().contains("Snail")) {
-        drawW = baseSize * 0.6f;
-        drawH = baseSize * 0.6f;
+        // ONLY render wildlife if it's inside CURRENT vision circle
+        int wx = w.getX();
+        int wy = w.getY();
+        int dx = wx - playerTileX;
+        int dy = wy - playerTileY;
+        if (dx * dx + dy * dy > r2) {
+            continue;
+        }
+
+        TextureRegion tex = w.getCurrentAppearance();
+        if (tex == null) {
+            continue;
+        }
+
+        float drawW = baseSize;
+        float drawH = baseSize;
+
+        // 🐌 snail is smaller
+        if (w.getClass().getSimpleName().contains("Snail")) {
+            drawW = baseSize * 0.6f;
+            drawH = baseSize * 0.6f;
+        }
+
+        // center the sprite in the tile (use smooth render position)
+        float px = w.getRenderX() * baseSize + (baseSize - drawW) * 0.5f;
+        float py = w.getRenderY() * baseSize + (baseSize - drawH) * 0.5f;
+
+        batch.draw(tex, px, py, drawW, drawH);
     }
-
-    // center the sprite in the tile
-    float px = w.getRenderX() * baseSize + (baseSize - drawW) * 0.5f;
-    float py = w.getRenderY() * baseSize + (baseSize - drawH) * 0.5f;
-
-    spriteBatch.draw(tex, px, py, drawW, drawH);
 }
 
-}
 
 
     private static void draw(SpriteBatch spriteBatch, Drawable drawable) {

@@ -86,6 +86,9 @@ public class GameMap {
     private float fleeDirX = 0f;
     private float fleeDirY = 0f;
     private static final float FLEE_SPEED = 6.0f;
+    
+    // Fog of War memory
+    private boolean[][] explored;
 
     // end state flags
     private boolean gameWon = false;
@@ -105,6 +108,9 @@ public class GameMap {
         this.wildlifeSpeedMultiplier = diff.speedMultiplier;
 
         loadMap(mapPath);
+
+        explored = new boolean[mapWidth][mapHeight];
+
 
         int[] entrance = findEntrancePosition();
         this.player = new Player(this.world, this, entrance[0], entrance[1]);
@@ -1075,6 +1081,10 @@ private boolean spawnOneWildlifeRandomly() {
     public void blockWildlifeAt(int x, int y) {
         wildlifeBlocked[x][y] = true;
     }
+    
+    public boolean[][] getExplored() {
+    return explored;
+}
 
 
 
