@@ -47,6 +47,12 @@ public class GameScreen implements Screen {
 
     private float remainingTime = 320f; // remeber to change total time in HUD if you change this
 
+
+    //fog of war
+    private com.badlogic.gdx.graphics.Texture blackPixel;
+    private static final int VISION_RADIUS = 3;      
+    private static final float FOG_ALPHA = 1f;    
+    private static final float EDGE_ALPHA = 0.45f;   
 // seconds
 
     private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
@@ -286,14 +292,58 @@ public class GameScreen implements Screen {
             }
         }
 
-        // 5) Wildlife (draw AFTER crops so snails on crops are visible)
-        drawWildlife(spriteBatch);
+        // 5) Wildlife
+    drawWildlife(spriteBatch);
 
-        // 6) Player
-        draw(spriteBatch, map.getPlayer());
+// 6) Player
+    draw(spriteBatch, map.getPlayer());
 
-        spriteBatch.end();
+// 7) Vision mask (MUST be before end)
+    drawVisionMask();
+
+spriteBatch.end();
+
     }
+
+private void drawVisionMask() {
+    if (blackPixel == null) {
+        return;
+    }
+
+    int px = map.worldToTile(map.getPlayer().getX());
+    int py = map.worldToTile(map.getPlayer().getY());
+
+    int r = VISION_RADIUS;
+    int r2 = r * r;
+    int inner = Math.max(0, r - 1);       // 光晕宽度：1格
+    int inner2 = inner * inner;
+
+    for (int x = 0; x < map.getMapWidth(); x++) {
+        for (int y = 0; y < map.getMapHeight(); y++) {
+            int dx = x - px;
+            int dy = y - py;
+            int d2 = dx * dx + dy * dy;
+
+            float alpha;
+            if (d2 > r2) {
+                alpha = FOG_ALPHA;       // 视野外：更暗
+            } else if (d2 > inner2) {
+                alpha = EDGE_ALPHA;      // 边缘一圈：更淡（光晕）
+            } else {
+                continue;                // 视野内：不盖
+            }
+
+            float drawX = x * TILE_SIZE_PX * SCALE;
+            float drawY = y * TILE_SIZE_PX * SCALE;
+
+            spriteBatch.setColor(0f, 0f, 0f, alpha);
+            spriteBatch.draw(blackPixel, drawX, drawY, TILE_SIZE_PX * SCALE, TILE_SIZE_PX * SCALE);
+        }
+    }
+
+    spriteBatch.setColor(1f, 1f, 1f, 1f);
+}
+
 
     /**
      * Draw wildlife with sprite-based size (supports non-16x16 frames like 41x32 snail).
@@ -393,6 +443,18 @@ private void drawWildlife(SpriteBatch batch) {
 
         mapCamera.position.set(px, py, 0);
         mapCamera.update();
+        //fog of war
+        if (blackPixel == null) {
+    com.badlogic.gdx.graphics.Pixmap pm =
+            new com.badlogic.gdx.graphics.Pixmap(1, 1, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+    pm.setColor(0f, 0f, 0f, 1f);
+    pm.fill();
+    blackPixel = new com.badlogic.gdx.graphics.Texture(pm);
+    pm.dispose();
+}
+
+
+
     }
 
     @Override
@@ -400,6 +462,11 @@ private void drawWildlife(SpriteBatch batch) {
     }
 
     @Override
-    public void dispose() {
+public void dispose() {
+    if (blackPixel != null) {
+        blackPixel.dispose();
+        blackPixel = null;
     }
+}
+
 }
