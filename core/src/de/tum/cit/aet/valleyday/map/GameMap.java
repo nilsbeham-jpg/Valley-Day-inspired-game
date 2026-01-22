@@ -350,7 +350,7 @@ if (value == 3) {
 
             case 1 -> {
                 Tile t;
-                if (Math.random() < 0.20f) {
+                if (Math.random() < 0.05f) {
                     t = new Tile(new RockDebris(x, y));
                 } else {
                     t = new Tile(new Debris(x, y));

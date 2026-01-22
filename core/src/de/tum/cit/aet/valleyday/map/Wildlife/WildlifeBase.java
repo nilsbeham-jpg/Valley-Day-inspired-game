@@ -117,8 +117,10 @@ public abstract class WildlifeBase {
         checkPlayerCollision(map);
 
         // AI
-        decide(dt, map);
-
+        // 🚫 Do NOT decide while moving
+        if (stepTimeLeft <= 0f) {
+            decide(dt, map);
+        }
         // Interaction (e.g., eat crop)
         onStealOrInteract(map);
 
@@ -128,35 +130,56 @@ public abstract class WildlifeBase {
 
     // Smooth walking animation
     protected void updateStepAnimation(float dt, GameMap map) {
-        if (stepTimeLeft > 0f && map.blocksWildlife(x, y)) {
+// 🚫 Abort if target tile is now blocked
+        // 🚫 Abort if target tile is now blocked
+        if (stepTimeLeft > 0f && map.blocksWildlife((int) stepToX, (int) stepToY)) {
+
+            // cancel movement
             stepTimeLeft = 0f;
+
+            // snap back to last valid logical tile
+            renderX = x;
+            renderY = y;
+
+            // 🔧 RESET animation / facing state (CRITICAL)
+            lastDx = 0;
+            lastDy = 0;
+
+            // 🔧 RESET interpolation origin (CRITICAL)
+            stepFromX = x;
+            stepFromY = y;
+
+            return;
+        }
+
+
+        if (stepTimeLeft <= 0f) {
             renderX = x;
             renderY = y;
             return;
         }
 
-        if (stepTimeLeft <= 0f) {
-            renderX = stepToX;
-            renderY = stepToY;
-            return;
-        }
-
         stepTimeLeft -= dt;
-        if (stepTimeLeft < 0f) {
-            stepTimeLeft = 0f;
-        }
+        if (stepTimeLeft < 0f) stepTimeLeft = 0f;
 
-        float t = (stepDuration <= 0f) ? 1f : 1f - (stepTimeLeft / stepDuration);
-        if (t < 0f) t = 0f;
-        if (t > 1f) t = 1f;
+        float t = 1f - (stepTimeLeft / stepDuration);
+        t = MathUtils.clamp(t, 0f, 1f);
 
         renderX = stepFromX + (stepToX - stepFromX) * t;
         renderY = stepFromY + (stepToY - stepFromY) * t;
+
+        // ✅ ONLY NOW commit logical position
+        if (stepTimeLeft == 0f) {
+            x = (int) stepToX;
+            y = (int) stepToY;
+            renderX = x;
+            renderY = y;
+        }
     }
 
     protected void beginStepTo(int nx, int ny, float walkTime) {
-        stepFromX = renderX;
-        stepFromY = renderY;
+        stepFromX = x;
+        stepFromY = y;
 
         stepToX = nx;
         stepToY = ny;
@@ -164,12 +187,8 @@ public abstract class WildlifeBase {
         stepDuration = walkTime;
         stepTimeLeft = walkTime;
 
-        // update direction for facing
         lastDx = nx - x;
         lastDy = ny - y;
-
-        x = nx;
-        y = ny;
     }
 
     protected boolean tryStep(int nx, int ny, GameMap map, float walkTime) {
