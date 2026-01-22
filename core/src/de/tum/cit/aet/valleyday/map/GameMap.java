@@ -37,13 +37,15 @@ import java.io.InputStream;
 
 
 /**
- * The class is responsible for:
- * loading the map layout
- * owning tiles, crops, and terrain objects
- * owning the physics World
- * owning the Player
- * advancing world simulation (physics + crops)
- * answering questions like “is this blocked?”, “is this an exit?”
+ * Central world container of the game.
+ *
+ * This class owns and coordinates almost all core game systems that are bound
+ * to the map: tiles, crops, wildlife, the player, and the physics world.
+ * It is responsible for loading the map layout from file, updating all
+ * simulation elements each frame, and answering high-level queries such as
+ * collision checks or win/lose conditions.
+ *
+ * In short: this is the authoritative state holder of the playable world.
  */
 public class GameMap {
 
@@ -79,14 +81,12 @@ public class GameMap {
     private float wildlifeRespawnTimer = 0f;
     private static final float WILDLIFE_RESPAWN_COOLDOWN = 10.0f;
 
-    // -------------------------
-    // SCARED 
-    // -------------------------
+
     private boolean scared = false;
     private float fleeDirX = 0f;
     private float fleeDirY = 0f;
     private static final float FLEE_SPEED = 6.0f;
-    
+
     // Fog of War memory
     private boolean[][] explored;
 
@@ -96,6 +96,17 @@ public class GameMap {
     private final float wildlifeSpeedMultiplier;
 
 
+
+    /**
+     * Creates a new game map instance and loads the given map file.
+     *
+     * This constructor initializes the physics world, reads difficulty
+     * parameters, loads all tiles and entities from the map definition,
+     * and finally spawns the player at the entrance position.
+     *
+     * @param game     reference to the main game instance
+     * @param mapPath  path to the map properties file
+     */
     public GameMap(ValleyDayGame game, String mapPath) {
         this.game = game;
         this.world = new World(Vector2.Zero, true);
@@ -119,7 +130,15 @@ public class GameMap {
 
     // ---------------------------------
     // MAIN TICK
-    // ---------------------------------
+    /**
+     * Main update method called once per frame.
+     *
+     * Advances wildlife logic, player logic, crops, physics simulation,
+     * and checks for win/lose conditions. This method defines the
+     * high-level update order of the entire game world.
+     *
+     * @param frameTime time elapsed since last frame (in seconds)
+     */
     public void tick(float frameTime) {
         // 1) wildlife moves
         tickWildlife(frameTime);
@@ -157,9 +176,14 @@ public class GameMap {
         }
     }
 
-    // ---------------------------------
+
     // SCARED: collision trigger
-    // ---------------------------------
+    /**
+     * Checks whether the player is currently touching dangerous wildlife.
+     *
+     * If a collision is detected, the player enters the "scared" state and
+     * is forced to flee toward the nearest map border.
+     */
     private void checkTouchWildlife() {
     if (lostWildlife || scared) {
         return;
@@ -187,6 +211,11 @@ public class GameMap {
 }
 
 
+
+    /**
+     * Computes a normalized flee direction pointing toward the closest
+     * map border. Used when the player is scared by wildlife.
+     */
     private void computeFleeDirectionToNearestBorder() {
         float px = player.getX();
         float py = player.getY();
@@ -1081,7 +1110,7 @@ private boolean spawnOneWildlifeRandomly() {
     public void blockWildlifeAt(int x, int y) {
         wildlifeBlocked[x][y] = true;
     }
-    
+
     public boolean[][] getExplored() {
     return explored;
 }
