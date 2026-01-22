@@ -3,34 +3,60 @@ package de.tum.cit.aet.valleyday.map.Items;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.TileObject;
 
+/**
+ * Item is a base class for all items on the map.
+ * Player can usually walk over and pick up items.
+ */
 public abstract class Item extends TileObject {
 
+    /**
+     * Create an item on a tile.
+     */
     protected Item(int x, int y) {
         super(x, y);
     }
 
+    /**
+     * Items do not block movement.
+     */
     @Override
     public boolean isWalkable() {
-        return true; // player can walk over items
+        return true;
     }
 
+    /**
+     * Items can be removed from the map.
+     */
     @Override
     public boolean isDestructible() {
         return true;
     }
-    public boolean activatesOnReveal(){
+
+    /**
+     * Some items activate when revealed from debris.
+     * Default is false.
+     */
+    public boolean activatesOnReveal() {
         return false;
     }
-    
+
+    /**
+     * Called when player picks up the item.
+     */
     public abstract void onPickup(GameMap map);
 
-    /** Called when revealed from debris */
+    /**
+     * Called when item is revealed.
+     * Default does nothing.
+     */
     public void onReveal(GameMap map, int x, int y) {
-        // default: do nothing
+        // nothing here
     }
-    /** Can this item be picked up by the player? */
+
+    /**
+     * @return true if item can be picked up
+     */
     public boolean isPickable() {
         return true;
     }
-
 }
