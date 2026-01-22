@@ -343,6 +343,22 @@ public class GameMap {
 
     }
 
+
+    /**
+     * Creates an input stream for map loading.
+     *
+     * Supports both file system paths and internal assets.
+     */
+    private InputStream createMapInputStream(String path) throws IOException {
+        // absolute or relative filesystem path
+        if (new java.io.File(path).exists()) {
+            return new FileInputStream(path);
+        }
+
+        // fallback: internal asset (for default maps)
+        return Gdx.files.internal(path).read();
+    }
+
     /**
      * Finds the entrance tile in the loaded map.
      *
@@ -755,8 +771,12 @@ public class GameMap {
 
 
 
-
+    //------------------------------------------------------------------
+    //------------------------------------------------------------------
     // WILDLIFE LOGIC!!!!!!!!!!!!!!!!!!
+    //------------------------------------------------------------------
+    //------------------------------------------------------------------
+
     //Wildlife Tick
     /**
      * Updates wildlife logic, handles death and respawning.
@@ -917,160 +937,9 @@ public class GameMap {
         return false;
     }
 
-
-    //Getters
-    public Player getPlayer() {
-        return player;
-    }
-
-    public boolean[][] getExplored() {
-        return explored;
-    }
-
-    public Tile[][] getTiles(){
-        return tiles;
-    }
-
-    public int getHarvestedCount() {
-        return harvested;
-    }
-
-    public int getQuota() {
-        return quota;
-    }
-
-    public List<WildlifeBase> getWildlife() {
-    return wildlife;
-    }
-
-    public CropTile[][] getCrops() {
-        return crops;
-    }
-
-    public CropTile getCropAt(int x, int y) {
-        if (crops == null) {
-            return null;
-        }
-        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
-            return null;
-        }
-        return crops[x][y];
-    }
-
-    public int getMapWidth() {
-        return mapWidth;
-    }
-
-    public int getMapHeight() {
-        return mapHeight;
-    }
-
-    public int worldToTile(float value) {
-        return (int) Math.floor(value);
-    }
-
     /**
-     * Converts a world coordinate to tile space.
+     * Computes the next BFS step toward a target tile.
      */
-    public int[] worldToTile(float worldX, float worldY) {
-        return new int[]{
-                worldToTile(worldX),
-                worldToTile(worldY)
-        };
-    }
-
-
-    /**
-     * Returns the tile directly in front of the player
-     * based on the current facing direction.
-     */
-    public int[] getFrontTile(Player player) {
-        int[] tile = worldToTile(player.getX(), player.getY());
-        int tx = tile[0];
-        int ty = tile[1];
-
-        switch (player.getFacing()) {
-            case UP -> ty += 1;
-            case DOWN -> ty -= 1;
-            case LEFT -> tx -= 1;
-            case RIGHT -> tx += 1;
-        }
-
-        return new int[]{tx, ty};
-    }
-
-
-
-
-
-
-
-    public void advanceAllCrops() {
-        if (crops == null) return;
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                if (crops[x][y] != null) {
-                    crops[x][y].advanceStage();
-                }
-            }
-        }
-    }
-
-    public void restoreAllCrops() {
-        if (crops == null) return;
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                if (crops[x][y] != null) {
-                    crops[x][y].restoreIfRotted();
-                }
-            }
-        }
-    }
-
-    public void applyWateringCan() {
-        if (crops == null) return;
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                CropTile c = crops[x][y];
-                if (c != null) {
-                    c.restoreIfRotted();
-                    c.resetRotTimer(60f);
-                }
-            }
-        }
-    }
-
-    // Pathfinding helpers you already have (unchanged)
-    public int[] findNearestMatureCrop(int sx, int sy, int maxManhattanDist) {
-        if (crops == null) {
-            return null;
-        }
-
-        int bestDist = Integer.MAX_VALUE;
-        int bestX = -1;
-        int bestY = -1;
-
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
-                CropTile c = crops[x][y];
-                if (c == null) continue;
-                if (c.getStage() != de.tum.cit.aet.valleyday.map.crops.CropStage.MATURE) continue;
-
-                int d = Math.abs(x - sx) + Math.abs(y - sy);
-                if (d <= maxManhattanDist && d < bestDist) {
-                    bestDist = d;
-                    bestX = x;
-                    bestY = y;
-                }
-            }
-        }
-
-        if (bestDist == Integer.MAX_VALUE) {
-            return null;
-        }
-        return new int[]{bestX, bestY};
-    }
-
     public int[] nextStepBfs(int sx, int sy, int tx, int ty) {
         if (sx == tx && sy == ty) {
             return new int[]{sx, sy};
@@ -1142,18 +1011,227 @@ public class GameMap {
     }
 
 
-
-    private InputStream createMapInputStream(String path) throws IOException {
-        // absolute or relative filesystem path
-        if (new java.io.File(path).exists()) {
-            return new FileInputStream(path);
+    /**
+     * Returns the wildlife instance located at the given tile.
+     */
+    public WildlifeBase getWildlifeAt(int x, int y) {
+        for (WildlifeBase w : wildlife) {
+            if (w.isAlive() && w.getX() == x && w.getY() == y) {
+                return w;
+            }
         }
+        return null;
+    }
 
-        // fallback: internal asset (for default maps)
-        return Gdx.files.internal(path).read();
+    /**
+     * Checks whether a tile is blocked specifically for wildlife.
+     */
+    public boolean blocksWildlife(int x, int y) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return true;
+        }
+        return wildlifeBlocked[x][y];
+    }
+
+    /**
+     * Marks a tile as blocked for wildlife pathfinding.
+     */
+    public void blockWildlifeAt(int x, int y) {
+        wildlifeBlocked[x][y] = true;
     }
 
 
+
+    //------------------------------------------------------------------
+    //------------------------------------------------------------------
+    //Getters
+    //------------------------------------------------------------------
+    //------------------------------------------------------------------
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public boolean[][] getExplored() {
+        return explored;
+    }
+
+    public Tile[][] getTiles(){
+        return tiles;
+    }
+
+    public int getHarvestedCount() {
+        return harvested;
+    }
+
+    public int getQuota() {
+        return quota;
+    }
+
+    public List<WildlifeBase> getWildlife() {
+    return wildlife;
+    }
+
+    public CropTile[][] getCrops() {
+        return crops;
+    }
+
+    public CropTile getCropAt(int x, int y) {
+        if (crops == null) {
+            return null;
+        }
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
+            return null;
+        }
+        return crops[x][y];
+    }
+
+    public int getMapWidth() {
+        return mapWidth;
+    }
+
+    public int getMapHeight() {
+        return mapHeight;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    public int worldToTile(float value) {
+        return (int) Math.floor(value);
+    }
+
+    /**
+     * Converts a world coordinate to tile space.
+     */
+    public int[] worldToTile(float worldX, float worldY) {
+        return new int[]{
+                worldToTile(worldX),
+                worldToTile(worldY)
+        };
+    }
+
+
+    /**
+     * Returns the tile directly in front of the player
+     * based on the current facing direction.
+     */
+    public int[] getFrontTile(Player player) {
+        int[] tile = worldToTile(player.getX(), player.getY());
+        int tx = tile[0];
+        int ty = tile[1];
+
+        switch (player.getFacing()) {
+            case UP -> ty += 1;
+            case DOWN -> ty -= 1;
+            case LEFT -> tx -= 1;
+            case RIGHT -> tx += 1;
+        }
+
+        return new int[]{tx, ty};
+    }
+
+
+
+
+
+    //------------------------------------------------------------------
+    //------------------------------------------------------------------
+    //CROPS
+    //------------------------------------------------------------------
+    //------------------------------------------------------------------
+
+    /**
+     * Advances all crops by one growth stage.
+     * Used by time-skip or item effects.
+     */
+    public void advanceAllCrops() {
+        if (crops == null) return;
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                if (crops[x][y] != null) {
+                    crops[x][y].advanceStage();
+                }
+            }
+        }
+    }
+
+    /**
+     * Restores all rotted crops if possible.
+     */
+    public void restoreAllCrops() {
+        if (crops == null) return;
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                if (crops[x][y] != null) {
+                    crops[x][y].restoreIfRotted();
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Applies the watering can effect to all crops.
+     */
+    public void applyWateringCan() {
+        if (crops == null) return;
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                CropTile c = crops[x][y];
+                if (c != null) {
+                    c.restoreIfRotted();
+                    c.resetRotTimer(60f);
+                }
+            }
+        }
+    }
+
+    /**
+     * Finds the nearest mature crop using Manhattan distance.
+     */
+    public int[] findNearestMatureCrop(int sx, int sy, int maxManhattanDist) {
+        if (crops == null) {
+            return null;
+        }
+
+        int bestDist = Integer.MAX_VALUE;
+        int bestX = -1;
+        int bestY = -1;
+
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                CropTile c = crops[x][y];
+                if (c == null) continue;
+                if (c.getStage() != de.tum.cit.aet.valleyday.map.crops.CropStage.MATURE) continue;
+
+                int d = Math.abs(x - sx) + Math.abs(y - sy);
+                if (d <= maxManhattanDist && d < bestDist) {
+                    bestDist = d;
+                    bestX = x;
+                    bestY = y;
+                }
+            }
+        }
+
+        if (bestDist == Integer.MAX_VALUE) {
+            return null;
+        }
+        return new int[]{bestX, bestY};
+    }
+
+
+
+    /**
+     * Randomly selects a crop type for planting.
+     */
     private CropType randomCropType() {
         double r = Math.random();
 
@@ -1166,24 +1244,10 @@ public class GameMap {
         }
     }
 
-    public WildlifeBase getWildlifeAt(int x, int y) {
-        for (WildlifeBase w : wildlife) {
-            if (w.isAlive() && w.getX() == x && w.getY() == y) {
-                return w;
-            }
-        }
-        return null;
-    }
 
-
-    public boolean blocksWildlife(int x, int y) {
-        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
-            return true;
-        }
-        return wildlifeBlocked[x][y];
-    }
-
-
+    /**
+     * Places a tile object if the tile is empty.
+     */
     public void placeTileObject(int x, int y, TileObject obj) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return;
@@ -1198,14 +1262,6 @@ public class GameMap {
 
         tile.setObject(obj);
     }
-
-    public void blockWildlifeAt(int x, int y) {
-        wildlifeBlocked[x][y] = true;
-    }
-
-
-
-
 
 
 
