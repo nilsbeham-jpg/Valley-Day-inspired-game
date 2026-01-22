@@ -18,7 +18,10 @@ public abstract class Item extends TileObject {
     public boolean isDestructible() {
         return true;
     }
-
+    public boolean activatesOnReveal(){
+        return false;
+    }
+    
     public abstract void onPickup(GameMap map);
 
     /** Called when revealed from debris */

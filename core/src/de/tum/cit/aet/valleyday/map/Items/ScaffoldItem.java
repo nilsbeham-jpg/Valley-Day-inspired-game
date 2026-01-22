@@ -1,9 +1,11 @@
 package de.tum.cit.aet.valleyday.map.Items;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.ScaffoldZone;
 import de.tum.cit.aet.valleyday.map.Wildlife.WildlifeBase;
+import de.tum.cit.aet.valleyday.texture.Textures;
 
 public class ScaffoldItem extends Item {
 
@@ -13,7 +15,7 @@ public class ScaffoldItem extends Item {
 
     @Override
     public TextureRegion getTexture() {
-        return null;
+        return Textures.SCARECROW;
     }
 
     @Override
@@ -40,9 +42,14 @@ public class ScaffoldItem extends Item {
                 map.blockWildlifeAt(tx, ty);
             }
         }
-
+        
     }
 
+@Override
+public boolean activatesOnReveal(){
+        return true;
+    }
+    
     @Override
     public void onPickup(GameMap map) {
         // scaffold is NOT picked up

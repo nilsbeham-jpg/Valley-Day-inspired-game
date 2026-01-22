@@ -26,8 +26,8 @@ public enum SpriteSheet {
     BASICS("basics.png",19,19),
     HARVEST("Harvest.png",16,16),
     CROPS("crops.png",32,32),
-    SNAIL("snail.png", 41, 32);
-    
+    SNAIL("snail.png", 41, 32),
+    SCARECROW("Harvest.png",16,16);
     private final Texture spritesheet;
     private final int width;
     private final int height;

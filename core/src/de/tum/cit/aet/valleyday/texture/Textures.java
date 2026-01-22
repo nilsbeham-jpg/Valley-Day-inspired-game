@@ -48,5 +48,6 @@ public class Textures {
     public static final TextureRegion WATERCAN  = SpriteSheet.HARVEST.at(1,7);
     public static TextureRegion NON_FARMLAND  = SpriteSheet.BASIC_TILES.at(2,1);
 
-
+    public static final TextureRegion SCARECROW  = SpriteSheet.SCARECROW.at(1,2);
+    
 }

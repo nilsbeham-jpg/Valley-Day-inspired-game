@@ -462,21 +462,24 @@ if (value == 3) {
                obj instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
        TileObject revealed = tile.interact();
+if(revealed==null){
+    return;
+}
+if(revealed instanceof Item item){
+    if( item.activatesOnReveal()){
+        item.onReveal(this, x, y);
+        tile.setObject(item);
+    }
+    else{
+        tile.setObject(item);
+    }
+}
+    else{
+        tile.setObject(revealed);
 
-       if (revealed != null) {
+    }
 
-           // If it's an Item with world effect (scaffold)
-           if (revealed instanceof Item item) {
-               item.onReveal(this, x, y);
-           }
-           // Otherwise (Exit, etc.) place it on the tile
-           else {
-               tile.clearObject();
-               tiles[x][y].setHiddenObject(null);
-               tiles[x][y].clearObject();
-               tiles[x][y] = new Tile(revealed);
-           }
-       }
+       
 
 
        boolean isDebrisNow =
