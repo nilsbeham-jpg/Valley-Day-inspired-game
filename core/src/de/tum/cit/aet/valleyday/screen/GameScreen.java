@@ -20,11 +20,19 @@ import de.tum.cit.aet.valleyday.map.terrain.SoilType;
 import de.tum.cit.aet.valleyday.texture.Drawable;
 import de.tum.cit.aet.valleyday.texture.Textures;
 
-
 /**
- * The GameScreen class is responsible for rendering the gameplay screen.
- * It handles the game logic and rendering of the game elements.
+ * Main gameplay screen.
+ *
+ * This screen is responsible for rendering the entire game world,
+ * advancing the game state each frame, handling camera movement,
+ * drawing HUD elements, and transitioning between playing, victory,
+ * and game-over states.
+ *
+ * It does not own game logic itself, but orchestrates rendering and
+ * delegates simulation updates to {@link GameMap}.
  */
+
+
 public class GameScreen implements Screen {
 
     /**
@@ -53,7 +61,7 @@ public class GameScreen implements Screen {
     private static final int VISION_RADIUS = 3;      
     private static final float FOG_ALPHA = 1f;    
     private static final float EDGE_ALPHA = 0.45f;   
-// seconds
+    // seconds
 
     private static final Color Play_Color = new Color (0.2f,0.5f,0.2f,1f);
     private static final Color WIN_Color = new Color (0.2f,0.6f,0.2f,1f);
@@ -65,15 +73,10 @@ public class GameScreen implements Screen {
 
 
 
-
-
-
-
-
     /**
-     * Constructor for GameScreen. Sets up the camera and font.
+     * Creates the gameplay screen and initializes camera and HUD.
      *
-     * @param game The main game class, used to access global resources and methods.
+     * @param game main game instance
      */
     public GameScreen(ValleyDayGame game) {
         this.game = game;
@@ -87,11 +90,15 @@ public class GameScreen implements Screen {
         this.mapCamera.setToOrtho(false);
 
     }
-    
+
     /**
-     * The render method is called every frame to render the game.
-     * @param deltaTime The time in seconds since the last render.
-     *///deltaTime：上一帧到这一帧过去了多少秒（秒数）
+     * Main render loop, called once per frame.
+     *
+     * Handles input, updates game state, advances the map simulation,
+     * and renders either the gameplay or end screens.
+     *
+     * @param deltaTime time since last frame in seconds
+     */
     @Override
     public void render(float deltaTime) {
         // Check for escape key press to go back to the menu //按ESC到菜单界面
@@ -117,7 +124,6 @@ public class GameScreen implements Screen {
 
         // Clear the previous frame from the screen, or else the picture smears
         //ScreenUtils.clear(new Color(0.2f, 0.5f, 0.2f, 1f)); // dark green
-        //清屏：避免“拖影/涂抹”
         switch(gameState){
             case PLAYING->ScreenUtils.clear(Play_Color);
             case VICTORY->ScreenUtils.clear(WIN_Color);
@@ -169,6 +175,12 @@ public class GameScreen implements Screen {
      */
     private static final float DEAD_ZONE_FACTOR = 0.8f;
 
+
+    /**
+     * Updates the camera position to follow the player smoothly
+     * while respecting a dead-zone.
+     */
+
     private void updateCamera() {
         float playerX = map.getPlayer().getX() * TILE_SIZE_PX * SCALE;
         float playerY = map.getPlayer().getY() * TILE_SIZE_PX * SCALE;
@@ -193,6 +205,11 @@ public class GameScreen implements Screen {
 
     private static final int GRASS_PADDING = 10; // tiles
 
+
+    /**
+     * Renders the entire map including background, tiles,
+     * crops, wildlife, player, and fog-of-war.
+     */
     private void renderMap() {
         // This configures the spriteBatch to use the camera's perspective when rendering
         spriteBatch.setProjectionMatrix(mapCamera.combined);
@@ -305,110 +322,118 @@ spriteBatch.end();
 
     }
 
-private void drawVisionMask() {
-    if (blackPixel == null) {
-        return;
-    }
-
-    int px = map.worldToTile(map.getPlayer().getX());
-    int py = map.worldToTile(map.getPlayer().getY());
-
-    int r = VISION_RADIUS;
-    int r2 = r * r;
-
-    boolean[][] explored = map.getExplored();
-
-    for (int x = 0; x < map.getMapWidth(); x++) {
-        for (int y = 0; y < map.getMapHeight(); y++) {
-            int dx = x - px;
-            int dy = y - py;
-            int d2 = dx * dx + dy * dy;
-
-            float alpha;
-
-            if (d2 <= r2) {
-                
-                explored[x][y] = true;
-                continue;
-            }
-
-            if (explored[x][y]) {
-                alpha = 0.75f; 
-            } else {
-                alpha = 1.0f;  
-            }
-
-            float drawX = x * TILE_SIZE_PX * SCALE;
-            float drawY = y * TILE_SIZE_PX * SCALE;
-
-            spriteBatch.setColor(0f, 0f, 0f, alpha);
-            spriteBatch.draw(
-                    blackPixel,
-                    drawX,
-                    drawY,
-                    TILE_SIZE_PX * SCALE,
-                    TILE_SIZE_PX * SCALE
-            );
-        }
-    }
-
-    spriteBatch.setColor(1f, 1f, 1f, 1f);
-}
 
 
     /**
-     * Draw wildlife with sprite-based size (supports non-16x16 frames like 41x32 snail).
-     * Also draws after crops so they are not hidden.
+     * Draws fog-of-war overlay based on player vision radius
+     * and explored tiles.
      */
-    // Put this field in GameScreen (class level)
-private float wildlifeDebugTimer = 0f;
-
-private void drawWildlife(SpriteBatch batch) {
-    int playerTileX = map.worldToTile(map.getPlayer().getX());
-    int playerTileY = map.worldToTile(map.getPlayer().getY());
-    int r = VISION_RADIUS;
-    int r2 = r * r;
-
-    float baseSize = TILE_SIZE_PX * SCALE;
-
-    for (WildlifeBase w : map.getWildlife()) {
-        if (!w.isAlive()) {
-            continue;
+    private void drawVisionMask() {
+        if (blackPixel == null) {
+            return;
         }
 
-        // ONLY render wildlife if it's inside CURRENT vision circle
-        int wx = w.getX();
-        int wy = w.getY();
-        int dx = wx - playerTileX;
-        int dy = wy - playerTileY;
-        if (dx * dx + dy * dy > r2) {
-            continue;
+        int px = map.worldToTile(map.getPlayer().getX());
+        int py = map.worldToTile(map.getPlayer().getY());
+
+        int r = VISION_RADIUS;
+        int r2 = r * r;
+
+        boolean[][] explored = map.getExplored();
+
+        for (int x = 0; x < map.getMapWidth(); x++) {
+            for (int y = 0; y < map.getMapHeight(); y++) {
+                int dx = x - px;
+                int dy = y - py;
+                int d2 = dx * dx + dy * dy;
+
+                float alpha;
+
+                if (d2 <= r2) {
+
+                    explored[x][y] = true;
+                    continue;
+                }
+
+                if (explored[x][y]) {
+                    alpha = 0.75f;
+                } else {
+                    alpha = 1.0f;
+                }
+
+                float drawX = x * TILE_SIZE_PX * SCALE;
+                float drawY = y * TILE_SIZE_PX * SCALE;
+
+                spriteBatch.setColor(0f, 0f, 0f, alpha);
+                spriteBatch.draw(
+                        blackPixel,
+                        drawX,
+                        drawY,
+                        TILE_SIZE_PX * SCALE,
+                        TILE_SIZE_PX * SCALE
+                );
+            }
         }
 
-        TextureRegion tex = w.getCurrentAppearance();
-        if (tex == null) {
-            continue;
-        }
-
-        float drawW = baseSize;
-        float drawH = baseSize;
-
-        // 🐌 snail is smaller
-        if (w.getClass().getSimpleName().contains("Snail")) {
-            drawW = baseSize * 0.6f;
-            drawH = baseSize * 0.6f;
-        }
-
-        // center the sprite in the tile (use smooth render position)
-        float px = w.getRenderX() * baseSize + (baseSize - drawW) * 0.5f;
-        float py = w.getRenderY() * baseSize + (baseSize - drawH) * 0.5f;
-
-        batch.draw(tex, px, py, drawW, drawH);
+        spriteBatch.setColor(1f, 1f, 1f, 1f);
     }
-}
 
 
 
+
+    private float wildlifeDebugTimer = 0f;
+
+
+    /**
+     * Draws all visible wildlife entities.
+     */
+    private void drawWildlife(SpriteBatch batch) {
+        int playerTileX = map.worldToTile(map.getPlayer().getX());
+        int playerTileY = map.worldToTile(map.getPlayer().getY());
+        int r = VISION_RADIUS;
+        int r2 = r * r;
+
+        float baseSize = TILE_SIZE_PX * SCALE;
+
+        for (WildlifeBase w : map.getWildlife()) {
+            if (!w.isAlive()) {
+                continue;
+            }
+
+            // ONLY render wildlife if it's inside CURRENT vision circle
+            int wx = w.getX();
+            int wy = w.getY();
+            int dx = wx - playerTileX;
+            int dy = wy - playerTileY;
+            if (dx * dx + dy * dy > r2) {
+                continue;
+            }
+
+            TextureRegion tex = w.getCurrentAppearance();
+            if (tex == null) {
+                continue;
+            }
+
+            float drawW = baseSize;
+            float drawH = baseSize;
+
+            // 🐌 snail is smaller
+            if (w.getClass().getSimpleName().contains("Snail")) {
+                drawW = baseSize * 0.6f;
+                drawH = baseSize * 0.6f;
+            }
+
+            // center the sprite in the tile (use smooth render position)
+            float px = w.getRenderX() * baseSize + (baseSize - drawW) * 0.5f;
+            float py = w.getRenderY() * baseSize + (baseSize - drawH) * 0.5f;
+
+            batch.draw(tex, px, py, drawW, drawH);
+        }
+    }
+
+    /**
+     * Draws a drawable entity aligned to tile center.
+     */
     private static void draw(SpriteBatch spriteBatch, Drawable drawable) {
         TextureRegion texture = drawable.getCurrentAppearance();
 
@@ -448,6 +473,10 @@ private void drawWildlife(SpriteBatch batch) {
     public void resume() {
     }
 
+
+    /**
+     * Called when the screen becomes active.
+     */
     @Override
     public void show() {
         MusicTrack.playExclusive(MusicTrack.BACKGROUND);
@@ -480,12 +509,16 @@ private void drawWildlife(SpriteBatch batch) {
     public void hide() {
     }
 
+
+    /**
+     * Disposes GPU resources used by this screen.
+     */
     @Override
-public void dispose() {
-    if (blackPixel != null) {
-        blackPixel.dispose();
-        blackPixel = null;
+    public void dispose() {
+        if (blackPixel != null) {
+            blackPixel.dispose();
+            blackPixel = null;
+        }
     }
-}
 
 }
