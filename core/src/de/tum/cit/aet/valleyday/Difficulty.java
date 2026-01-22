@@ -1,5 +1,19 @@
 package de.tum.cit.aet.valleyday;
 
+/**
+ * Defines the difficulty levels available in the game.
+ *
+ * Each difficulty bundles a set of gameplay parameters that directly
+ * influence challenge and pacing. These values are read by the game
+ * during initialization and applied consistently across the map,
+ * wildlife behavior, and win conditions.
+ *
+ * Difficulty affects:
+ * - how many wildlife entities can exist at the same time
+ * - how fast wildlife moves
+ * - how many crops must be harvested to unlock the exit
+ */
+
 public enum Difficulty {
 
     EASY(
@@ -24,6 +38,14 @@ public enum Difficulty {
     public final float speedMultiplier;
     public final int exitQuota;
 
+
+    /**
+     * Creates a difficulty configuration with fixed gameplay parameters.
+     *
+     * @param maxWildlife     maximum simultaneous wildlife
+     * @param speedMultiplier wildlife speed multiplier
+     * @param exitQuota      required harvest count to finish the level
+     */
     Difficulty(int maxWildlife, float speedMultiplier, int exitQuota) {
         this.maxWildlife = maxWildlife;
         this.speedMultiplier = speedMultiplier;

@@ -6,9 +6,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * Contains all animation constants used in the game.
- * It is good practice to keep all textures and animations in constants to avoid loading them multiple times.
- * These can be referenced anywhere they are needed.
+ * Central registry for all animations used in the game.
+ *
+ * This class defines animation constants for the player character and
+ * wildlife entities. All animations are created once and reused to avoid
+ * unnecessary texture loading and memory overhead.
+ *
+ * The class is intentionally static-only and holds no instance state.
  */
 public class Animations {
     
@@ -57,24 +61,28 @@ public class Animations {
     }
 
 
-//SNAIL WALK 
-// ----------------------------
-public static final com.badlogic.gdx.graphics.g2d.Animation<TextureRegion> SNAIL_WALK;
+    /**
+     * Walking animation for snail wildlife.
+     *
+     * Uses a custom texture file with non-square frames to give the
+     * snail a slower and more heavy movement feeling.
+     */
+        public static final com.badlogic.gdx.graphics.g2d.Animation<TextureRegion> SNAIL_WALK;
 
-static {
-    Texture snailTexture = new Texture(Gdx.files.internal("texture/snail.png"));
+        static {
+            Texture snailTexture = new Texture(Gdx.files.internal("texture/snail.png"));
 
-    TextureRegion[] snailFrames = new TextureRegion[] {
-            new TextureRegion(snailTexture, 0,   0, 41, 32),
-            new TextureRegion(snailTexture, 41,  0, 41, 32),
-            new TextureRegion(snailTexture, 82,  0, 41, 32)
-    };
+            TextureRegion[] snailFrames = new TextureRegion[] {
+                    new TextureRegion(snailTexture, 0,   0, 41, 32),
+                    new TextureRegion(snailTexture, 41,  0, 41, 32),
+                    new TextureRegion(snailTexture, 82,  0, 41, 32)
+            };
 
-    SNAIL_WALK = new com.badlogic.gdx.graphics.g2d.Animation<>(
-            0.35f,          // slow animation → snail feeling
-            snailFrames
-    );
-}
+            SNAIL_WALK = new com.badlogic.gdx.graphics.g2d.Animation<>(
+                    0.35f,          // slow animation → snail feeling
+                    snailFrames
+            );
+        }
 
 }
 
