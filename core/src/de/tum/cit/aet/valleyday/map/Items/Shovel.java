@@ -1,5 +1,4 @@
 package de.tum.cit.aet.valleyday.map.Items;
-
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.texture.Textures;
