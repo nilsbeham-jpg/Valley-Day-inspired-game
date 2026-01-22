@@ -4,7 +4,8 @@ import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.TileObject;
 
 /**
- * Item is a base class for all items on the map.
+ * this Class is father class for all the Items.
+ * 
  * Player can usually walk over and pick up items.
  */
 public abstract class Item extends TileObject {
