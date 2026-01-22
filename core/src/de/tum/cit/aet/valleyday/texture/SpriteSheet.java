@@ -9,9 +9,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * It is assumed that every spritesheet has some standard grid size which can be used for easier coordinate specification.
  * See the assets/texture folder for the actual texture files (plus some more samples which are not enumerated here).
  * Feel free to add your own spritesheets and use them in the game!
- *
- * SpriteSheet 用来集中管理“精灵表（spritesheet）”，
-    并提供一个统一的方法，按“行/列”从精灵表中取出单个贴图（TextureRegion）。
  * @see Texture a whole image
  * @see TextureRegion a part of an image
  */

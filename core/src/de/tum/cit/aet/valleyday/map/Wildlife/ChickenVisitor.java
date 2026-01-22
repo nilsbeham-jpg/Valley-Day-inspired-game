@@ -11,8 +11,8 @@ import de.tum.cit.aet.valleyday.texture.Animations;
 public class ChickenVisitor extends WildlifeBase {
 
     // simple behavior params
-    private static final int PLAYER_CHASE_RANGE = 4;   // 玩家靠近多少格就追
-    private static final int CROP_VISION_RANGE  = 10;  // 找成熟作物的范围
+    private static final int PLAYER_CHASE_RANGE = 4;   
+    private static final int CROP_VISION_RANGE  = 10;  
 
     private static final float DECIDE_WANDER = 1.5f;
     private static final float DECIDE_CHASE  = 1f;
