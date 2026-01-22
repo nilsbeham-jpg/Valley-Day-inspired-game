@@ -458,30 +458,21 @@ if (value == 3) {
            return;
        }
 
-       boolean wasDebris =
-               obj instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
+       boolean wasDebris = obj instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
        TileObject revealed = tile.interact();
-    if(revealed==null){
-        return;
-    }
-    if(revealed instanceof Item item){
-        if( item.activatesOnReveal()){
-            item.onReveal(this, x, y);
-            tile.setObject(item);
-        }
-    else{
-        tile.setObject(item);
-    }
-}
-    else{
-        tile.setObject(revealed);
 
-    }
+       if (revealed instanceof Item item) {
+           if (item.activatesOnReveal()) {
+               item.onReveal(this, x, y);
+           }
+           tile.setObject(item);
+       }
+       else if (revealed != null) {
+           tile.setObject(revealed);
+       }
 
-       
-
-
+// 🔊 sound logic MUST always be reached
        boolean isDebrisNow =
                tile.getObject() instanceof de.tum.cit.aet.valleyday.map.terrain.Debris;
 
@@ -492,7 +483,13 @@ if (value == 3) {
 
 
 
-}
+
+
+
+
+
+
+   }
 
 
     private void checkItemPickup() {
