@@ -1,199 +1,246 @@
 package de.tum.cit.aet.valleyday.screen;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.tum.cit.aet.valleyday.GameState;
 import de.tum.cit.aet.valleyday.map.GameMap;
 import de.tum.cit.aet.valleyday.map.player.Player;
-
-import static com.badlogic.gdx.scenes.scene2d.ui.Table.Debug.table;
-
+import de.tum.cit.aet.valleyday.texture.Textures;
 
 /**
- * Heads-Up Display (HUD) for the gameplay screen.
- *
- * This class is responsible for rendering all on-screen UI elements that
- * should stay fixed relative to the screen, independent of the world camera.
- * This includes timers, tool status, exit state, and end-of-game messages.
- *
- * The HUD does not modify game logic; it only visualizes the current state.
+ * HUD shows simple game info on screen (top-left).
+ * It uses Scene2D Table so it looks tidy.
  */
 public class Hud {
-    
-    /** The SpriteBatch used to draw the HUD. This is the same as the one used in the GameScreen. */
-    private final SpriteBatch spriteBatch;
-    /** The font used to draw text on the screen. */
-    private final BitmapFont font;
-    /** The camera used to render the HUD. */
-    private final OrthographicCamera camera;
-    private GameMap map;
 
-    private float remainingTime= 0f;
-    private Player player;
-    private Stage endStage;
-    private Table endTable;
+    private final SpriteBatch spriteBatch;
+    private final BitmapFont font; // kept for compatibility
     private final Skin skin;
-    private Label difficultyLabel;
+
+    private GameMap map;
+    private Player player;
+    private float remainingTime = 0f;
+
+    // ---------- HUD UI (top-left) ----------
+    private final Stage hudStage;
+    private final Table hudTable;
+
+    private final Label hintLabel;
+    private final Label timeLabel;
+    private final Label toolsTitleLabel;
+    private final Label exitLabel;
+
+    // tools (icons + text, always visible)
+    private final Image shovelIcon;
+    private final Image fertilizerIcon;
+    private final Image wateringIcon;
+
+    private final Label shovelLabel;
+    private final Label fertilizerLabel;
+    private final Label wateringLabel;
+
+    // ---------- END UI (center) ----------
+    private final Stage endStage;
+    private final Table endTable;
+
     private static final float TOTAL_TIME = 320f;
 
+    /**
+     * Create a new HUD.
+     *
+     * @param spriteBatch shared batch
+     * @param font        font (not required, but keep it)
+     * @param skin        UI skin
+     */
+    public Hud(SpriteBatch spriteBatch, BitmapFont font, Skin skin) {
+        this.spriteBatch = spriteBatch;
+        this.font = font;
+        this.skin = skin;
+
+        // Normal HUD stage
+        this.hudStage = new Stage(new ScreenViewport(), spriteBatch);
+        this.hudTable = new Table();
+        this.hudTable.setFillParent(true);
+        this.hudStage.addActor(hudTable);
+
+        // Labels (use styles from skin)
+        hintLabel = new Label("Press Esc to Pause!", skin, "default");
+        timeLabel = new Label("Time left: 0", skin, "default");
+        toolsTitleLabel = new Label("Tools:", skin, "bold");
+        exitLabel = new Label("", skin, "default");
+
+        // IMPORTANT:
+        // Use "default" here, not "dim".
+        // Because Scene2D multiplies label color with style fontColor.
+        shovelLabel = new Label("Shovel", skin, "default");
+        fertilizerLabel = new Label("Fertilizer", skin, "default");
+        wateringLabel = new Label("Watering Can", skin, "default");
+
+        // Icons
+        shovelIcon = new Image(new TextureRegionDrawable(Textures.SHOVEL));
+        fertilizerIcon = new Image(new TextureRegionDrawable(Textures.FERTILIZER));
+        wateringIcon = new Image(new TextureRegionDrawable(Textures.WATERCAN));
+
+        // Bigger icons
+        float iconSize = 32f;
+
+        // Layout: top-left
+        hudTable.top().left();
+        hudTable.pad(10);
+
+        // Slightly smaller text so it matches icons better
+        hintLabel.setFontScale(0.9f);
+        timeLabel.setFontScale(0.95f);
+        toolsTitleLabel.setFontScale(0.95f);
+        exitLabel.setFontScale(0.95f);
+
+        shovelLabel.setFontScale(0.9f);
+        fertilizerLabel.setFontScale(0.9f);
+        wateringLabel.setFontScale(0.9f);
+
+        hudTable.add(hintLabel).left().row();
+        hudTable.add(timeLabel).left().padTop(4).row();
+
+        // Tools block (aligned rows)
+        Table toolsBlock = new Table();
+        toolsBlock.left();
+
+        toolsBlock.add(toolsTitleLabel).left().row();
+
+        toolsBlock.add(shovelIcon).size(iconSize).left();
+        toolsBlock.add(shovelLabel).left().padLeft(8).row();
+
+        toolsBlock.add(fertilizerIcon).size(iconSize).left();
+        toolsBlock.add(fertilizerLabel).left().padLeft(8).row();
+
+        toolsBlock.add(wateringIcon).size(iconSize).left();
+        toolsBlock.add(wateringLabel).left().padLeft(8).row();
+
+        hudTable.add(toolsBlock).left().padTop(10).row();
+
+        // Exit line
+        hudTable.add(exitLabel).left().padTop(8).row();
+
+        // End screen stage
+        this.endStage = new Stage(new ScreenViewport(), spriteBatch);
+        this.endTable = new Table();
+        this.endTable.setFillParent(true);
+        this.endStage.addActor(endTable);
+    }
 
     /**
-     * Assigns the player reference used by the HUD.
-     *
-     * @param player current player instance
+     * Set player for HUD.
      */
     public void setPlayer(Player player) {
         this.player = player;
     }
 
+    /**
+     * Set map for HUD.
+     */
+    public void setMap(GameMap map) {
+        this.map = map;
+    }
 
     /**
-     * Updates the remaining time displayed by the HUD.
-     *
-     * @param time remaining time in seconds
+     * Update remaining time.
      */
     public void setRemainingTime(float time) {
         this.remainingTime = time;
     }
 
-
-
     /**
-     * Creates a new HUD instance.
-     *
-     * Initializes the HUD camera, end-of-game stage,
-     * and basic layout structures.
-     *
-     * @param spriteBatch shared sprite batch
-     * @param font        font used for text rendering
-     * @param skin        UI skin for labels
-     */
-    public Hud(SpriteBatch spriteBatch, BitmapFont font, Skin skin) {
-        this.spriteBatch = spriteBatch;
-        this.font = font;
-        this.camera = new OrthographicCamera();
-        endStage = new Stage(new ScreenViewport());
-        endTable = new Table();
-        endTable.setFillParent(true);
-        endStage.addActor(endTable);
-        this.skin = skin;
-
-
-    }
-
-    /**
-     * Renders the in-game HUD.
-     *
-     * Displays controls hints, remaining time,
-     * tool states, and exit unlock status.
+     * Render normal HUD.
      */
     public void render() {
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
+        updateHudState();
 
-        // Pause hint
-        font.draw(
-                spriteBatch,
-                "Press Esc to Pause!",
-                10,
-                Gdx.graphics.getHeight() - 10
-        );
-
-        // Daylight countdown (rounded up)
-        int secondsLeft = (int) Math.ceil(remainingTime);
-
-        font.draw(
-                spriteBatch,
-                "Time left: " + secondsLeft,
-                10,
-                Gdx.graphics.getHeight() - 30
-        );
-
-        int y = Gdx.graphics.getHeight() - 60;
-
-        font.draw(spriteBatch, "Tools:", 10, y);
-        y -= 20;
-
-        if (player.hasShovel()) {
-            font.setColor(Color.GRAY);
-            font.draw(spriteBatch, "Shovel", 10, y);
-            y -= 20;
-            font.setColor(Color.WHITE);
-        }
-        if (player.isFertilizerActive()) {
-            font.setColor(Color.BROWN);
-            font.draw(spriteBatch, "Fertilizer active!", 10, y);
-            y -= 20;
-            font.setColor(Color.WHITE);
-        }
-
-        if (player.isWateringCanActive()) {
-            font.setColor(Color.BLUE);
-            font.draw(spriteBatch, "Watering Can active!", 10, y);
-            y -= 20;
-            font.setColor(Color.WHITE);
-        }
-        if (map.isExitUnlocked()) {
-            font.setColor(Color.GREEN);
-            font.draw(spriteBatch, "Exit unlocked", 10, y);
-            font.setColor(Color.WHITE);
-        } else {
-            font.setColor(Color.RED);
-            font.draw(spriteBatch, "Exit locked (" + map.getHarvestedCount()+ "/" + map.getQuota() + ")", 10, y);
-            font.setColor(Color.WHITE);
-        }
-
-
-
-
-        spriteBatch.end();
-
+        hudStage.getViewport().apply();
+        hudStage.act();
+        hudStage.draw();
     }
 
+    /**
+     * Update HUD texts and colors.
+     */
+    private void updateHudState() {
+        int secondsLeft = (int) Math.ceil(remainingTime);
+        timeLabel.setText("Time left: " + secondsLeft);
+
+        if (player != null) {
+            // Shovel
+            if (player.hasShovel()) {
+                shovelLabel.setText("Shovel(AKTIV), Your faster!!");
+                shovelLabel.setColor(Color.WHITE);
+            } else {
+                shovelLabel.setText("Shovel");
+                shovelLabel.setColor(skin.getColor("gray"));
+            }
+
+            // Fertilizer
+            if (player.isFertilizerActive()) {
+                fertilizerLabel.setText("Fertilizer(AKTIV), Your plants have been fertilized once. ");
+                fertilizerLabel.setColor(Color.WHITE);
+            } else {
+                fertilizerLabel.setText("Fertilizer");
+                fertilizerLabel.setColor(skin.getColor("gray"));
+            }
+
+            // Watering Can
+            if (player.isWateringCanActive()) {
+                wateringLabel.setText("Watering Can(AKTIV), You used the Watering Can once.");
+                wateringLabel.setColor(Color.WHITE);
+            } else {
+                wateringLabel.setText("Watering Can");
+                wateringLabel.setColor(skin.getColor("gray"));
+            }
+        }
+
+        if (map != null) {
+            if (map.isExitUnlocked()) {
+                exitLabel.setColor(Color.GREEN);
+                exitLabel.setText("Exit unlocked");
+            } else {
+                exitLabel.setColor(Color.RED);
+                exitLabel.setText("Exit locked (" + map.getHarvestedCount() + "/" + map.getQuota() + ")");
+            }
+        } else {
+            exitLabel.setColor(Color.WHITE);
+            exitLabel.setText("");
+        }
+    }
 
     /**
-     * Updates the HUD camera when the window size changes.
-     *
-     * @param width  new screen width
-     * @param height new screen height
+     * Resize HUD.
      */
     public void resize(int width, int height) {
-        camera.setToOrtho(false, width, height);
+        hudStage.getViewport().update(width, height, true);
+        endStage.getViewport().update(width, height, true);
     }
 
     /**
-     * Renders the end-of-game overlay.
-     *
-     * Displays victory or game-over message,
-     * star rating (on victory), and return hint.
-     *
-     * @param state final game state
+     * Render end message overlay.
      */
     public void renderEndMessage(GameState state) {
         endStage.getViewport().apply();
 
         endTable.clear();
 
-        String titleText = (state == GameState.VICTORY)
-                ? "YOU WIN!"
-                : "GAME OVER";
+        String titleText = (state == GameState.VICTORY) ? "YOU WIN!" : "GAME OVER";
 
         Label title = new Label(titleText, skin, "title");
         title.setAlignment(Align.center);
 
-        Label subtitle = new Label(
-                "Press ENTER to return to menu",
-                skin
-        );
+        Label subtitle = new Label("Press ENTER to return to menu", skin, "default");
         subtitle.setAlignment(Align.center);
 
         endTable.add(title).padBottom(15).row();
@@ -201,45 +248,22 @@ public class Hud {
         if (state == GameState.VICTORY) {
             String stars = computeStars(remainingTime, TOTAL_TIME);
 
-            Label starLabel = new Label(
-                    stars,
-                    skin,
-                    "title"   // reuse big font
-            );
+            Label starLabel = new Label(stars, skin, "title");
             starLabel.setFontScale(1.5f);
-
-            // GOLD color
             starLabel.setColor(1f, 0.85f, 0.2f, 1f);
             starLabel.setAlignment(Align.center);
-
 
             endTable.add(starLabel).padBottom(15).row();
         }
 
         endTable.add(subtitle);
 
-
         endStage.act();
         endStage.draw();
     }
 
     /**
-    * Assigns the map reference used by the HUD.
-            *
-            * @param map current game map
-     */
-    public void setMap(GameMap map) {
-        this.map = map;
-    }
-
-
-
-    /**
-     * Computes a star rating based on remaining time.
-     *
-     * @param remainingTime time left at level end
-     * @param totalTime     total level time
-     * @return star string representation
+     * Compute stars from remaining time.
      */
     private String computeStars(float remainingTime, float totalTime) {
         float ratio = remainingTime / totalTime;
@@ -255,7 +279,11 @@ public class Hud {
         }
     }
 
-
-
-
+    /**
+     * Free resources.
+     */
+    public void dispose() {
+        hudStage.dispose();
+        endStage.dispose();
+    }
 }
