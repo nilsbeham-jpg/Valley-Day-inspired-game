@@ -1,13 +1,16 @@
 package de.tum.cit.aet.valleyday.screen;
 
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -44,6 +47,9 @@ public class MenuScreen implements Screen {
     private final Stage stage; // root container of everything UI-related.
     private final boolean canResume;
     private Difficulty selectedDifficulty;
+    private Texture menuBgTex;
+    private Image menuBgImg;
+    private Table table;
 
 
 
@@ -65,7 +71,7 @@ public class MenuScreen implements Screen {
         Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera 负责把“世界坐标”映射到“屏幕像素”
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
-        Table table = new Table(); // Create a table for layout table is a layout manager.
+        table = new Table(); // Create a table for layout table is a layout manager.
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
@@ -185,11 +191,11 @@ public class MenuScreen implements Screen {
 
         selectDifficulty(game, selectedDifficulty, easyBtn, normalBtn, hardBtn);
 
+        
 
 
 
-
-
+    
 
 
 
@@ -225,14 +231,29 @@ public class MenuScreen implements Screen {
     public void dispose() {
         // Dispose of the stage when screen is disposed 
         stage.dispose();
+        if (menuBgTex != null) {
+        menuBgTex.dispose();
+    }
+
     }
 
     @Override
+    
     public void show() {
-        // Set the input processor so the stage can receive input events
-        Gdx.input.setInputProcessor(stage);
-        MusicTrack.playExclusive(MusicTrack.MENU);
-    }
+    Gdx.input.setInputProcessor(stage);
+    MusicTrack.playExclusive(MusicTrack.MENU);
+
+    menuBgTex = new Texture("texture/Menubg.png");
+    menuBgImg = new Image(menuBgTex);
+
+    menuBgImg.setFillParent(true);
+    menuBgImg.setScaling(Scaling.fill);
+    menuBgImg.setAlign(com.badlogic.gdx.utils.Align.center);
+
+    stage.addActor(menuBgImg);
+    menuBgImg.toBack();
+}
+
 
     // The following methods are part of the Screen interface but are not used in this screen.
     @Override
