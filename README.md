@@ -114,6 +114,14 @@ Implemented items:
 - **Watering Can** – prevents rotting and restores crops
 - **Scaffold** – blocks wildlife movement & kills wildlife within the zone if present at activation
 
+Tool Selection:
+- The player can cycle through collected tools by pressing the `Q `key.
+- Each press of `Q ` switches to the next available tool in the inventory.
+- Only one tool can be active at a time.  
+- The currently selected tool determines the effect applied during interactions 
+  (e.g. debris removal, crop handling, wildlife control).
+
+
 ### 4.5 Fog of War 
 - Player vision is limited to a fixed radius
 - Tiles outside vision are darkened
