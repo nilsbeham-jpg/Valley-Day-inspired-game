@@ -120,7 +120,7 @@ public class MenuScreen implements Screen {
                             public void onFileChosen(FileHandle file) {
                                 String path = file.file().getAbsolutePath();
 
-                                // 🔑 THIS is the key integration point
+                                // THIS is the key integration point
                                 game.setSelectedMapPath(path);
                                 game.goToGame();
                             }

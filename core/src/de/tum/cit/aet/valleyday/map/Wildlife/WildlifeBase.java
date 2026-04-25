@@ -117,7 +117,7 @@ public abstract class WildlifeBase {
         checkPlayerCollision(map);
 
         // AI
-        // 🚫 Do NOT decide while moving
+        //  Do NOT decide while moving
         if (stepTimeLeft <= 0f) {
             decide(dt, map);
         }
@@ -130,8 +130,8 @@ public abstract class WildlifeBase {
 
     // Smooth walking animation
     protected void updateStepAnimation(float dt, GameMap map) {
-// 🚫 Abort if target tile is now blocked
-        // 🚫 Abort if target tile is now blocked
+//  Abort if target tile is now blocked
+        //  Abort if target tile is now blocked
         if (stepTimeLeft > 0f && map.blocksWildlife((int) stepToX, (int) stepToY)) {
 
             // cancel movement
@@ -229,7 +229,7 @@ public abstract class WildlifeBase {
             return;
         }
 
-        // ✅ harmless wildlife won't trigger lose
+        //  harmless wildlife won't trigger lose
         if (!isDangerousToPlayer()) {
             return;
         }

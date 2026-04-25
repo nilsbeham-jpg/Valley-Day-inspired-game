@@ -85,7 +85,7 @@ public class SnailVisitor extends WildlifeBase {
         if (crop != null && crop.getStage() == CropStage.MATURE) {
             crop.harvest();
 
-            // ✅ Use same sound as chicken
+            //  Use same sound as chicken
             Effectmusic.ChickenPickup.play();
 
             // pause to make it feel like "eating" and prevent multi-play in same tile
