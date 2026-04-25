@@ -9,12 +9,11 @@ The player must plant and harvest crops to unlock the exit while defending their
 ---
 
 ## Gameplay Preview
+<img width="1051" height="589" alt="image" src="https://github.com/user-attachments/assets/a3239f7d-da5d-46c1-9c5e-3b5ab76bef64" />
+<img width="978" height="758" alt="image" src="https://github.com/user-attachments/assets/08fb2599-9ce8-4f18-943a-1699a7a436d9" />
 
-(Add screenshots or GIFs here)
 
-Example:
 
-![Gameplay](screenshots/gameplay1.png)
 
 ---
 
